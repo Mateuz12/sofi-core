@@ -142,12 +142,12 @@ st.markdown("""
 
 <!-- Link elegante de voltar ao início -->
 <div style="text-align: left; margin-top: 20px; margin-bottom: 40px;">
-<a href="/" target="_self" class="sofi-back-link">
+<a href="/?dept=Financeiro" target="_self" class="sofi-back-link">
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 <line x1="19" y1="12" x2="5" y2="12"></line>
 <polyline points="12 19 5 12 12 5"></polyline>
 </svg>
-Voltar para o Início
+Voltar para Financeiro
 </a>
 </div>
 """, unsafe_allow_html=True)
