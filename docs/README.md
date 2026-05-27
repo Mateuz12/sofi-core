@@ -27,7 +27,7 @@
 
 ## Sobre o projeto
 
-O SOFI nasceu como uma solução para eliminar o trabalho manual repetitivo do setor financeiro de uma empresa franqueada do Grupo Boticário (21 lojas, unidades UDI e BH). O que começou como automação de relatórios evoluiu para um **hub corporativo** que centraliza processos automatizados de múltiplos departamentos em uma única interface web.
+O SOFI nasceu como uma solução para eliminar o trabalho manual repetitivo do setor financeiro de uma empresa franqueada do Grupo Boticário (43 lojas, unidades UDI e BH). O que começou como automação de relatórios evoluiu para um **hub corporativo** que centraliza processos automatizados de múltiplos departamentos em uma única interface web.
 
 O sistema é um **ativo da empresa** — totalmente documentado, versionado no repositório corporativo e independente de qualquer pessoa específica para operar.
 
@@ -41,7 +41,7 @@ O sistema é um **ativo da empresa** — totalmente documentado, versionado no r
 | Redução de tempo operacional | — | **95%** |
 | Atividades do Assistente Financeiro automatizadas | 0% | **80%** |
 | Tempo de processamento de emails VD | Manual | **2 minutos automáticos** |
-| Lojas com extrato processado automaticamente | 0 | **21 lojas** |
+| Lojas com extrato processado automaticamente | 0 | **42 lojas** |
 
 ---
 
