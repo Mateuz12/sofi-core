@@ -86,8 +86,15 @@ def obter_planilha_recente():
     if not os.path.exists(PASTA_PLANILHAS_REDE):
         return None
         
-    padrao = os.path.join(PASTA_PLANILHAS_REDE, f"{PREFIXO_PLANILHA}*.xls*")
-    arquivos = glob.glob(padrao)
+    # Busca tanto arquivos Excel (.xls, .xlsx) quanto CSV (.csv)
+    padroes = [
+        os.path.join(PASTA_PLANILHAS_REDE, f"{PREFIXO_PLANILHA}*.xls*"),
+        os.path.join(PASTA_PLANILHAS_REDE, f"{PREFIXO_PLANILHA}*.csv")
+    ]
+    
+    arquivos = []
+    for padrao in padroes:
+        arquivos.extend(glob.glob(padrao))
     
     if not arquivos:
         return None
@@ -103,7 +110,7 @@ def validar_chave(chave):
 
 
 def ler_chaves_planilha(caminho_planilha):
-    """Lê as chaves NFe da coluna H da planilha sintética."""
+    """Lê as chaves NFe da planilha sintética (suporta Excel e CSV)."""
     log(f"Lendo planilha: {caminho_planilha}")
     
     if not os.path.exists(caminho_planilha):
@@ -111,30 +118,63 @@ def ler_chaves_planilha(caminho_planilha):
         return []
     
     valores = []
-    try:
-        wb = xlrd.open_workbook(caminho_planilha)
-        sheet = wb.sheet_by_index(0)
-        log(f"Planilha carregada: {sheet.nrows} linhas x {sheet.ncols} colunas (xlrd)")
-        for i in range(LINHA_INICIO, sheet.nrows):
-            valores.append(sheet.cell_value(i, COLUNA_CHAVE))
-    except Exception as e:
-        if "xlsx" in str(e).lower() or "not supported" in str(e).lower():
-            try:
-                import openpyxl
-                # Passamos um objeto de arquivo para contornar a verificação restrita de extensão do openpyxl
-                with open(caminho_planilha, 'rb') as f:
-                    wb = openpyxl.load_workbook(f, data_only=True)
-                sheet = wb.active
-                log(f"Planilha carregada: {sheet.max_row} linhas x {sheet.max_column} colunas (openpyxl)")
-                # openpyxl is 1-indexed
-                for i in range(LINHA_INICIO + 1, sheet.max_row + 1):
-                    valores.append(sheet.cell(row=i, column=COLUNA_CHAVE + 1).value)
-            except Exception as e2:
-                log(f"ERRO ao abrir planilha com openpyxl: {e2}", "ERRO")
-                return []
-        else:
-            log(f"ERRO ao abrir planilha com xlrd: {e}", "ERRO")
+    
+    # 1. Tratamento para arquivos CSV
+    if caminho_planilha.lower().endswith('.csv'):
+        try:
+            import csv
+            # Tenta ler com cp1252/latin-1 que é comum no Windows
+            with open(caminho_planilha, 'r', encoding='latin-1') as f:
+                # Detectar o delimitador (geralmente ; ou ,)
+                linha = f.readline()
+                delimiter = ';' if ';' in linha else ','
+                f.seek(0)
+                
+                reader = csv.reader(f, delimiter=delimiter)
+                for row in reader:
+                    # Procura robustamente por uma chave NFe em todas as colunas
+                    chave_encontrada = False
+                    for cell in row:
+                        val_limpo = str(cell).strip()
+                        if validar_chave(val_limpo):
+                            valores.append(val_limpo)
+                            chave_encontrada = True
+                            break
+                    
+                    # Se não encontrou varrendo tudo, tenta pegar da coluna H (índice 7) por compatibilidade
+                    if not chave_encontrada and len(row) > COLUNA_CHAVE:
+                        valores.append(row[COLUNA_CHAVE])
+            log(f"Planilha CSV carregada com sucesso.")
+        except Exception as e:
+            log(f"ERRO ao abrir planilha CSV: {e}", "ERRO")
             return []
+            
+    # 2. Tratamento para arquivos Excel (.xls, .xlsx)
+    else:
+        try:
+            wb = xlrd.open_workbook(caminho_planilha)
+            sheet = wb.sheet_by_index(0)
+            log(f"Planilha carregada: {sheet.nrows} linhas x {sheet.ncols} colunas (xlrd)")
+            for i in range(LINHA_INICIO, sheet.nrows):
+                valores.append(sheet.cell_value(i, COLUNA_CHAVE))
+        except Exception as e:
+            if "xlsx" in str(e).lower() or "not supported" in str(e).lower():
+                try:
+                    import openpyxl
+                    # Passamos um objeto de arquivo para contornar a verificação restrita de extensão do openpyxl
+                    with open(caminho_planilha, 'rb') as f:
+                        wb = openpyxl.load_workbook(f, data_only=True)
+                    sheet = wb.active
+                    log(f"Planilha carregada: {sheet.max_row} linhas x {sheet.max_column} colunas (openpyxl)")
+                    # openpyxl is 1-indexed
+                    for i in range(LINHA_INICIO + 1, sheet.max_row + 1):
+                        valores.append(sheet.cell(row=i, column=COLUNA_CHAVE + 1).value)
+                except Exception as e2:
+                    log(f"ERRO ao abrir planilha com openpyxl: {e2}", "ERRO")
+                    return []
+            else:
+                log(f"ERRO ao abrir planilha com xlrd: {e}", "ERRO")
+                return []
     
     chaves = []
     chaves_duplicadas = 0
@@ -168,6 +208,20 @@ def ler_chaves_planilha(caminho_planilha):
     
     log(f"Chaves encontradas: {len(chaves)} válidas | "
         f"{chaves_duplicadas} duplicadas | {chaves_invalidas} inválidas")
+        
+    # Adiciona aviso caso a planilha seja um CSV e não contenha chaves válidas
+    if caminho_planilha.lower().endswith('.csv') and not chaves:
+        sep("!")
+        log(" AVISO IMPORTANTE: ARQUIVO CSV SEM CHAVES NFE ".center(70, "!"), "AVISO")
+        sep("!")
+        log("O relatório mais recente encontrado na rede é um arquivo CSV,", "AVISO")
+        log("mas ele NÃO contém nenhuma chave de acesso NFe de 44 dígitos.", "AVISO")
+        log("Geralmente, o sistema ERP exporta colunas reduzidas em CSV.", "AVISO")
+        log("Para corrigir isso, por favor:", "AVISO")
+        log("  1. Acesse o sistema retaguarda/ERP", "AVISO")
+        log("  2. Exporte o relatório no formato EXCEL (.xls ou .xlsx) em vez de CSV", "AVISO")
+        log("  3. Salve-o na pasta: Z:\\XMLS CÁLAMO\\PLANILHAS_RETAGUARDA", "AVISO")
+        sep("!")
     
     return chaves
 
@@ -498,7 +552,6 @@ def main():
             leitor_xml.gerar_relatorio.__globals__  # acessar apenas para verificar
             
             # Copia XMLs para pasta padrão do leitor
-            import shutil
             pasta_temp = "xmls_recebidos"
             os.makedirs(pasta_temp, exist_ok=True)
             
