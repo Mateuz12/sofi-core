@@ -1,4 +1,10 @@
 .env
-database\*db
+.env.local
+core/database/*.db
 /MDS
-.xml
+*.xml
+__pycache__/
+*.pyc
+build/
+dist/
+.venv/
