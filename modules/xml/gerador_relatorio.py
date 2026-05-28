@@ -97,7 +97,9 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_base.Cells(row, 5).Value = 19  # Operação
             sheet_base.Cells(row, 6).Value = nota.get('Canal', '')  # LOJA ou VD para SUMIFS
             sheet_base.Cells(row, 7).Value = 'PENDENTE'
+            sheet_base.Cells(row, 8).NumberFormat = "@"
             sheet_base.Cells(row, 8).Value = nota.get('Dt. Emissão', '')
+            sheet_base.Cells(row, 9).NumberFormat = "@"
             sheet_base.Cells(row, 9).Value = nota.get('Dt. Vencimento', '')  # Data Vencimento
             sheet_base.Cells(row, 20).Value = nota.get('Total Itens/Merc.', 0.0)
             sheet_base.Cells(row, 20).NumberFormat = "#,##0.00"
@@ -191,11 +193,11 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_nf.Cells(row, 5).Formula = f"=VLOOKUP(Base!A{row_base},'{aba_nomeclatura}'!A:{col_max},2,0)"
             
             sheet_nf.Cells(row, 6).Formula = f"=Base!H{row_base}"  # Dt. Emissão
-            sheet_nf.Cells(row, 6).NumberFormat = "dd/mm/yyyy"
+            sheet_nf.Cells(row, 6).NumberFormat = "@"
             sheet_nf.Cells(row, 6).HorizontalAlignment = -4108
             
             sheet_nf.Cells(row, 7).Formula = f"=Base!I{row_base}"  # Dt. Vencimento
-            sheet_nf.Cells(row, 7).NumberFormat = "dd/mm/yyyy"
+            sheet_nf.Cells(row, 7).NumberFormat = "@"
             sheet_nf.Cells(row, 7).HorizontalAlignment = -4108
             sheet_nf.Cells(row, 8).Value = ""
             
@@ -324,7 +326,9 @@ def processar_relatorio_matheus(unidade, notas, caminho_modelo, caminho_saida):
             sheet_base.Cells(row, 5).Value = 19
             sheet_base.Cells(row, 6).Value = nota.get('Canal', '')
             sheet_base.Cells(row, 7).Value = 'PENDENTE'
+            sheet_base.Cells(row, 8).NumberFormat = "@"
             sheet_base.Cells(row, 8).Value = nota.get('Dt. Emissão', '')
+            sheet_base.Cells(row, 9).NumberFormat = "@"
             sheet_base.Cells(row, 9).Value = nota.get('Dt. Vencimento', '')  # Data Vencimento
             sheet_base.Cells(row, 20).Value = nota.get('Total Itens/Merc.', 0.0)
             sheet_base.Cells(row, 20).NumberFormat = "#,##0.00"
@@ -380,7 +384,7 @@ def processar_relatorio_matheus(unidade, notas, caminho_modelo, caminho_saida):
                 sheet_nf.Cells(row, 2).Formula = f"=VLOOKUP(Base!A{row_base},'{aba_nomenclatura}'!A:{col_max},2,0)" # Nome
                 
                 sheet_nf.Cells(row, 3).Formula = f"=Base!H{row_base}"  # Dt. Emissão
-                sheet_nf.Cells(row, 3).NumberFormat = "dd/mm/yyyy"
+                sheet_nf.Cells(row, 3).NumberFormat = "@"
                 sheet_nf.Cells(row, 3).HorizontalAlignment = -4108
                 
                 sheet_nf.Cells(row, 4).Formula = f"=Base!D{row_base}"  # Nº NF
@@ -398,7 +402,7 @@ def processar_relatorio_matheus(unidade, notas, caminho_modelo, caminho_saida):
                 sheet_nf.Cells(row, 7).Formula = f"=VLOOKUP(Base!A{row_base},'{aba_nomenclatura}'!A:{col_max},2,0)" # Nome
                 
                 sheet_nf.Cells(row, 8).Formula = f"=Base!H{row_base}"  # Dt. Emissão
-                sheet_nf.Cells(row, 8).NumberFormat = "dd/mm/yyyy"
+                sheet_nf.Cells(row, 8).NumberFormat = "@"
                 sheet_nf.Cells(row, 8).HorizontalAlignment = -4108
                 
                 sheet_nf.Cells(row, 9).Formula = f"=Base!D{row_base}"  # Nº NF

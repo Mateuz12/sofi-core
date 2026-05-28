@@ -204,7 +204,26 @@ def extrair_dados_xml(caminho_xml):
             
         dt_vencimento = ""
         dVenc = infNFe.find('.//nfe:cobr/nfe:dup/nfe:dVenc', ns) if ns['nfe'] else infNFe.find('.//cobr/dup/dVenc')
-        if dVenc is not None: dt_vencimento = formatar_data(dVenc.text)
+        if dVenc is not None: 
+            dt_vencimento = formatar_data(dVenc.text)
+            
+            # Validação e Correção de Data de Vencimento Invertida (Dia/Mês)
+            if dt_emissao and dt_vencimento:
+                try:
+                    obj_emi = datetime.strptime(dt_emissao, '%d/%m/%Y')
+                    obj_venc = datetime.strptime(dt_vencimento, '%d/%m/%Y')
+                    
+                    # Se o vencimento for anterior à emissão, inverte dia e mês
+                    if obj_venc < obj_emi:
+                        partes = dt_vencimento.split('/')
+                        if len(partes) == 3:
+                            dia, mes, ano = partes
+                            dt_venc_invertida = f"{mes}/{dia}/{ano}"
+                            obj_venc_invertido = datetime.strptime(dt_venc_invertida, '%d/%m/%Y')
+                            if obj_venc_invertido >= obj_emi:
+                                dt_vencimento = dt_venc_invertida
+                except Exception:
+                    pass
 
         n_doc = ""
         nNF = infNFe.find('.//nfe:ide/nfe:nNF', ns) if ns['nfe'] else infNFe.find('.//ide/nNF')
@@ -340,10 +359,10 @@ def gerar_relatorio():
             sheet.cell(row=linha_atual, column=6, value=dados['Destinatário'])
             
             c7 = sheet.cell(row=linha_atual, column=7, value=dados['Dt. Emissão'])
-            c7.number_format = 'dd/mm/yyyy'
+            c7.number_format = '@'
             
             c8 = sheet.cell(row=linha_atual, column=8, value=dados['Dt. Vencimento'])
-            c8.number_format = 'dd/mm/yyyy'
+            c8.number_format = '@'
             c8.alignment = align_center
             
             c10 = sheet.cell(row=linha_atual, column=10, value=dados['Total Itens/Merc.'])
