@@ -15,9 +15,9 @@ render_layout()
 
 # Referencias para os scripts
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-SCRIPT_DEBUG = ROOT_DIR / "modules" / "xml" / "debug_meudanfe.py"
-SCRIPT_GERADOR = ROOT_DIR / "modules" / "xml" / "gerador_relatorio.py"
-DB_PATH = ROOT_DIR / "database" / "sofi.db"
+SCRIPT_DEBUG = ROOT_DIR / "departments" / "financeiro" / "modules" / "xml" / "debug_meudanfe.py"
+SCRIPT_GERADOR = ROOT_DIR / "departments" / "financeiro" / "modules" / "xml" / "gerador_relatorio.py"
+DB_PATH = ROOT_DIR / "core" / "database" / "sofi.db"
 
 # Função que roda o processo completo
 def run_xml_processes():
@@ -146,12 +146,12 @@ else:
 
 st.markdown("""
 <div style="text-align: left; margin-top: 20px; margin-bottom: 40px;">
-    <a href="/modulos" target="_self" class="sofi-back-link">
+    <a href="/financeiro" target="_self" class="sofi-back-link">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
-        Voltar para Módulos
+        Voltar para Módulos Financeiros
     </a>
 </div>
 """, unsafe_allow_html=True)
