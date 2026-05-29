@@ -20,22 +20,19 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
-# Carrega o .env global do SOFI
-# Carrega o .env global do SOFI + .env.local do departamento
-_ROOT = Path(__file__).resolve()
-while not (_ROOT / ".env").exists() and _ROOT != _ROOT.parent:
+# Localiza a raiz do projeto SOFI-core buscando onde existe o pacote 'core'.
+# Não pode usar .env como marcador pois subpastas também possuem .env local.
+_ROOT = Path(__file__).resolve().parent
+while _ROOT != _ROOT.parent:
+    if (_ROOT / "core" / "sofi_env.py").exists():
+        break
     _ROOT = _ROOT.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 from core.sofi_env import load_sofi_env
 load_sofi_env(department="financeiro")
 
-# Importa o logger
-_ROOT_L = Path(__file__).resolve()
-while not (_ROOT_L / ".env").exists() and _ROOT_L != _ROOT_L.parent:
-    _ROOT_L = _ROOT_L.parent
-if str(_ROOT_L) not in sys.path:
-    sys.path.insert(0, str(_ROOT_L))
+# Importa o logger (mesma raiz já resolvida acima)
 from core.database.logger import log_execution
 
 # ============================================================================
