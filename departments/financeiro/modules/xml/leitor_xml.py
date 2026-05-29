@@ -10,9 +10,12 @@ from lxml import etree
 import zipfile
 import win32com.client
 
-# Importa o logger
-_ROOT_L = Path(__file__).resolve()
-while not (_ROOT_L / ".env").exists() and _ROOT_L != _ROOT_L.parent:
+# Localiza a raiz do projeto SOFI-core buscando onde existe o pacote 'core'.
+# Não usa .env como marcador pois subpastas também possuem .env local.
+_ROOT_L = Path(__file__).resolve().parent
+while _ROOT_L != _ROOT_L.parent:
+    if (_ROOT_L / "core" / "sofi_env.py").exists():
+        break
     _ROOT_L = _ROOT_L.parent
 if str(_ROOT_L) not in sys.path:
     sys.path.insert(0, str(_ROOT_L))

@@ -3,6 +3,7 @@ import sys
 import re
 import shutil
 from datetime import datetime
+from pathlib import Path
 import win32com.client
 
 # Configura diretórios no sys.path para importações locais e dependências
@@ -26,9 +27,12 @@ except ImportError as e:
     print(f"Erro ao importar dependências do 'leitor_xml.py': {e}")
     sys.exit(1)
 
-# Importa o logger
-_ROOT = Path(__file__).resolve()
-while not (_ROOT / ".env").exists() and _ROOT != _ROOT.parent:
+# Localiza a raiz do projeto SOFI-core buscando onde existe o pacote 'core'.
+# Não usa .env como marcador pois subpastas também possuem .env local.
+_ROOT = Path(__file__).resolve().parent
+while _ROOT != _ROOT.parent:
+    if (_ROOT / "core" / "sofi_env.py").exists():
+        break
     _ROOT = _ROOT.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
