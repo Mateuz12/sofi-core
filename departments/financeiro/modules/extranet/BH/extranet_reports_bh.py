@@ -478,6 +478,152 @@ def login(page: Page, url: str, user: str, password: str) -> None:
     wait_for_portal_after_login(page, url)
 
 
+def _tratar_popup_avaliacao(page: Page) -> None:
+    """Verifica se há um popup de avaliação (Maze) em Shadow DOM na tela e fecha se houver."""
+    try:
+        print("  Verificando se ha popup de avaliacao (Maze) na tela...")
+
+        def _popup_visivel() -> bool:
+            try:
+                return page.locator("#maze-contextual-widget-host").first.is_visible(timeout=300)
+            except Exception:
+                return False
+
+        for attempt in range(8):
+            if not _popup_visivel():
+                print("  [Popup] Nenhum popup de avaliacao detectado.")
+                return
+
+            print(f"  [Popup] Host do popup Maze detectado (tentativa {attempt+1}). Tentando fechar...")
+
+            # Estratégia 1: JS avancado — busca recursiva em shadow DOMs aninhados
+            fechou = page.evaluate("""() => {
+                function findAllShadowRoots(root, found) {
+                    found = found || [];
+                    var all = root.querySelectorAll('*');
+                    for (var i = 0; i < all.length; i++) {
+                        if (all[i].shadowRoot) {
+                            found.push(all[i].shadowRoot);
+                            findAllShadowRoots(all[i].shadowRoot, found);
+                        }
+                    }
+                    return found;
+                }
+
+                function clickEl(el) {
+                    try {
+                        el.click();
+                        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+                        el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+                        return true;
+                    } catch(e) { return false; }
+                }
+
+                function findAndClickClose(root) {
+                    // 1. Busca por aria-label comum de fechar
+                    var ariaClose = root.querySelector('[aria-label*="close" i], [aria-label*="fechar" i], [aria-label*="dismiss" i], [aria-label="×"], [aria-label="✕"]');
+                    if (ariaClose) { clickEl(ariaClose); return 'aria:' + (ariaClose.getAttribute('aria-label') || ''); }
+
+                    // 2. Busca por classe de close
+                    var classClose = root.querySelector('[class*="close" i], [class*="Close"], [class*="dismiss" i], [class*="skip" i]');
+                    if (classClose) { clickEl(classClose); return 'class:' + (classClose.className || '').slice(0, 40); }
+
+                    // 3. Busca botao/espan com texto "fechar", "×", "skip", etc
+                    var all = root.querySelectorAll('button, [role="button"], span, a, div[tabindex], [onclick]');
+                    for (var i = 0; i < all.length; i++) {
+                        var el = all[i];
+                        var txt = (el.textContent || '').replace(/\\s+/g, ' ').trim();
+                        var aria = (el.getAttribute('aria-label') || '');
+                        if (txt === '×' || txt === '✕' || txt === 'x' || txt === 'X') { clickEl(el); return 'text:x'; }
+                        if (/^(close|fechar|dismiss|skip|pular|no thanks|não obrigad|dispensar)$/i.test(txt)) { clickEl(el); return 'text:' + txt; }
+                        if (/close|fechar|dismiss|skip|pular/i.test(aria)) { clickEl(el); return 'aria:' + aria; }
+                    }
+
+                    // 4. Busca botoes: tenta clicar o que contem SVG (icone X) ou o ultimo
+                    var buttons = root.querySelectorAll('button');
+                    for (var i = buttons.length - 1; i >= 0; i--) {
+                        var btn = buttons[i];
+                        if (btn.querySelector('svg') || btn.querySelector('i') || btn.querySelector('img')) {
+                            clickEl(btn);
+                            return 'svg_button';
+                        }
+                    }
+                    if (buttons.length > 0) { clickEl(buttons[buttons.length - 1]); return 'last_button'; }
+
+                    return null;
+                }
+
+                // Busca em todos os shadow DOMs a partir do host
+                var host = document.querySelector('#maze-contextual-widget-host');
+                if (!host) return 'no_host';
+
+                // Tenta no shadowRoot do host primeiro
+                if (host.shadowRoot) {
+                    var reason = findAndClickClose(host.shadowRoot);
+                    if (reason) return 'host_sr:' + reason;
+                }
+
+                // Busca em shadow DOMs aninhados dentro do host
+                var nested = findAllShadowRoots(host);
+                for (var i = 0; i < nested.length; i++) {
+                    var reason = findAndClickClose(nested[i]);
+                    if (reason) return 'nested_sr:' + reason;
+                }
+
+                return 'no_close_found';
+            }""")
+
+            print(f"  [Popup JS] Resultado: {fechou}")
+            page.wait_for_timeout(1500)
+
+            if not _popup_visivel():
+                print("  [Popup] Popup fechado com sucesso (verificado).")
+                return
+
+            # Estratégia 2: Playwright CSS com piercing de shadow DOM
+            try:
+                for sel in [
+                    "#maze-contextual-widget-host >>> [aria-label*='close' i]",
+                    "#maze-contextual-widget-host >>> [aria-label*='fechar' i]",
+                    "#maze-contextual-widget-host >>> [class*='close' i]",
+                    "#maze-contextual-widget-host >>> button:last-of-type",
+                    "#maze-contextual-widget-host >>> span[class*='close' i]",
+                ]:
+                    try:
+                        btn = page.locator(sel).first
+                        if btn.is_visible(timeout=800):
+                            btn.click(force=True)
+                            page.wait_for_timeout(1500)
+                            if not _popup_visivel():
+                                print(f"  [Popup] Fechado via CSS: {sel}")
+                                return
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+            # Estratégia 3 (nuclear): Remove o elemento host do DOM
+            page.evaluate("""() => {
+                document.querySelectorAll('#maze-contextual-widget-host, #maze-media-host, iframe[id*="maze"], [id*="maze"][class*="widget"]').forEach(function(el) {
+                    el.remove();
+                });
+                document.documentElement.style.overflow = 'auto';
+                document.body.style.overflow = 'auto';
+            }""")
+            print("  [Popup] Host Maze removido do DOM (estratégia nuclear).")
+            page.wait_for_timeout(1500)
+
+            if not _popup_visivel():
+                print("  [Popup] Popup removido com sucesso.")
+                return
+
+            page.wait_for_timeout(1000)
+
+        print("  [Popup] Aviso: nao foi possivel fechar/remover o popup apos multiplas tentativas.")
+    except Exception as e:
+        print(f"  [Popup] Erro ao tratar popup de avaliacao: {e}")
+
+
 def open_reports_area(page: Page) -> None:
     print("Abrindo menu Financeiro > Relatórios...")
     page.get_by_text("Financeiro", exact=True).first.click()
@@ -498,6 +644,10 @@ def open_reports_area(page: Page) -> None:
         page.wait_for_url(lambda u: "relatorios" in u.lower(), timeout=15_000)
     except PlaywrightTimeoutError:
         pass
+    
+    # Trata o popup de avaliação
+    _tratar_popup_avaliacao(page)
+    
     page.keyboard.press("Escape")
     page.wait_for_timeout(500)
     try:
@@ -584,6 +734,7 @@ def _open_tab(page: Page, tab_patterns: list, tab_name: str) -> None:
 
 
 def _click_generate_button(page: Page) -> None:
+    _tratar_popup_avaliacao(page)
     for selector in [
         page.get_by_role("button", name=re.compile(r"Gerar", re.I)),
         page.get_by_text(re.compile(r"Gerar\s+relat[oó]rio", re.I)),
