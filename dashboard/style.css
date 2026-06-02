@@ -38,8 +38,10 @@ footer {
 .block-container {
     padding-top: 0rem !important;
     padding-bottom: 5rem !important;
-    max-width: 1180px !important;
-    margin: 0 auto;
+    max-width: 100% !important;
+    margin-left: 0px !important;
+    margin-right: auto !important;
+    padding-left: 20px !important;
 }
 
 div[data-testid="stVerticalBlock"] > div {
@@ -47,7 +49,7 @@ div[data-testid="stVerticalBlock"] > div {
 }
 
 /* ============================================================
-   HEADER SAGE - Barra superior clara com fontes PT Sans
+   HEADER SAGE - Barra superior azul #1d87b3 com fontes PT Sans
    ============================================================ */
 .sofi-header {
     position: fixed;
@@ -55,13 +57,13 @@ div[data-testid="stVerticalBlock"] > div {
     left: 0;
     right: 0;
     height: 41px;
-    background-color: #f5f5f5;
+    background-color: #1d87b3;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     z-index: 9999;
-    border-bottom: 1px solid #d4dde6;
+    border-bottom: none;
     font-family: "PT Sans", sans-serif;
 }
 
@@ -71,7 +73,7 @@ div[data-testid="stVerticalBlock"] > div {
     align-items: center;
     gap: 0;
     text-decoration: none !important;
-    color: rgb(34, 34, 34) !important;
+    color: #ffffff !important;
     font-family: "PT Sans", sans-serif !important;
     font-weight: 400;
     font-size: 15px;
@@ -80,7 +82,7 @@ div[data-testid="stVerticalBlock"] > div {
 }
 
 .sofi-logo:hover {
-    color: rgb(34, 34, 34) !important;
+    color: #ffffff !important;
     text-decoration: none !important;
 }
 
@@ -88,7 +90,7 @@ div[data-testid="stVerticalBlock"] > div {
     font-family: "PT Sans", sans-serif !important;
     font-weight: 400;
     font-size: 15px;
-    color: rgb(34, 34, 34);
+    color: #ffffff;
     letter-spacing: normal;
 }
 
@@ -100,7 +102,7 @@ div[data-testid="stVerticalBlock"] > div {
 }
 
 .sofi-nav-link {
-    color: rgb(34, 34, 34) !important;
+    color: #ffffff !important;
     font-family: "PT Sans", sans-serif !important;
     text-decoration: none !important;
     font-size: 15px;
@@ -112,18 +114,18 @@ div[data-testid="stVerticalBlock"] > div {
 }
 
 .sofi-nav-link:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: rgb(34, 34, 34) !important;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
     text-decoration: none !important;
 }
 
 .sofi-nav-link.active {
-    background-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(255, 255, 255, 0.25);
 }
 
 /* Backward compatibility com classe antiga */
 .sofi-center {
-    color: rgb(34, 34, 34) !important;
+    color: #ffffff !important;
     font-family: "PT Sans", sans-serif !important;
     text-decoration: none !important;
     font-size: 15px;
@@ -135,8 +137,8 @@ div[data-testid="stVerticalBlock"] > div {
 }
 
 .sofi-center:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: rgb(34, 34, 34) !important;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
 }
 
 /* Usuário no canto direito */
@@ -151,11 +153,11 @@ div[data-testid="stVerticalBlock"] > div {
     font-family: "PT Sans", sans-serif !important;
     font-size: 15px;
     font-weight: 400;
-    color: rgb(34, 34, 34);
+    color: #ffffff;
 }
 
 .sofi-user-chevron {
-    color: rgb(34, 34, 34);
+    color: #ffffff;
     opacity: 0.8;
 }
 
@@ -164,7 +166,7 @@ div[data-testid="stVerticalBlock"] > div {
 }
 
 /* ============================================================
-   FOOTER SAGE - Mesmo gradiente azul-escuro fixo
+   FOOTER SAGE - Barra inferior azul #268bb5 com fontes PT Sans
    ============================================================ */
 .sofi-footer {
     position: fixed;
@@ -172,25 +174,25 @@ div[data-testid="stVerticalBlock"] > div {
     left: 0;
     right: 0;
     height: 38px;
-    background-color: #f5f5f5;
-    border-top: 1px solid #d4dde6;
+    background-color: #268bb5;
+    border-top: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     font-size: 12px;
-    color: rgb(34, 34, 34);
+    color: #ffffff;
     z-index: 9999;
     font-family: "PT Sans", sans-serif;
 }
 
 .sofi-footer-left {
-    color: rgb(34, 34, 34) !important;
+    color: #ffffff !important;
     font-size: 12px;
 }
 
 .sofi-footer-right {
-    color: rgb(34, 34, 34) !important;
+    color: #ffffff !important;
     font-size: 12px;
 }
 
