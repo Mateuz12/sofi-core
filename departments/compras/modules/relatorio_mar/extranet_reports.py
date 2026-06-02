@@ -200,19 +200,42 @@ MONTH_NAMES_PT = {
 }
 
 
+def _is_month_visible(page: Page, target_month: int, target_year: int) -> bool:
+    """Verifica se o mês alvo está visível no calendário aberto (Ant Design)."""
+    month_pt = MONTH_NAMES_PT[target_month]
+    
+    # 1. Tenta buscar pelo texto direto usando regex (caso o cabeçalho seja um elemento único)
+    try:
+        target_regex = re.compile(rf"\b{month_pt}\b.*\b{target_year}\b", re.IGNORECASE)
+        if page.get_by_text(target_regex).first.is_visible(timeout=500):
+            return True
+    except Exception:
+        pass
+        
+    # 2. Tenta inspecionar o inner_text dos cabeçalhos dos painéis de calendário (Ant Design)
+    try:
+        headers = page.locator(".ant-picker-header, .ant-picker-header-view, .calendar-header, .ant-calendar-header")
+        for idx in range(headers.count()):
+            try:
+                h_text = headers.nth(idx).inner_text(timeout=200)
+                if month_pt.lower() in h_text.lower() and str(target_year) in h_text:
+                    return True
+            except Exception:
+                continue
+    except Exception:
+        pass
+        
+    return False
+
+
 def _navigate_to_month(page: Page, target_month: int, target_year: int) -> None:
     """Navega o calendário até o mês/ano desejado usando a seta de voltar."""
-    target_month_label = f"{MONTH_NAMES_PT[target_month]} {target_year}"
+    month_pt = MONTH_NAMES_PT[target_month]
     max_nav = 24
     for nav_attempt in range(max_nav):
-        # Verifica se o mês alvo está visível na tela
-        target_label = page.get_by_text(target_month_label)
-        try:
-            if target_label.first.is_visible(timeout=1_000):
-                print(f"  Mês '{target_month_label}' encontrado no calendário.")
-                return
-        except Exception:
-            pass
+        if _is_month_visible(page, target_month, target_year):
+            print(f"  Mês '{month_pt} {target_year}' encontrado no calendário.")
+            return
 
         # Clica na seta de voltar (mês anterior) - tenta várias estratégias
         back_clicked = False
@@ -249,23 +272,42 @@ def _navigate_to_month(page: Page, target_month: int, target_year: int) -> None:
         page.wait_for_timeout(600)
     else:
         raise RuntimeError(
-            f"Não consegui navegar até o mês {target_month_label} no calendário "
+            f"Não consegui navegar até o mês {month_pt} {target_year} no calendário "
             f"após {max_nav} tentativas."
         )
 
 
 def _click_day_in_calendar(page: Page, day: int, label: str) -> None:
-    """Clica em um dia específico no calendário aberto."""
     day_str = str(day)
-    day_locators = [
-        page.get_by_role("gridcell", name=day_str, exact=True),
-        page.get_by_role("button", name=day_str, exact=True),
-        page.locator(f"button:text-is('{day_str}')"),
-        page.locator(f"td:text-is('{day_str}')"),
-        page.locator(f"div:text-is('{day_str}')"),
-    ]
+    
+    # Identifica o contêiner correto se houver múltiplos painéis de meses lado a lado
+    container = page
+    try:
+        panels = page.locator(".ant-picker-panel, table, .ant-picker-content, .calendar-table, [class*='calendar-grid'], .ant-calendar-content")
+        visible_panels = []
+        for idx in range(panels.count()):
+            p = panels.nth(idx)
+            if p.is_visible(timeout=500):
+                visible_panels.append(p)
+                
+        if len(visible_panels) >= 2:
+            if "inicial" in label.lower():
+                container = visible_panels[0]
+                print(f"  [Calendário] Restringindo busca de dia '{day_str}' ao painel esquerdo (inicial).")
+            else:
+                container = visible_panels[1]
+                print(f"  [Calendário] Restringindo busca de dia '{day_str}' ao painel direito (final).")
+    except Exception as e:
+        print(f"  [Aviso] Erro ao identificar painéis do calendário: {e}. Buscando na página inteira...")
 
-    for day_btns in day_locators:
+    # Realiza a busca do dia dentro do contêiner selecionado
+    for day_btns in [
+        container.get_by_role("gridcell", name=day_str, exact=True),
+        container.get_by_role("button",   name=day_str, exact=True),
+        container.locator(f"button:text-is('{day_str}')"),
+        container.locator(f"td:text-is('{day_str}')"),
+        container.locator(f"div:text-is('{day_str}')"),
+    ]:
         if day_btns.count() == 0:
             continue
         for i in range(day_btns.count()):
@@ -273,17 +315,81 @@ def _click_day_in_calendar(page: Page, day: int, label: str) -> None:
             try:
                 if not btn.is_visible() or not btn.is_enabled():
                     continue
+                
+                # Obtém a classe do elemento atual e também do pai (ex: td) para identificar 'out-of-view'
                 classes = btn.get_attribute("class") or ""
+                parent_classes = ""
+                try:
+                    parent = btn.locator("xpath=..")
+                    if parent.count() > 0:
+                        parent_classes = parent.first.get_attribute("class") or ""
+                except Exception:
+                    pass
+                
+                all_classes = (classes + " " + parent_classes).lower()
                 aria_disabled = btn.get_attribute("aria-disabled") or "false"
-                if "outside" in classes.lower() or "disabled" in classes.lower() or aria_disabled == "true":
+                
+                # Rejeita se for dia de fora do mês ou desabilitado
+                if (
+                    "outside" in all_classes 
+                    or "out-of-view" in all_classes 
+                    or "disabled" in all_classes 
+                    or aria_disabled == "true"
+                ):
                     continue
+                
                 btn.click()
                 print(f"  Dia {day} clicado ({label}).")
                 return
             except Exception:
                 continue
-    # Fallback
-    print(f"  Aviso: fallback para dia {day} ({label}).")
+                
+    # Fallback no documento inteiro se não achou no contêiner
+    if container != page:
+        print("  [Fallback] Dia não encontrado no contêiner específico. Tentando na página inteira...")
+        for day_btns in [
+            page.get_by_role("gridcell", name=day_str, exact=True),
+            page.get_by_role("button",   name=day_str, exact=True),
+            page.locator(f"button:text-is('{day_str}')"),
+            page.locator(f"td:text-is('{day_str}')"),
+            page.locator(f"div:text-is('{day_str}')"),
+        ]:
+            if day_btns.count() == 0:
+                continue
+            for i in range(day_btns.count()):
+                btn = day_btns.nth(i)
+                try:
+                    if not btn.is_visible() or not btn.is_enabled():
+                        continue
+                        
+                    classes = btn.get_attribute("class") or ""
+                    parent_classes = ""
+                    try:
+                        parent = btn.locator("xpath=..")
+                        if parent.count() > 0:
+                            parent_classes = parent.first.get_attribute("class") or ""
+                    except Exception:
+                        pass
+                    
+                    all_classes = (classes + " " + parent_classes).lower()
+                    aria_disabled = btn.get_attribute("aria-disabled") or "false"
+                    
+                    if (
+                        "outside" in all_classes 
+                        or "out-of-view" in all_classes 
+                        or "disabled" in all_classes 
+                        or aria_disabled == "true"
+                    ):
+                        continue
+                    
+                    btn.click()
+                    print(f"  Dia {day} clicado ({label} via fallback geral).")
+                    return
+                except Exception:
+                    continue
+                    
+    # Fallback final
+    print(f"  Aviso: fallback geral para dia {day} ({label}).")
     page.get_by_text(day_str, exact=True).first.click()
 
 
@@ -333,20 +439,12 @@ def pick_date_range_from_calendar(
     # --- 2º clique: data final ---
     # Se a data fim estiver em um mês diferente, navega para frente
     if (end_date.year, end_date.month) != (start_date.year, start_date.month):
-        # Precisa avançar meses – usa seta de avançar (next)
-        end_month_label = f"{MONTH_NAMES_PT[end_date.month]} {end_date.year}"
-        print(f"  Navegando para mês da data final: {end_month_label}...")
-        max_fwd = 12
-        for _ in range(max_fwd):
-            try:
-                lbl = page.get_by_text(end_month_label)
-                if lbl.first.is_visible(timeout=1_000):
-                    print(f"  Mês '{end_month_label}' encontrado.")
-                    break
-            except Exception:
-                pass
-
-            # Tenta clicar na seta de avançar (próximo mês)
+        month_pt = MONTH_NAMES_PT[end_date.month]
+        print(f"  Navegando para o mês final: {month_pt} {end_date.year}...")
+        for _ in range(12):
+            if _is_month_visible(page, end_date.month, end_date.year):
+                break
+            
             fwd_clicked = False
             fwd_selectors = [
                 "button[aria-label*='próximo']",

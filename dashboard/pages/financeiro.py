@@ -43,9 +43,9 @@ st.markdown("""
 </div>
 </div>
 </a>
-<!-- Card 2: Extranet (Em breve) -->
-<div class="sofi-card disabled">
-<span class="sofi-card-badge">Em Breve</span>
+<!-- Card 2: Extranet -->
+<a href="/extranet" target="_self" class="sofi-card-link">
+<div class="sofi-card">
 <div class="sofi-card-icon-container">
 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0078C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="12" cy="12" r="10"></circle>
@@ -62,9 +62,10 @@ st.markdown("""
 </svg>
 </div>
 </div>
-<!-- Card 3: Retaguarda (Em breve) -->
-<div class="sofi-card disabled">
-<span class="sofi-card-badge">Em Breve</span>
+</a>
+<!-- Card 3: Retaguarda -->
+<a href="/retaguarda" target="_self" class="sofi-card-link">
+<div class="sofi-card">
 <div class="sofi-card-icon-container">
 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0078C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
@@ -82,6 +83,7 @@ st.markdown("""
 </svg>
 </div>
 </div>
+</a>
 <!-- Card 4: Emails VD (Em breve) -->
 <div class="sofi-card disabled">
 <span class="sofi-card-badge">Em Breve</span>
