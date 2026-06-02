@@ -2,7 +2,7 @@
 
 > Auxiliar corporativo autônomo — opera, importa, concilia e entrega processos automatizados por departamento, sem intervenção manual.
 
-![Versão](https://img.shields.io/badge/versão-2.1.0-45B57B?style=flat-square)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-2.2.0-45B57B?style=flat-square)
 ![Ambiente](https://img.shields.io/badge/ambiente-produção-45B57B?style=flat-square)
 ![Stack](https://img.shields.io/badge/stack-Python%20%7C%20Streamlit%20%7C%20Playwright-7CD884?style=flat-square)
 ![Status](https://img.shields.io/badge/status-ativo-45B57B?style=flat-square)
@@ -30,6 +30,26 @@
 O SOFI nasceu como uma solução para eliminar o trabalho manual repetitivo do setor financeiro de uma empresa franqueada do Grupo Boticário (43 lojas, unidades UDI e BH). O que começou como automação de relatórios evoluiu para um **hub corporativo** que centraliza processos automatizados de múltiplos departamentos em uma única interface web.
 
 O sistema é um **ativo da empresa** — totalmente documentado, versionado no repositório corporativo e independente de qualquer pessoa específica para operar.
+
+---
+
+## Novidades da Versão 2.2.0
+
+Nesta atualização, o sistema passou por uma grande reformulação técnica e estética para unificar e alinhar o fluxo de processos:
+
+### 🎨 Rebranding Visual (Padrão Sage)
+- **Identidade Visual:** Alinhamento de cabeçalho e rodapé usando as cores padrão do sistema Sage:
+  - Barra superior em azul `#1d87b3` (altura de 41px, fonte `PT Sans`, texto branco).
+  - Barra inferior em azul `#268bb5` (texto branco).
+- **Alinhamento de Layout:** Expansão da interface para a largura total da tela, com todo o conteúdo e títulos alinhados ao canto superior esquerdo da página.
+- **Títulos minimalistas:** Ajustados para 14px bold minimalista no topo esquerdo, removendo as linhas decorativas antigas.
+- **Cards de Módulos:** Redesenhados no tamanho exato de 425x138px, com `border-radius: 16px` e display flex horizontal (ícone à esquerda e nome em azul `rgb(42, 100, 150)` à direita).
+
+### 🚀 Novas Funcionalidades (Novas Features)
+- **Integração do Módulo Extranet (BH e UDI):** Operação dos scripts automáticos de extração de relatórios e de importação automática para o FinançasGB.
+- **Módulo Retaguarda:** Página do Streamlit criada para gerenciar relatórios de vendas e conciliação integrando processos.
+- **Módulo de Importação Financeira:** Utilitário `importar_financas.py` criado sob o departamento financeiro para otimizar os fluxos de arquivos locais/Oracle.
+- **Banco de Dados e Console em Tempo Real:** Logs e histórico de execuções integrados com SQLite e exibidos na tela.
 
 ---
 
@@ -399,4 +419,4 @@ Este repositório é de uso interno. Para adicionar um novo módulo ou departame
 
 ---
 
-*SOFI v2.1.0 · Sistema Operacional Financeiro Integrado · Uso interno · 2026*
+*SOFI v2.2.0 · Sistema Operacional Financeiro Integrado · Uso interno · 2026*
