@@ -26,7 +26,7 @@ def render_topbar(nav_links: list[tuple[str, str]] | None = None):
     html = f"""
     <div class="sofi-header">
         <a href="/" target="_self" class="sofi-logo">
-            <span class="sofi-logo-text">SOFI.COM.BR</span>
+            <span class="sofi-logo-text">SAGE.COM.BR</span>
         </a>
         <div class="sofi-nav-center">
             {nav_html}
