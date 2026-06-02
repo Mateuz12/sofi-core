@@ -12,7 +12,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from components.layout import render_layout
 
-render_layout()
+render_layout(nav_links=[
+    ("Módulos", "/financeiro"),
+    ("Retaguarda", "/retaguarda"),
+])
 
 # Referencias para os scripts
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -41,50 +44,53 @@ def run_retaguarda_process(unidade, data_str=None):
     except Exception as e:
         print(f"Erro inesperado ao lançar subprocesso do Retaguarda: {e}")
 
-# Cabeçalho da página (Design SAGE alinhado à esquerda)
+# Cabeçalho estilo Sage (Foto 2)
 st.markdown("""
 <div class="sofi-title-container">
-    <h1 class="sofi-main-title">Módulo Retaguarda</h1>
+    <p class="sage-section-title">ATIVIDADES</p>
+    <h1 class="sage-page-title">MÓDULO RETAGUARDA</h1>
     <p class="sofi-sub-title">Extração automática de receitas de vendas e upload direto no FinançasGB.</p>
 </div>
 """, unsafe_allow_html=True)
 
-col_center = st.columns([1, 2, 1])[1]
+col_form, col_space = st.columns([2, 1])
 
-with col_center:
+with col_form:
     # Seleção da Unidade
-    unidade = st.radio("Escolha a Unidade:", ["BH", "UDI"], horizontal=True)
+    st.markdown("**UNIDADE:**")
+    unidade = st.radio("", ["BH", "UDI"], horizontal=True, label_visibility="collapsed")
+    
+    st.write("")
     
     # Seleção da Data
-    tipo_data = st.radio("Período do Relatório:", ["D-1 (Ontem)", "Data Específica"], horizontal=True)
+    st.markdown("**PERÍODO:**")
+    tipo_data = st.radio("", ["D-1 (Ontem)", "Data Específica"], horizontal=True, label_visibility="collapsed")
     
     data_selecionada = None
     if tipo_data == "Data Específica":
-        data_selecionada = st.date_input("Selecione a Data:", datetime.now() - timedelta(days=1))
+        st.markdown("**DATA BASE:**")
+        data_selecionada = st.date_input("", datetime.now() - timedelta(days=1), label_visibility="collapsed")
     
-    st.write("") # Espaçador
+    st.write("")
     
-    # Botão de Ação
+    # Botão de Ação estilo Sage
     if not st.session_state.retaguarda_process_running:
-        if st.button("▶ Executar Relatório e Importação", type="primary", use_container_width=True):
+        if st.button("✔ Executar Relatório e Importação", type="primary", use_container_width=False):
             st.session_state.retaguarda_process_running = True
             
-            # Formata data (sempre fornecida para evitar prompt no terminal)
             if tipo_data == "D-1 (Ontem)":
                 data_ontem = datetime.now() - timedelta(days=1)
                 data_str = data_ontem.strftime("%d/%m/%Y")
             else:
                 data_str = data_selecionada.strftime("%d/%m/%Y") if data_selecionada else (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
             
-            # Dispara a thread em background
             thread = threading.Thread(target=run_retaguarda_process, args=(unidade, data_str))
             thread.daemon = True 
             thread.start()
-            
             st.session_state.retaguarda_thread = thread
             st.rerun()
     else:
-        st.button("⏳ Processo em execução...", type="secondary", disabled=True, use_container_width=True)
+        st.button("⏳ Processo em execução...", type="secondary", disabled=True)
 
 # Função para ler os últimos logs
 def get_recent_logs():
@@ -106,8 +112,8 @@ def get_recent_logs():
     except Exception as e:
         return None, None
 
-st.divider()
-st.markdown("### 🖥️ Console em Tempo Real")
+st.markdown("<hr class='sage-divider'>", unsafe_allow_html=True)
+st.markdown("**Console em Tempo Real**")
 
 with st.container(height=350):
     log_container = st.empty()
@@ -152,13 +158,7 @@ else:
         st.rerun()
 
 st.markdown("""
-<div style="text-align: left; margin-top: 20px; margin-bottom: 40px;">
-    <a href="/financeiro" target="_self" class="sofi-back-link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Voltar para Módulos Financeiros
-    </a>
+<div style="margin-top:20px; margin-bottom:30px;">
+    <a href="/financeiro" target="_self" class="sofi-back-link">&#8592; Voltar para Módulos Financeiros</a>
 </div>
 """, unsafe_allow_html=True)
