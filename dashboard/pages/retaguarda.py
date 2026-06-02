@@ -45,13 +45,11 @@ def run_retaguarda_process(unidade, data_str=None):
         print(f"Erro inesperado ao lançar subprocesso do Retaguarda: {e}")
 
 # Cabeçalho estilo Sage (Foto 2)
-st.markdown("""
-<div class="sofi-title-container">
-    <p class="sage-section-title">ATIVIDADES</p>
-    <h1 class="sage-page-title">MÓDULO RETAGUARDA</h1>
-    <p class="sofi-sub-title">Extração automática de receitas de vendas e upload direto no FinançasGB.</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("""<div class="sofi-title-container">
+<p class="sage-section-title">ATIVIDADES</p>
+<h1 class="sage-page-title">MÓDULO RETAGUARDA</h1>
+<p class="sofi-sub-title">Extração automática de receitas de vendas e upload direto no FinançasGB.</p>
+</div>""", unsafe_allow_html=True)
 
 col_form, col_space = st.columns([2, 1])
 
@@ -157,8 +155,6 @@ else:
     if st.button("↻ Atualizar Logs"):
         st.rerun()
 
-st.markdown("""
-<div style="margin-top:20px; margin-bottom:30px;">
-    <a href="/financeiro" target="_self" class="sofi-back-link">&#8592; Voltar para Módulos Financeiros</a>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("""<div style="margin-top:20px; margin-bottom:30px;">
+<a href="/financeiro" target="_self" class="sofi-back-link">&#8592; Voltar para Módulos Financeiros</a>
+</div>""", unsafe_allow_html=True)
