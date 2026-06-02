@@ -11,7 +11,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from components.layout import render_layout
 
-render_layout()
+render_layout(nav_links=[
+    ("Módulos", "/financeiro"),
+    ("XML", "/xml"),
+])
 
 # Referencias para os scripts
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -43,46 +46,41 @@ def run_only_gerador():
 if "xml_process_running" not in st.session_state:
     st.session_state.xml_process_running = False
 
-# Cabeçalho da página (Design SAGE alinhado à esquerda)
+# Cabeçalho estilo Sage (Foto 2)
 st.markdown("""
 <div class="sofi-title-container">
-    <h1 class="sofi-main-title">Módulo XML</h1>
+    <p class="sage-section-title">ATIVIDADES</p>
+    <h1 class="sage-page-title">MÓDULO XML</h1>
     <p class="sofi-sub-title">Baixa XMLs via API e gera relatórios de conferência Cálamo.</p>
 </div>
 """, unsafe_allow_html=True)
 
-col_center = st.columns([1, 2, 1])[1]
+col_form, col_space = st.columns([2, 1])
 
-with col_center:
-    # Botão de Ação
+with col_form:
+    # Botões de Ação estilo Sage Bootstrap
     if not st.session_state.xml_process_running:
         btn_col1, btn_col2 = st.columns(2)
         
         with btn_col1:
-            if st.button("▶ Executar todo o processo", type="primary", use_container_width=True):
+            if st.button("✔ Executar todo o processo", type="primary", use_container_width=False):
                 st.session_state.xml_process_running = True
-                
-                # Dispara a thread em background
                 thread = threading.Thread(target=run_xml_processes)
                 thread.daemon = True 
                 thread.start()
-                
                 st.session_state.xml_thread = thread
                 st.rerun()
                 
         with btn_col2:
-            if st.button("📊 Apenas Gerar Relatório", type="secondary", use_container_width=True):
+            if st.button("📊 Apenas Gerar Relatório", type="secondary", use_container_width=False):
                 st.session_state.xml_process_running = True
-                
-                # Dispara a thread em background apenas para o gerador
                 thread = threading.Thread(target=run_only_gerador)
                 thread.daemon = True 
                 thread.start()
-                
                 st.session_state.xml_thread = thread
                 st.rerun()
     else:
-        st.button("⏳ Processo em execução...", type="secondary", disabled=True, use_container_width=True)
+        st.button("⏳ Processo em execução...", type="secondary", disabled=True)
 
 # Função para ler os últimos logs
 def get_recent_logs():
@@ -98,8 +96,8 @@ def get_recent_logs():
     except Exception as e:
         return None, None
 
-st.divider()
-st.markdown("### 🖥️ Console em Tempo Real")
+st.markdown("<hr class='sage-divider'>", unsafe_allow_html=True)
+st.markdown("**Console em Tempo Real**")
 
 with st.container(height=400):
     log_container = st.empty()
@@ -145,13 +143,7 @@ else:
         st.rerun()
 
 st.markdown("""
-<div style="text-align: left; margin-top: 20px; margin-bottom: 40px;">
-    <a href="/financeiro" target="_self" class="sofi-back-link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Voltar para Módulos Financeiros
-    </a>
+<div style="margin-top:20px; margin-bottom:30px;">
+    <a href="/financeiro" target="_self" class="sofi-back-link">&#8592; Voltar para Módulos Financeiros</a>
 </div>
 """, unsafe_allow_html=True)

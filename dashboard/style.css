@@ -1,29 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+/* ============================================================
+   SOFI - Design System Sage
+   Rebranding visual inspirado no sistema SAGE (gestaosage.com.br)
+   ============================================================ */
 
-/* Variáveis SAGE Premium */
-:root {
-    --primary-blue: #0078C8;
-    --primary-blue-dark: #0068AD;
-    --primary-blue-light: #DDEEFF;
-    --primary-blue-soft: #EEF7FF;
-    --bg-main: #F4FAFF;
-    --bg-card: #FFFFFF;
-    --text-main: #0F2E5C;
-    --text-dark: #0F172A;
-    --text-muted: #64748B;
-    --border-soft: #E8F1F9;
-    --shadow-soft: rgba(0, 120, 200, 0.04);
-    --shadow-hover: rgba(0, 120, 200, 0.08);
+/* Reset e fonte base */
+* {
+    box-sizing: border-box;
 }
 
-/* Reset Geral e Imersão Estilo Aplicativo */
 .stApp {
-    background-color: var(--bg-main);
-    color: var(--text-dark);
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #e8edf2;
+    color: #333333;
+    font-family: Arial, Helvetica, "Segoe UI", sans-serif;
+    font-size: 14px;
 }
 
-/* Ocultar elementos nativos do Streamlit para máxima imersão */
+/* Ocultar elementos nativos do Streamlit */
 header[data-testid="stHeader"] {
     display: none !important;
 }
@@ -40,133 +32,254 @@ footer {
     visibility: hidden;
 }
 
-/* Ocultar padding nativo superior das páginas */
+/* Padding ajustado para o header e footer fixos */
 .block-container {
     padding-top: 0rem !important;
     padding-bottom: 5rem !important;
-    max-width: 1200px !important;
+    max-width: 1180px !important;
     margin: 0 auto;
 }
 
-/* Remove quebras visuais e esticas do Streamlit */
 div[data-testid="stVerticalBlock"] > div {
     padding: 0 !important;
 }
 
-/* Header SOFI Superior */
+/* ============================================================
+   HEADER SAGE - Gradiente azul-escuro fixo
+   ============================================================ */
 .sofi-header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 72px;
-    background: #FFFFFF;
-    border-bottom: 1px solid var(--border-soft);
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
+    height: 42px;
+    background: linear-gradient(to bottom, #3a7ca5 0%, #2c6490 50%, #255680 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 40px;
+    padding: 0 20px;
     z-index: 9999;
+    border-bottom: 1px solid #1e4a6e;
 }
 
+/* Logo / Nome do sistema */
 .sofi-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0;
     text-decoration: none !important;
-    color: inherit;
-    transition: transform 0.2s ease;
+    color: #ffffff !important;
+    font-weight: bold;
+    font-size: 15px;
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 .sofi-logo:hover {
-    transform: scale(1.02);
+    color: #d0e8f8 !important;
+    text-decoration: none !important;
 }
 
 .sofi-logo-text {
-    font-weight: 800;
-    font-size: 24px;
-    color: var(--primary-blue-dark);
-    letter-spacing: -0.5px;
+    font-weight: bold;
+    font-size: 15px;
+    color: #ffffff;
+    letter-spacing: 0;
 }
 
-.sofi-center {
+/* Navegação central */
+.sofi-nav-center {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
+}
+
+.sofi-nav-link {
+    color: #ffffff !important;
     text-decoration: none !important;
-    color: var(--text-dark) !important;
-    font-weight: 600;
-    font-size: 16px;
-    padding: 8px 16px;
-    border-radius: 12px;
-    transition: background-color 0.2s ease;
+    font-size: 14px;
+    font-weight: normal;
+    padding: 6px 14px;
+    border-radius: 2px;
+    transition: background-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.sofi-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+.sofi-nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Backward compatibility com classe antiga */
+.sofi-center {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 14px;
+    font-weight: normal;
+    padding: 6px 14px;
+    border-radius: 2px;
+    transition: background-color 0.15s ease;
+    white-space: nowrap;
 }
 
 .sofi-center:hover {
-    background-color: var(--primary-blue-soft);
-    color: var(--primary-blue-dark) !important;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
 }
 
+/* Usuário no canto direito */
 .sofi-user {
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-
-.sofi-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background-color: var(--primary-blue-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--primary-blue-light);
+    gap: 6px;
+    cursor: pointer;
 }
 
 .sofi-user-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-dark);
+    font-size: 13px;
+    font-weight: normal;
+    color: #ffffff;
 }
 
 .sofi-user-chevron {
-    margin-top: 2px;
+    color: #ffffff;
+    opacity: 0.8;
 }
 
-/* Estrutura de Títulos com Alinhamento à Esquerda */
+.sofi-avatar {
+    display: none; /* Escondido no estilo Sage */
+}
+
+/* ============================================================
+   FOOTER SAGE - Mesmo gradiente azul-escuro fixo
+   ============================================================ */
+.sofi-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 38px;
+    background: linear-gradient(to bottom, #3a7ca5 0%, #2c6490 50%, #255680 100%);
+    border-top: 1px solid #1e4a6e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 12px;
+    color: #ffffff;
+    z-index: 9999;
+}
+
+.sofi-footer-left {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.sofi-footer-right {
+    color: #d0e8f8;
+    font-size: 12px;
+}
+
+/* Compatibility com footer antigo */
+.footer-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ffffff;
+}
+
+.footer-item svg {
+    display: none;
+}
+
+.footer-divider {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.status-indicator {
+    width: 6px;
+    height: 6px;
+    background-color: #7eff7e;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* ============================================================
+   ÁREA DE CONTEÚDO
+   ============================================================ */
+.sofi-content-area {
+    margin-top: 58px;
+    padding: 20px 24px;
+    min-height: calc(100vh - 96px);
+}
+
+/* ============================================================
+   TÍTULO DA SEÇÃO (Foto 2 - ATIVIDADES / CONCILIAÇÃO BANCÁRIA)
+   ============================================================ */
 .sofi-title-container {
     width: 100%;
-    margin: 120px auto 30px auto;
+    margin: 68px auto 20px auto;
     text-align: left;
 }
 
+.sofi-section-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px 0;
+}
+
 .sofi-main-title {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 8px 0;
-    letter-spacing: -0.5px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333333;
+    margin: 0 0 6px 0;
+    border-bottom: 1px solid #3a7ca5;
+    padding-bottom: 8px;
 }
 
 .sofi-sub-title {
-    font-size: 16px;
-    color: var(--text-muted);
-    margin: 0;
-    font-weight: 400;
+    font-size: 12px;
+    color: #777777;
+    margin: 4px 0 0 0;
+    font-style: italic;
 }
 
-/* Grid de Cards */
+/* ============================================================
+   CARDS DE DEPARTAMENTO / MÓDULOS (Foto 1 - Sage)
+   ============================================================ */
 .sofi-card-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin-bottom: 60px;
+    gap: 16px;
+    margin-bottom: 40px;
     width: 100%;
 }
 
-/* Links dos Cards */
+.sofi-card-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.sofi-card-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+/* Links sem decoração */
 .sofi-card-link {
     text-decoration: none !important;
     color: inherit !important;
@@ -174,295 +287,311 @@ div[data-testid="stVerticalBlock"] > div {
     width: 100%;
 }
 
-/* Estilo do Card Premium */
+/* Card Sage - Branco, bordas suaves, ícone + nome */
 .sofi-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-soft);
-    border-radius: 24px;
-    padding: 36px 24px;
-    box-shadow: 0 4px 20px var(--shadow-soft), 0 2px 6px rgba(15, 23, 42, 0.01);
+    background-color: #ffffff;
+    border: 1px solid #d4dde6;
+    border-radius: 6px;
+    padding: 24px 16px 20px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    min-height: 320px;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 160px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
     position: relative;
-    overflow: hidden;
+    cursor: pointer;
 }
 
 .sofi-card:hover {
-    transform: translateY(-6px);
-    border-color: #B9DDFF;
-    box-shadow: 0 12px 30px var(--shadow-hover), 0 4px 12px rgba(15, 23, 42, 0.02);
+    border-color: #3a7ca5;
+    box-shadow: 0 2px 8px rgba(58, 124, 165, 0.15);
 }
 
-/* Efeito sutil de brilho/gradiente nos cantos em hover */
 .sofi-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #0078C8, #60A5FA);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    display: none; /* Remove o efeito de linha no topo do card antigo */
 }
 
-.sofi-card:hover::after {
-    opacity: 1;
-}
-
-/* Ícone do Card */
+/* Ícone do Card - Estilo Sage (grande, ilustrativo) */
 .sofi-card-icon-container {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: var(--primary-blue-soft);
-    border: 1px solid var(--primary-blue-light);
+    width: 72px;
+    height: 60px;
+    background-color: transparent;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 24px;
-    transition: all 0.3s ease;
+    margin-bottom: 12px;
+    font-size: 48px;
+    line-height: 1;
 }
 
 .sofi-card:hover .sofi-card-icon-container {
-    transform: scale(1.05);
-    background-color: var(--primary-blue-light);
-}
-
-/* SVG do Ícone */
-.sofi-card-icon-container svg {
-    color: var(--primary-blue);
-    stroke: var(--primary-blue);
-}
-
-/* Título do Card */
-.sofi-card-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 12px 0;
-    letter-spacing: -0.2px;
-}
-
-/* Descrição do Card */
-.sofi-card-desc {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin: 0 0 24px 0;
-    flex-grow: 1;
-}
-
-/* Setinha de Ação do Card */
-.sofi-card-arrow-container {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: var(--primary-blue-soft);
-    border: 1px solid var(--primary-blue-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.sofi-card-arrow-container svg {
-    stroke: var(--primary-blue);
-    transition: transform 0.3s ease;
-}
-
-/* Hover no Card inteira muda a cor da setinha */
-.sofi-card:hover .sofi-card-arrow-container {
-    background-color: var(--primary-blue);
-    border-color: var(--primary-blue);
-}
-
-.sofi-card:hover .sofi-card-arrow-container svg {
-    stroke: #FFFFFF;
-    transform: translateX(2px);
-}
-
-/* Estilo do Card Desabilitado ("Em breve") */
-.sofi-card.disabled {
-    opacity: 0.65;
-    cursor: default;
-    background-color: #FAFCFE;
-}
-
-.sofi-card.disabled:hover {
     transform: none;
-    border-color: var(--border-soft);
-    box-shadow: 0 4px 20px var(--shadow-soft);
+    background-color: transparent;
 }
 
-.sofi-card.disabled::after {
+.sofi-card-icon-container svg {
+    width: 52px;
+    height: 52px;
+}
+
+/* Nome do módulo no card */
+.sofi-card-title {
+    font-size: 13px;
+    font-weight: normal;
+    color: #3a7ca5;
+    margin: 0;
+    letter-spacing: 0;
+    text-align: center;
+}
+
+.sofi-card:hover .sofi-card-title {
+    text-decoration: underline;
+    color: #255680;
+}
+
+/* Esconde elementos antigos do card */
+.sofi-card-desc {
     display: none;
 }
 
-.sofi-card.disabled .sofi-card-icon-container {
-    background-color: #F1F5F9;
-    border-color: #E2E8F0;
+.sofi-card-arrow-container {
+    display: none;
 }
 
-.sofi-card.disabled .sofi-card-icon-container svg {
-    stroke: #94A3B8;
+/* Card desabilitado */
+.sofi-card.disabled {
+    opacity: 0.55;
+    cursor: default;
+    background-color: #f5f7fa;
 }
 
-.sofi-card.disabled .sofi-card-arrow-container {
-    background-color: #F1F5F9;
-    border-color: #E2E8F0;
+.sofi-card.disabled:hover {
+    border-color: #d4dde6;
+    box-shadow: none;
 }
 
-.sofi-card.disabled .sofi-card-arrow-container svg {
-    stroke: #94A3B8;
+.sofi-card.disabled .sofi-card-title {
+    color: #999999;
+    text-decoration: none;
 }
 
-.sofi-card.disabled:hover .sofi-card-arrow-container {
-    background-color: #F1F5F9;
-    border-color: #E2E8F0;
+.sofi-card.disabled:hover .sofi-card-title {
+    text-decoration: none;
+    color: #999999;
 }
 
-.sofi-card.disabled:hover .sofi-card-arrow-container svg {
-    stroke: #94A3B8;
-    transform: none;
-}
-
-/* Badge de "Em Breve" sutil */
+/* Badge "Em Breve" */
 .sofi-card-badge {
     position: absolute;
-    top: 14px;
-    right: 14px;
-    font-size: 10px;
-    font-weight: 700;
-    color: #94A3B8;
-    background-color: #F1F5F9;
-    padding: 3px 8px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
+    top: 8px;
+    right: 8px;
+    font-size: 9px;
+    font-weight: bold;
+    color: #999999;
+    background-color: #eef2f6;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
+    border: 1px solid #d4dde6;
 }
 
-/* Footer Fixo SOFI */
-.sofi-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    background: #FFFFFF;
-    border-top: 1px solid var(--border-soft);
+/* ============================================================
+   BOTÕES DE AÇÃO SAGE (Foto 2 - Estilo Bootstrap clássico)
+   ============================================================ */
+.sage-btn-group {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--text-muted);
-    z-index: 9999;
-    box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.01);
-}
-
-.footer-item {
-    display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
+    margin: 16px 0;
 }
 
-.footer-item svg {
-    color: var(--primary-blue);
+.sage-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: normal;
+    color: #ffffff;
+    background-color: #337ab7;
+    border: 1px solid #2e6da4;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none !important;
+    transition: background-color 0.1s ease;
+    white-space: nowrap;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-.footer-divider {
-    color: #D8E4EF;
-    font-weight: 300;
+.sage-btn:hover {
+    background-color: #286090;
+    border-color: #204d74;
+    color: #ffffff !important;
+    text-decoration: none !important;
 }
 
-.status-indicator {
-    width: 7px;
-    height: 7px;
-    background-color: #22C55E;
-    border-radius: 50%;
-    margin-left: 6px;
-    display: inline-block;
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+.sage-btn-success {
+    background-color: #5cb85c;
+    border-color: #4cae4c;
 }
 
-/* Estilização para o Grid de 3 colunas em Páginas Secundárias */
-.sofi-card-grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-bottom: 40px;
-    width: 100%;
+.sage-btn-success:hover {
+    background-color: #449d44;
+    border-color: #398439;
 }
 
-/* Customização dos elementos interativos nativos do Streamlit nas páginas operacionais */
+.sage-btn-warning {
+    background-color: #f0ad4e;
+    border-color: #eea236;
+    color: #ffffff;
+}
+
+.sage-btn-warning:hover {
+    background-color: #ec971f;
+    border-color: #d58512;
+}
+
+/* Customização dos botões nativos Streamlit para o estilo Sage */
 div.stButton > button {
-    font-family: 'Outfit', sans-serif !important;
-    border-radius: 14px !important;
-    font-weight: 600 !important;
-    transition: all 0.2s ease !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
+    font-weight: normal !important;
+    padding: 6px 14px !important;
+    transition: background-color 0.1s ease !important;
 }
 
-/* Botão Primário no Streamlit */
 div.stButton > button[kind="primary"] {
-    background-color: var(--primary-blue) !important;
-    border: 1px solid var(--primary-blue) !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 4px 12px rgba(0, 120, 200, 0.15) !important;
+    background-color: #337ab7 !important;
+    border: 1px solid #2e6da4 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
 }
 
 div.stButton > button[kind="primary"]:hover {
-    background-color: var(--primary-blue-dark) !important;
-    border-color: var(--primary-blue-dark) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 6px 16px rgba(0, 120, 200, 0.25) !important;
+    background-color: #286090 !important;
+    border-color: #204d74 !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
-/* Botão Secundário no Streamlit */
 div.stButton > button[kind="secondary"] {
-    background-color: #FFFFFF !important;
-    border: 1px solid var(--border-soft) !important;
-    color: var(--text-dark) !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #333333 !important;
+    box-shadow: none !important;
 }
 
 div.stButton > button[kind="secondary"]:hover {
-    border-color: var(--primary-blue) !important;
-    color: var(--primary-blue) !important;
+    background-color: #e6e6e6 !important;
+    border-color: #adadad !important;
+    color: #333333 !important;
 }
 
-/* Área de código/console Streamlit */
+/* ============================================================
+   FORMULÁRIOS SAGE (Foto 2 - Labels em negrito, inputs simples)
+   ============================================================ */
+.sage-form-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.sage-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333333;
+    min-width: 100px;
+    text-align: right;
+}
+
+.sage-field {
+    flex: 1;
+    max-width: 300px;
+}
+
+/* Streamlit form label */
+.stSelectbox label,
+.stDateInput label,
+.stRadio label,
+.stTextInput label {
+    font-size: 13px !important;
+    font-weight: bold !important;
+    color: #333333 !important;
+}
+
+/* Console/código */
 .stCodeBlock {
-    border: 1px solid var(--border-soft) !important;
-    border-radius: 16px !important;
-    background-color: #0F172A !important;
+    border: 1px solid #d4dde6 !important;
+    border-radius: 4px !important;
+    background-color: #1a1a2e !important;
     overflow: hidden !important;
+    font-family: "Courier New", Courier, monospace !important;
+    font-size: 12px !important;
 }
 
-/* Botão de voltar customizado */
+/* ============================================================
+   DIVISORES E SEÇÕES
+   ============================================================ */
+.sage-divider {
+    border: none;
+    border-top: 1px solid #3a7ca5;
+    margin: 16px 0 20px 0;
+}
+
+.sage-section-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: #555555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.sage-page-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222222;
+    margin-bottom: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #3a7ca5;
+}
+
+/* ============================================================
+   LINK DE VOLTAR
+   ============================================================ */
 .sofi-back-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     text-decoration: none !important;
-    color: var(--text-muted) !important;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 10px 20px;
-    border-radius: 12px;
-    border: 1px solid var(--border-soft);
-    background-color: #FFFFFF;
-    transition: all 0.2s ease;
-    margin-top: 10px;
-    margin-bottom: 50px;
+    color: #337ab7 !important;
+    font-weight: normal;
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #337ab7;
+    background-color: #ffffff;
+    transition: background-color 0.1s ease;
+    margin-top: 12px;
+    margin-bottom: 30px;
 }
 
 .sofi-back-link:hover {
-    color: var(--primary-blue) !important;
-    border-color: var(--primary-blue);
-    background-color: var(--primary-blue-soft);
-    transform: translateX(-2px);
+    color: #ffffff !important;
+    background-color: #337ab7;
+    text-decoration: none !important;
+}
+
+/* ============================================================
+   DATAFRAME / TABELA SAGE
+   ============================================================ */
+.stDataFrame {
+    border: 1px solid #d4dde6 !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
 }

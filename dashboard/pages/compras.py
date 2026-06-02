@@ -2,53 +2,39 @@ import streamlit as st
 import sys
 from pathlib import Path
 
-# Configuração do caminho
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from components.layout import render_layout
 
-# Renderiza Topbar, Footer e injeta CSS global
-render_layout()
+render_layout(nav_links=[("MÓDULOS", "/")])
 
-# Título e Subtítulo
 st.markdown("""
 <div class="sofi-title-container">
-<h1 class="sofi-main-title">Módulos de Compras</h1>
-<p class="sofi-sub-title">Ferramentas e rotinas do departamento de Compras.</p>
+    <h1 class="sofi-main-title">Módulos de Compras</h1>
+    <p class="sofi-sub-title">Ferramentas e rotinas do departamento de Compras.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Grid de Cards
 st.markdown("""
 <div class="sofi-card-grid-3">
-<!-- Card 1: Relatório MAR (Em breve) -->
-<div class="sofi-card disabled">
-<span class="sofi-card-badge">Em Breve</span>
-<div class="sofi-card-icon-container">
-<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0078C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<circle cx="9" cy="21" r="1"></circle>
-<circle cx="20" cy="21" r="1"></circle>
-<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-</svg>
-</div>
-<h3 class="sofi-card-title">Relatório MAR</h3>
-<p class="sofi-card-desc">Extração e geração de relatórios de compras MAR via extranet.</p>
-<div class="sofi-card-arrow-container">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0078C8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-<line x1="5" y1="12" x2="19" y2="12"></line>
-<polyline points="12 5 19 12 12 19"></polyline>
-</svg>
-</div>
-</div>
+
+    <!-- Card: Relatório MAR (Em breve) -->
+    <div class="sofi-card disabled">
+    <span class="sofi-card-badge">Em Breve</span>
+        <div class="sofi-card-icon-container">
+            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <rect x="8" y="10" width="48" height="44" rx="4" fill="#ddeeff" stroke="#5b8fc9" stroke-width="2"/>
+                <rect x="8" y="10" width="48" height="12" rx="4" fill="#5b8fc9"/>
+                <line x1="16" y1="34" x2="48" y2="34" stroke="#5b8fc9" stroke-width="1.5"/>
+                <line x1="16" y1="42" x2="40" y2="42" stroke="#5b8fc9" stroke-width="1.5"/>
+                <line x1="16" y1="26" x2="48" y2="26" stroke="#c8ddf5" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <h3 class="sofi-card-title">Relatório MAR</h3>
+    </div>
+
 </div>
 
-<!-- Link elegante de voltar ao início -->
-<div style="text-align: left; margin-top: 20px; margin-bottom: 40px;">
-<a href="/" target="_self" class="sofi-back-link">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-<line x1="19" y1="12" x2="5" y2="12"></line>
-<polyline points="12 19 5 12 12 5"></polyline>
-</svg>
-Voltar para Departamentos
-</a>
+<div style="margin-top: 12px; margin-bottom: 30px;">
+    <a href="/" target="_self" class="sofi-back-link">&#8592; Voltar para Módulos</a>
 </div>
 """, unsafe_allow_html=True)
