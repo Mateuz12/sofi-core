@@ -19,8 +19,7 @@ render_layout(nav_links=[
 
 # Referencias para os scripts
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-SCRIPT_BH = ROOT_DIR / "departments" / "financeiro" / "modules" / "retaguarda" / "BH" / "extrator_retaguarda_bh.py"
-SCRIPT_UDI = ROOT_DIR / "departments" / "financeiro" / "modules" / "retaguarda" / "UDI" / "extrator_retaguarda_udi.py"
+SCRIPT_RETAGUARDA = ROOT_DIR / "departments" / "financeiro" / "modules" / "retaguarda" / "extrator_retaguarda.py"
 DB_PATH = ROOT_DIR / "core" / "database" / "sofi.db"
 
 # Inicia variáveis na sessão
@@ -30,10 +29,8 @@ if "retaguarda_process_running" not in st.session_state:
 # Função que roda o processo
 def run_retaguarda_process(unidade, data_str=None):
     try:
-        script_path = SCRIPT_BH if unidade == "BH" else SCRIPT_UDI
-        
         # Monta o comando
-        cmd_args = f'"{sys.executable}" "{script_path}"'
+        cmd_args = f'"{sys.executable}" "{SCRIPT_RETAGUARDA}" --unidade {unidade}'
         if data_str:
             cmd_args += f' --data {data_str}'
             
