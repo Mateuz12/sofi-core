@@ -35,7 +35,7 @@ def run_extranet_process(unidade, data_str=None, dias=None):
             cmd_args += f' --data {data_str}'
         if dias:
             cmd_args += f' --dias {dias}'
-        full_cmd = f'cmd.exe /c "{cmd_args} || pause"'
+        full_cmd = f'cmd.exe /c "{cmd_args}"'
         subprocess.run(full_cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
     except Exception as e:
         print(f"Erro inesperado ao lançar subprocesso do Extranet: {e}")
