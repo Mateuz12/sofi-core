@@ -195,10 +195,12 @@ def validate_report_not_empty(file_path: Path, report_name: str) -> None:
 def _is_month_visible(page: Page, target_month: int, target_year: int) -> bool:
     """Verifica se o mês alvo está visível no calendário aberto (Ant Design)."""
     month_pt = MONTH_NAMES_PT[target_month]
+    month_abbr = month_pt[:3]  # Versão abreviada de 3 letras (ex: Jan, Fev, Mar, ..., Jun)
     
-    # 1. Tenta buscar pelo texto direto usando regex (caso o cabeçalho seja um elemento único)
+    # 1. Tenta buscar pelo texto direto usando regex flexível (com nome por extenso ou abreviação de 3 letras, sem \b rígidos)
     try:
-        target_regex = re.compile(rf"\b{month_pt}\b.*\b{target_year}\b", re.IGNORECASE)
+        pattern = rf"({month_pt}|{month_abbr}).*?{target_year}"
+        target_regex = re.compile(pattern, re.IGNORECASE | re.DOTALL)
         if page.get_by_text(target_regex).first.is_visible(timeout=500):
             return True
     except Exception:
@@ -206,12 +208,14 @@ def _is_month_visible(page: Page, target_month: int, target_year: int) -> bool:
         
     # 2. Tenta inspecionar o inner_text dos cabeçalhos dos painéis de calendário (Ant Design)
     try:
-        headers = page.locator(".ant-picker-header, .ant-picker-header-view, .calendar-header, .ant-calendar-header")
+        headers = page.locator(".ant-picker-header, .ant-picker-header-view, .calendar-header, .ant-calendar-header, [class*='header-view']")
         for idx in range(headers.count()):
             try:
-                h_text = headers.nth(idx).inner_text(timeout=200)
-                if month_pt.lower() in h_text.lower() and str(target_year) in h_text:
-                    return True
+                h = headers.nth(idx)
+                if h.is_visible(timeout=200):
+                    h_text = h.inner_text(timeout=200).lower()
+                    if (month_pt.lower() in h_text or month_abbr.lower() in h_text) and str(target_year) in h_text:
+                        return True
             except Exception:
                 continue
     except Exception:
