@@ -22,7 +22,7 @@ from playwright.sync_api import Page, sync_playwright, TimeoutError as Playwrigh
 
 # Carrega o .env global do SOFI + .env.local do departamento
 _ROOT = Path(__file__).resolve()
-while not (_ROOT / ".env").exists() and _ROOT != _ROOT.parent:
+while not (_ROOT / "core").exists() and _ROOT != _ROOT.parent:
     _ROOT = _ROOT.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
