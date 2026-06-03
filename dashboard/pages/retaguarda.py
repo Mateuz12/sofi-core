@@ -34,7 +34,7 @@ def run_retaguarda_process(unidade, data_str=None):
         if data_str:
             cmd_args += f' --data {data_str}'
             
-        full_cmd = f'cmd.exe /c "{cmd_args} || pause"'
+        full_cmd = f'cmd.exe /c "{cmd_args}"'
         
         # Abre console visível no Windows
         subprocess.run(full_cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)

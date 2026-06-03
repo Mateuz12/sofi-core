@@ -27,7 +27,7 @@ def run_xml_processes():
     try:
         # Comando CMD em uma única string para evitar que o subprocess escape as aspas no Windows (\")
         # O cmd.exe /c tira as primeiras e as últimas aspas, então envolvemos tudo num bloco de aspas duplas.
-        full_cmd = f'cmd.exe /c ""{sys.executable}" "{SCRIPT_DEBUG}" && "{sys.executable}" "{SCRIPT_GERADOR}" || pause"'
+        full_cmd = f'cmd.exe /c ""{sys.executable}" "{SCRIPT_DEBUG}" && "{sys.executable}" "{SCRIPT_GERADOR}""'
         
         # creationflags=subprocess.CREATE_NEW_CONSOLE força a abertura de uma nova janela visível no Windows
         subprocess.run(full_cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
@@ -37,7 +37,7 @@ def run_xml_processes():
 # Função que roda apenas a geração de relatório
 def run_only_gerador():
     try:
-        full_cmd = f'cmd.exe /c ""{sys.executable}" "{SCRIPT_GERADOR}" || pause"'
+        full_cmd = f'cmd.exe /c ""{sys.executable}" "{SCRIPT_GERADOR}""'
         subprocess.run(full_cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
     except Exception as e:
         print(f"Erro inesperado ao lançar subprocessos: {e}")
