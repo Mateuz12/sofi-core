@@ -3,11 +3,29 @@ import sys
 from pathlib import Path
 
 # Configuração do caminho
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from components.layout import render_layout
 
+# ─────────────────────────────────────────────
+# Scheduler (singleton via cache_resource)
+# Garante que apenas 1 instância do BackgroundScheduler
+# existe por processo Streamlit, mesmo com múltiplas abas
+# ─────────────────────────────────────────────
+@st.cache_resource
+def _get_scheduler():
+    try:
+        from core.scheduler import start_scheduler
+        return start_scheduler()
+    except Exception as e:
+        print(f"[Scheduler] Erro ao iniciar: {e}")
+        return None
+
+_get_scheduler()
+
 # Renderiza Topbar, Footer e injeta CSS global
 render_layout(nav_links=[("MÓDULOS", "/")])
+
 
 # ─────────────────────────────────────────────
 # Tela de Seleção de Departamento (raiz)

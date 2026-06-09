@@ -2,6 +2,23 @@ import streamlit as st
 import datetime
 from pathlib import Path
 
+def _get_scheduler_badge_html() -> str:
+    """Retorna o HTML do badge de status do scheduler para a topbar."""
+    try:
+        from core.scheduler import get_scheduler_status
+        status = get_scheduler_status()
+        if status["running"]:
+            return (
+                f'<span class="sofi-scheduler-badge sofi-scheduler-ok">'
+                f'🟢 Scheduler: OK'
+                f'<span class="sofi-scheduler-next"> | Próx: {status["next_job"]}</span>'
+                f'</span>'
+            )
+        else:
+            return '<span class="sofi-scheduler-badge sofi-scheduler-off">🔴 Scheduler: PAUSADO</span>'
+    except Exception:
+        return ''  # silencioso se scheduler não estiver disponível
+
 def load_css():
     """Carrega o arquivo CSS e injeta no Streamlit."""
     css_path = Path(__file__).resolve().parent.parent / "style.css"
@@ -23,6 +40,8 @@ def render_topbar(nav_links: list[tuple[str, str]] | None = None):
     for label, url in nav_links:
         nav_html += f'<a href="{url}" target="_self" class="sofi-nav-link">{label}</a>'
 
+    scheduler_badge = _get_scheduler_badge_html()
+
     html = f"""
     <div class="sofi-header">
         <a href="/" target="_self" class="sofi-logo">
@@ -32,6 +51,7 @@ def render_topbar(nav_links: list[tuple[str, str]] | None = None):
             {nav_html}
         </div>
         <div class="sofi-user">
+            {scheduler_badge}
             <span class="sofi-user-name">USUARIO FINANCEIRO DE UDI ▾</span>
         </div>
     </div>
