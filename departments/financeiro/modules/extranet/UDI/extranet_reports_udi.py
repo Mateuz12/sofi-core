@@ -823,6 +823,13 @@ def generate_overpayment_report(page: Page, target_date: datetime) -> Path:
 
 import argparse
 
+# ─────────────────────────────────────────────
+# Exit codes (usados pelo scheduler para decidir sobre retry)
+# ─────────────────────────────────────────────
+EXIT_OK        = 0  # execução concluída com sucesso
+EXIT_RETRYABLE = 1  # falha transitória (Playwright, rede) → scheduler fará retry
+EXIT_PERMANENT = 2  # falha permanente (dados vazios)     → scheduler NÃO fará retry
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Extração Extranet UDI")
     parser.add_argument("--data", type=str, default=None, help="Data de referência (DD/MM/AAAA)")
@@ -915,4 +922,13 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+        sys.exit(EXIT_OK)
+    except RuntimeError as e:
+        msg = str(e).upper()
+        if "EM BRANCO" in msg or "VAZIO" in msg:
+            sys.exit(EXIT_PERMANENT)
+        sys.exit(EXIT_RETRYABLE)
+    except Exception:
+        sys.exit(EXIT_RETRYABLE)
