@@ -2,7 +2,7 @@ import os
 import sys
 import re
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 import win32com.client
 
@@ -158,11 +158,19 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         if last_row_nf >= 4:
             sheet_nf.Rows(f"4:{last_row_nf}").Delete()
             
-        # Cores de preenchimento alternado:
-        # Linha 1: Azul ênfase 5 Mais Claro 40% = RGB(155, 194, 230) -> 15123099
-        # Linha 2: Azul ênfase 5 Mais Claro 60% = RGB(189, 215, 238) -> 15652797
-        azul_40 = 15123099
-        azul_60 = 15652797
+        # Cores de preenchimento alternado POR LOJA (PDV):
+        # Cor 1: #DDEBF7 = RGB(221, 235, 247) -> BGR 16247773
+        # Cor 2: #9BC2E6 = RGB(155, 194, 230) -> BGR 15123099
+        cor_loja_1 = 16247773
+        cor_loja_2 = 15123099
+        
+        # Monta mapeamento de cor por loja (PDV)
+        pdvs_unicos = []
+        for n in notas:
+            pdv = str(n.get('PDV', ''))
+            if pdv not in pdvs_unicos:
+                pdvs_unicos.append(pdv)
+        pdv_color_map = {pdv: i % 2 for i, pdv in enumerate(pdvs_unicos)}
         
         # Escreve as notas e suas fórmulas apontando para a aba Base
         num_notas = len(notas)
@@ -170,9 +178,10 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             row = 4 + idx
             row_base = 2 + idx
             
-            # Altura e estilo padrão da linha
+            # Altura e estilo padrão da linha — cor alternada por LOJA
             sheet_nf.Rows(row).RowHeight = 25
-            current_color = azul_40 if idx % 2 == 0 else azul_60
+            pdv_atual = str(notas[idx].get('PDV', ''))
+            current_color = cor_loja_1 if pdv_color_map.get(pdv_atual, 0) == 0 else cor_loja_2
             
             for col in range(1, 11):
                 cell = sheet_nf.Cells(row, col)
@@ -264,10 +273,18 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_nf.Cells(r_tot, 6).Formula = f'=SUM(F{r_loja}:F{r_eudora})'
             sheet_nf.Cells(r_tot, 7).Formula = f'=F{r_tot}/E{r_tot}-1'
             
+        # Centraliza todas as informações da tabela de resumo
+        if orig_resumo_start and orig_resumo_end:
+            for r_res in range(row_resumo_start, r_tot + 1):
+                for c_res in range(1, 11):
+                    cell_res = sheet_nf.Cells(r_res, c_res)
+                    cell_res.HorizontalAlignment = -4108  # xlCenter
+                    cell_res.VerticalAlignment = -4108     # xlCenter
+        
         # Remove a aba de backup temporário de forma limpa
         sheet_backup.Delete()
         
-        # Atualiza Título Principal na linha 1
+        # Atualiza Título Principal na linha 1 — usa semana completa (segunda a domingo)
         datas_emissao = []
         for n in notas:
             dt_emi = n.get('Dt. Emissão')
@@ -275,8 +292,12 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
                 try: datas_emissao.append(datetime.strptime(dt_emi, '%d/%m/%Y'))
                 except: pass
         if datas_emissao:
-            min_d = min(datas_emissao).strftime('%d/%m')
-            max_d = max(datas_emissao).strftime('%d/%m')
+            min_date = min(datas_emissao)
+            # Calcula segunda-feira da semana e domingo correspondente
+            segunda = min_date - timedelta(days=min_date.weekday())
+            domingo = segunda + timedelta(days=6)
+            min_d = segunda.strftime('%d/%m')
+            max_d = domingo.strftime('%d/%m')
             sheet_nf.Cells(1, 1).Value = f"NOTAS FISCAIS X CONTABILIZAÇÃO - SEMANA {min_d} A {max_d} - {unidade}"
             print(f"  [{unidade}] Cabeçalho atualizado: {min_d} a {max_d}")
         else:
@@ -356,15 +377,27 @@ def processar_relatorio_matheus(unidade, notas, caminho_modelo, caminho_saida):
         start_col = 1 if unidade == "BH" else 6
         end_col = 5 if unidade == "BH" else 10
         
-        azul_40 = 15123099
-        azul_60 = 15652797
+        # Cores de preenchimento alternado POR LOJA (PDV):
+        # Cor 1: #DDEBF7 = RGB(221, 235, 247) -> BGR 16247773
+        # Cor 2: #9BC2E6 = RGB(155, 194, 230) -> BGR 15123099
+        cor_loja_1 = 16247773
+        cor_loja_2 = 15123099
+        
+        # Monta mapeamento de cor por loja (PDV)
+        pdvs_unicos = []
+        for n in notas:
+            pdv = str(n.get('PDV', ''))
+            if pdv not in pdvs_unicos:
+                pdvs_unicos.append(pdv)
+        pdv_color_map = {pdv: i % 2 for i, pdv in enumerate(pdvs_unicos)}
         
         for idx, nota in enumerate(notas):
             row = 4 + idx
             row_base = 2 + idx
             
             sheet_nf.Rows(row).RowHeight = 25
-            current_color = azul_40 if idx % 2 == 0 else azul_60
+            pdv_atual = str(nota.get('PDV', ''))
+            current_color = cor_loja_1 if pdv_color_map.get(pdv_atual, 0) == 0 else cor_loja_2
             
             # Formata todas as células da nova linha
             for col in range(start_col, end_col + 1):
@@ -422,7 +455,7 @@ def processar_relatorio_matheus(unidade, notas, caminho_modelo, caminho_saida):
                 except: sheet_nf.Cells(row, 10).Value = pedido_val
                 sheet_nf.Cells(row, 10).HorizontalAlignment = -4108
                 
-        # Atualiza o Título na linha 1
+        # Atualiza o Título na linha 1 — usa semana completa (segunda a domingo)
         datas_emissao = []
         for n in notas:
             dt_emi = n.get('Dt. Emissão')
@@ -430,8 +463,12 @@ def processar_relatorio_matheus(unidade, notas, caminho_modelo, caminho_saida):
                 try: datas_emissao.append(datetime.strptime(dt_emi, '%d/%m/%Y'))
                 except: pass
         if datas_emissao:
-            min_d = min(datas_emissao).strftime('%d/%m')
-            max_d = max(datas_emissao).strftime('%d/%m')
+            min_date = min(datas_emissao)
+            # Calcula segunda-feira da semana e domingo correspondente
+            segunda = min_date - timedelta(days=min_date.weekday())
+            domingo = segunda + timedelta(days=6)
+            min_d = segunda.strftime('%d/%m')
+            max_d = domingo.strftime('%d/%m')
             col_tit = 1 if unidade == "BH" else 6
             sheet_nf.Cells(1, col_tit).Value = f"NOTAS FISCAIS FATURADAS - SEMANA {min_d} A {max_d} - {unidade}"
             print(f"  [{unidade}/Matheus] Cabeçalho atualizado: {min_d} a {max_d}")
@@ -530,13 +567,15 @@ def gerar_relatorio_calamo():
     # 4. Determina Ano, Mês e a Semana para criar a estrutura organizada de pastas
     if datas_emissao:
         min_date_obj = min(datas_emissao)
-        max_date_obj = max(datas_emissao)
+        # Calcula segunda-feira da semana e domingo correspondente
+        segunda_pasta = min_date_obj - timedelta(days=min_date_obj.weekday())
+        domingo_pasta = segunda_pasta + timedelta(days=6)
         
-        ano_pasta = str(max_date_obj.year)
-        mes_pasta = MESES_MAP.get(max_date_obj.month, f"{max_date_obj.month:02d} - Outros")
+        ano_pasta = str(segunda_pasta.year)
+        mes_pasta = MESES_MAP.get(segunda_pasta.month, f"{segunda_pasta.month:02d} - Outros")
         
-        min_str = min_date_obj.strftime('%d-%m')
-        max_str = max_date_obj.strftime('%d-%m')
+        min_str = segunda_pasta.strftime('%d-%m')
+        max_str = domingo_pasta.strftime('%d-%m')
         semana_pasta = f"Semana {min_str} a {max_str}"
     else:
         # Fallback padrão
