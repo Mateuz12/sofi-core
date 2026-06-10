@@ -492,8 +492,8 @@ def gerar_relatorio_calamo():
     """Função principal que orquestra a leitura do XML, classificação e geração dos 4 relatórios."""
     print("=== INICIANDO PROCESSAMENTO DOS RELATÓRIOS DA CÁLAMO ===")
     
-    if os.path.exists(r"Z:\XMLS CÁLAMO"):
-        pasta_xml = r"Z:\XMLS CÁLAMO\XML BAIXADOS\TEMP_PROCESSAMENTO"
+    if os.path.exists(r"T:\05-FIN\XMLS CÁLAMO"):
+        pasta_xml = r"T:\05-FIN\XMLS CÁLAMO\XML BAIXADOS\TEMP_PROCESSAMENTO"
     else:
         pasta_xml = os.path.join(DIRETORIO_ATUAL, 'xmls_meudanfe')
         
@@ -583,13 +583,13 @@ def gerar_relatorio_calamo():
         mes_pasta = MESES_MAP.get(datetime.now().month, f"{datetime.now().month:02d} - Outros")
         semana_pasta = f"Semana {datetime.now().strftime('%d-%m')}"
         
-    # Caminho final estruturado na rede Z:
-    base_relatorios = r"Z:\XMLS CÁLAMO\RELATÓRIOS COMPLETOS"
-    base_xmls_baixados = r"Z:\XMLS CÁLAMO\XML BAIXADOS"
+    # Caminho final estruturado na rede T:
+    base_relatorios = r"T:\05-FIN\XMLS CÁLAMO\RELATÓRIOS COMPLETOS"
+    base_xmls_baixados = r"T:\05-FIN\XMLS CÁLAMO\XML BAIXADOS"
     
-    # Se a Z: não estiver mapeada, usar fallback local
-    if not os.path.exists(r"Z:\XMLS CÁLAMO"):
-        print("AVISO: Drive Z:\\XMLS CÁLAMO não encontrado! Usando pastas locais como fallback.")
+    # Se a T: não estiver mapeada, usar fallback local
+    if not os.path.exists(r"T:\05-FIN\XMLS CÁLAMO"):
+        print("AVISO: Drive T:\\05-FIN\\XMLS CÁLAMO não encontrado! Usando pastas locais como fallback.")
         base_relatorios = os.path.join(DIRETORIO_ATUAL, 'Relatórios Cálamo')
         base_xmls_baixados = os.path.join(DIRETORIO_ATUAL, 'XML BAIXADOS')
         

@@ -41,8 +41,8 @@ from core.database.logger import log_execution
 API_KEY = os.getenv("MEUDANFE_API_KEY", "")
 BASE_URL = "https://api.meudanfe.com.br/v2"
 
-# Rede Z: Planilhas Base
-PASTA_PLANILHAS_REDE = r"Z:\XMLS CÁLAMO\PLANILHAS_RETAGUARDA"
+# Rede T: Planilhas Base
+PASTA_PLANILHAS_REDE = r"T:\05-FIN\XMLS CÁLAMO\PLANILHAS_RETAGUARDA"
 PREFIXO_PLANILHA = "relatorioSinteticoDeNotasFiscaisCompra"
 
 # Fallback
@@ -51,8 +51,8 @@ COLUNA_CHAVE = 7          # Coluna H = índice 7 (0-based)
 LINHA_INICIO = 10         # Primeira linha com dados (0-based)
 
 # Pasta de saída temporária para os XMLs baixados (preferencialmente na rede)
-if os.path.exists(r"Z:\XMLS CÁLAMO"):
-    PASTA_XMLS = r"Z:\XMLS CÁLAMO\XML BAIXADOS\TEMP_PROCESSAMENTO"
+if os.path.exists(r"T:\05-FIN\XMLS CÁLAMO"):
+    PASTA_XMLS = r"T:\05-FIN\XMLS CÁLAMO\XML BAIXADOS\TEMP_PROCESSAMENTO"
 else:
     PASTA_XMLS = "xmls_meudanfe"
 
@@ -226,7 +226,7 @@ def ler_chaves_planilha(caminho_planilha):
         log("Para corrigir isso, por favor:", "AVISO")
         log("  1. Acesse o sistema retaguarda/ERP", "AVISO")
         log("  2. Exporte o relatório no formato EXCEL (.xls ou .xlsx) em vez de CSV", "AVISO")
-        log("  3. Salve-o na pasta: Z:\\XMLS CÁLAMO\\PLANILHAS_RETAGUARDA", "AVISO")
+        log("  3. Salve-o na pasta: T:\\05-FIN\\XMLS CÁLAMO\\PLANILHAS_RETAGUARDA", "AVISO")
         sep("!")
     
     return chaves
