@@ -8,7 +8,14 @@ import pandas as pd
 from pathlib import Path
 
 # Configuração do caminho
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from core.sofi_env import load_sofi_env
+load_sofi_env()
+
+import os
 from components.layout import render_layout
 
 render_layout(nav_links=[
@@ -17,10 +24,10 @@ render_layout(nav_links=[
 ])
 
 # Referencias para os scripts
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 SCRIPT_DEBUG = ROOT_DIR / "departments" / "financeiro" / "modules" / "xml" / "debug_meudanfe.py"
 SCRIPT_GERADOR = ROOT_DIR / "departments" / "financeiro" / "modules" / "xml" / "gerador_relatorio.py"
-DB_PATH = ROOT_DIR / "core" / "database" / "sofi.db"
+DB_PATH = ROOT_DIR / os.getenv("LOG_DB_PATH", "core/database/sofi.db")
+
 
 # Função que roda o processo completo
 def run_xml_processes():
