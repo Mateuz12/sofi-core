@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from components.layout import render_layout
+from components.layout import render_layout, render_scheduler_status
 
 render_layout(nav_links=[("MÓDULOS", "/")])
 
@@ -106,3 +106,8 @@ st.markdown("""<div class="sofi-card-grid-3">
 <div style="margin-top: 12px; margin-bottom: 30px;">
 <a href="/" target="_self" class="sofi-back-link">&#8592; Voltar para Módulos</a>
 </div>""", unsafe_allow_html=True)
+
+# ─── Agendados ────────────────────────────────────────────────────────────────
+st.markdown("<hr class='sage-divider'>", unsafe_allow_html=True)
+st.markdown("**Agendados**")
+render_scheduler_status()

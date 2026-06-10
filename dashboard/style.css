@@ -651,35 +651,45 @@ div.stButton > button[kind="secondary"]:hover {
 }
 
 /* ============================================================
-   SCHEDULER BADGE — Topbar
+   SCHEDULER PANEL — Painel de status na página de módulos
    ============================================================ */
-.sofi-scheduler-badge {
+.sofi-scheduler-panel {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-family: "PT Sans", sans-serif;
-    font-size: 11px;
-    font-weight: 400;
-    padding: 2px 8px;
-    border-radius: 10px;
-    white-space: nowrap;
-    margin-right: 8px;
+    gap: 8px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    padding: 7px 14px;
+    border-radius: 4px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
 }
 
-.sofi-scheduler-ok {
-    background-color: rgba(255, 255, 255, 0.18);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.35);
+.sofi-scheduler-panel.sofi-scheduler-ok {
+    background-color: #dff0d8;
+    color: #3c763d;
+    border-color: #d6e9c6;
 }
 
-.sofi-scheduler-off {
-    background-color: rgba(220, 50, 50, 0.25);
-    color: #ffe0e0;
-    border: 1px solid rgba(220, 50, 50, 0.5);
+.sofi-scheduler-panel.sofi-scheduler-off {
+    background-color: #f2dede;
+    color: #a94442;
+    border-color: #ebccd1;
+}
+
+.sofi-scheduler-indicator {
+    font-size: 10px;
+    line-height: 1;
+}
+
+.sofi-scheduler-label {
+    font-weight: bold;
 }
 
 .sofi-scheduler-next {
-    opacity: 0.85;
-    font-size: 10px;
+    opacity: 0.8;
+    font-size: 11px;
 }
 
