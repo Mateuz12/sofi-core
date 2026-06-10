@@ -2,22 +2,29 @@ import streamlit as st
 import datetime
 from pathlib import Path
 
-def _get_scheduler_badge_html() -> str:
-    """Retorna o HTML do badge de status do scheduler para a topbar."""
+def render_scheduler_status():
+    """Renderiza o painel de status do scheduler. Pode ser chamado em qualquer página."""
     try:
         from core.scheduler import get_scheduler_status
         status = get_scheduler_status()
         if status["running"]:
-            return (
-                f'<span class="sofi-scheduler-badge sofi-scheduler-ok">'
-                f'🟢 Scheduler: OK'
-                f'<span class="sofi-scheduler-next"> | Próx: {status["next_job"]}</span>'
-                f'</span>'
+            html = (
+                f'<div class="sofi-scheduler-panel sofi-scheduler-ok">'
+                f'<span class="sofi-scheduler-indicator">&#9679;</span>'
+                f'<span class="sofi-scheduler-label">Agendados: ativo</span>'
+                f'<span class="sofi-scheduler-next">| Próxima execução: {status["next_job"]}</span>'
+                f'</div>'
             )
         else:
-            return '<span class="sofi-scheduler-badge sofi-scheduler-off">🔴 Scheduler: PAUSADO</span>'
+            html = (
+                '<div class="sofi-scheduler-panel sofi-scheduler-off">'
+                '<span class="sofi-scheduler-indicator">&#9679;</span>'
+                '<span class="sofi-scheduler-label">Agendados: pausado</span>'
+                '</div>'
+            )
+        st.markdown(html, unsafe_allow_html=True)
     except Exception:
-        return ''  # silencioso se scheduler não estiver disponível
+        pass  # silencioso se scheduler não estiver disponível
 
 def load_css():
     """Carrega o arquivo CSS e injeta no Streamlit."""
@@ -40,8 +47,6 @@ def render_topbar(nav_links: list[tuple[str, str]] | None = None):
     for label, url in nav_links:
         nav_html += f'<a href="{url}" target="_self" class="sofi-nav-link">{label}</a>'
 
-    scheduler_badge = _get_scheduler_badge_html()
-
     html = f"""
     <div class="sofi-header">
         <a href="/" target="_self" class="sofi-logo">
@@ -51,7 +56,6 @@ def render_topbar(nav_links: list[tuple[str, str]] | None = None):
             {nav_html}
         </div>
         <div class="sofi-user">
-            {scheduler_badge}
             <span class="sofi-user-name">USUARIO FINANCEIRO DE UDI ▾</span>
         </div>
     </div>
