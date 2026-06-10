@@ -9,16 +9,30 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Configuração do caminho
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from core.sofi_env import load_sofi_env
+load_sofi_env()
+
+import os
 from components.layout import render_layout
 
 render_layout()
 
 # Referencias para os scripts
+<<<<<<< Updated upstream
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 SCRIPT_BH = ROOT_DIR / "departments" / "financeiro" / "modules" / "extranet" / "BH" / "extranet_reports_bh.py"
 SCRIPT_UDI = ROOT_DIR / "departments" / "financeiro" / "modules" / "extranet" / "UDI" / "extranet_reports_udi.py"
 DB_PATH = ROOT_DIR / "core" / "database" / "sofi.db"
+=======
+SCRIPT_BH  = ROOT_DIR / "departments" / "financeiro" / "modules" / "extranet" / "BH"  / "extranet_reports_bh.py"
+SCRIPT_UDI = ROOT_DIR / "departments" / "financeiro" / "modules" / "extranet" / "UDI" / "extranet_reports_udi.py"
+DB_PATH    = ROOT_DIR / os.getenv("LOG_DB_PATH", "core/database/sofi.db")
+
+>>>>>>> Stashed changes
 
 # Inicia variáveis na sessão
 if "extranet_process_running" not in st.session_state:
