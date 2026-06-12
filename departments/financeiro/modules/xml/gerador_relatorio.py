@@ -71,8 +71,9 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         
     print(f"[{unidade}] Iniciando preenchimento do Relatório Geral...")
     
-    # Inicializa Excel COM
-    excel = win32com.client.Dispatch('Excel.Application')
+    # Inicializa Excel COM — DispatchEx sempre cria nova instância isolada,
+    # evitando herdar estado corrompido de sessões anteriores.
+    excel = win32com.client.DispatchEx('Excel.Application')
     excel.Visible = False
     excel.DisplayAlerts = False
     
@@ -323,7 +324,8 @@ def processar_relatorio_matheus(unidade, notas, caminho_modelo, caminho_saida):
         
     print(f"[{unidade}] Iniciando preenchimento do Relatório do Matheus...")
     
-    excel = win32com.client.Dispatch('Excel.Application')
+    # DispatchEx sempre cria nova instância isolada do Excel
+    excel = win32com.client.DispatchEx('Excel.Application')
     excel.Visible = False
     excel.DisplayAlerts = False
     
