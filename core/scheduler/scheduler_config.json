@@ -1,6 +1,11 @@
 {
   "enabled": true,
   "timezone": "America/Sao_Paulo",
+  "notification": {
+    "enabled": true,
+    "send_on_success": true,
+    "send_on_error": true
+  },
   "jobs": [
     {
       "name": "Extranet BH",
@@ -8,8 +13,7 @@
       "script": "departments/financeiro/modules/extranet/BH/extranet_reports_bh.py",
       "schedule": { "type": "cron", "hour": 9, "minute": 0 },
       "dias": 5,
-      "retry": { "max_attempts": 3, "delay_seconds": 120 },
-      "notification": { "email": null }
+      "retry": { "max_attempts": 3, "delay_seconds": 120 }
     },
     {
       "name": "Extranet UDI",
@@ -17,8 +21,7 @@
       "script": "departments/financeiro/modules/extranet/UDI/extranet_reports_udi.py",
       "schedule": { "type": "cron", "hour": 9, "minute": 15 },
       "dias": 5,
-      "retry": { "max_attempts": 3, "delay_seconds": 120 },
-      "notification": { "email": null }
+      "retry": { "max_attempts": 3, "delay_seconds": 120 }
     }
   ]
 }
