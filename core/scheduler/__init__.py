@@ -21,6 +21,7 @@ from core.scheduler.scheduler import (
     get_scheduler_status,
     load_config,
     run_job,
+    run_all_jobs,
     send_alert,
 )
 
@@ -30,5 +31,6 @@ __all__ = [
     "get_scheduler_status",
     "load_config",
     "run_job",
+    "run_all_jobs",
     "send_alert",
 ]
