@@ -208,26 +208,52 @@ def run_all_jobs(jobs_configs: list[dict]) -> None:
     Chamado pelo APScheduler como job único para garantir que a notificação
     só seja enviada após todos os jobs terminarem.
     """
+    import traceback
+
     config = load_config()
     notif_cfg = config.get("notification", {})
+
+    nomes = [j["name"] for j in jobs_configs]
+    _log("INFO", f"run_all_jobs iniciado. Jobs configurados: {nomes}", modulo="Scheduler")
+    print(f"[Scheduler] run_all_jobs iniciado. Jobs: {nomes}")
 
     resultados: list[dict] = []
 
     for job_cfg in jobs_configs:
+        name = job_cfg["name"]
+        
         if not job_cfg.get("enabled", True):
             # Registra como desabilitado sem executar
             resultados.append({
-                "name": job_cfg["name"],
+                "name": name,
                 "status": "DESABILITADO",
                 "tentativas": 0,
                 "duracao": "—",
                 "mensagem_erro": "",
             })
-            print(f"[Scheduler] Job '{job_cfg['name']}' desabilitado — ignorado.")
+            print(f"[Scheduler] Job '{name}' desabilitado — ignorado.")
             continue
 
-        resultado = run_job(job_cfg)
+        try:
+            resultado = run_job(job_cfg)
+        except Exception as exc:
+            tb = traceback.format_exc()
+            msg = f"Exceção não capturada no job '{name}': {exc}\n{tb}"
+            _log("ERRO", msg, modulo="Scheduler")
+            print(f"[Scheduler] EXCEÇÃO NÃO CAPTURADA em '{name}': {exc}")
+            resultado = {
+                "name": name,
+                "status": "ERRO",
+                "tentativas": 0,
+                "duracao": "—",
+                "mensagem_erro": msg,
+            }
         resultados.append(resultado)
+
+    # ── Resumo ──
+    resumo = ", ".join(f"{r['name']}={r['status']}" for r in resultados)
+    _log("INFO", f"run_all_jobs concluído. Resultados: {resumo}", modulo="Scheduler")
+    print(f"[Scheduler] run_all_jobs concluído. Resultados: {resumo}")
 
     # ── Decide se envia o e-mail ──
     if not notif_cfg.get("enabled", True):
