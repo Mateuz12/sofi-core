@@ -25,15 +25,9 @@ render_layout(nav_links=[
 ])
 
 # Referencias para os scripts
-<<<<<<< Updated upstream
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-SCRIPT_RETAGUARDA = ROOT_DIR / "departments" / "financeiro" / "modules" / "retaguarda" / "extrator_retaguarda.py"
-DB_PATH = ROOT_DIR / "core" / "database" / "sofi.db"
-=======
 SCRIPT_RETAGUARDA = ROOT_DIR / "departments" / "financeiro" / "modules" / "retaguarda" / "extrator_retaguarda.py"
 DB_PATH = ROOT_DIR / os.getenv("LOG_DB_PATH", "core/database/sofi.db")
 
->>>>>>> Stashed changes
 
 # Inicia variáveis na sessão
 if "retaguarda_process_running" not in st.session_state:
