@@ -120,7 +120,7 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         
         # Desmescla as células antigas a partir da linha 4 para evitar erros ao redimensionar/limpar
         try:
-            sheet_nf.Range("A4:J200").UnMerge()
+            sheet_nf.Range("A4:K200").UnMerge()
         except Exception as ex:
             print(f"[{unidade}] Aviso ao desmesclar células antigas: {ex}")
                 
@@ -184,7 +184,7 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             pdv_atual = str(notas[idx].get('PDV', ''))
             current_color = cor_loja_1 if pdv_color_map.get(pdv_atual, 0) == 0 else cor_loja_2
             
-            for col in range(1, 11):
+            for col in range(1, 12):
                 cell = sheet_nf.Cells(row, col)
                 cell.Font.Name = 'Calibri'
                 cell.Font.Size = 9
@@ -219,13 +219,31 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_nf.Cells(row, 7).HorizontalAlignment = -4108
             sheet_nf.Cells(row, 8).Value = ""
             
-            sheet_nf.Cells(row, 9).Formula = f"=Base!T{row_base}"  # Total Itens
-            sheet_nf.Cells(row, 9).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(row, 9).HorizontalAlignment = -4152   # xlRight
+            # ── Prazo de Pagamento — formato "45+5+X" ──────────────────────────
+            # X = max(dias entre emissão e vencimento - 50, 0)
+            # Ex: 60 dias → "45+5+10" | 50 dias ou menos → "45+5+0"
+            _dt_emi_str  = notas[idx].get('Dt. Emissão', '')
+            _dt_venc_str = notas[idx].get('Dt. Vencimento', '')
+            _prazo_texto = ""
+            if _dt_emi_str and _dt_venc_str:
+                try:
+                    _obj_emi  = datetime.strptime(_dt_emi_str,  '%d/%m/%Y')
+                    _obj_venc = datetime.strptime(_dt_venc_str, '%d/%m/%Y')
+                    _prazo_dias = (_obj_venc - _obj_emi).days
+                    _x = max(_prazo_dias - 50, 0)
+                    _prazo_texto = f"45+5+{_x}"
+                except Exception:
+                    _prazo_texto = ""
+            sheet_nf.Cells(row, 9).Value = _prazo_texto
+            sheet_nf.Cells(row, 9).HorizontalAlignment = -4108  # xlCenter
             
-            sheet_nf.Cells(row, 10).Formula = f"=Base!X{row_base}" # Total Documento
+            sheet_nf.Cells(row, 10).Formula = f"=Base!T{row_base}"  # Total Itens
             sheet_nf.Cells(row, 10).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(row, 10).HorizontalAlignment = -4152   # xlRight
+            
+            sheet_nf.Cells(row, 11).Formula = f"=Base!X{row_base}" # Total Documento
+            sheet_nf.Cells(row, 11).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(row, 11).HorizontalAlignment = -4152   # xlRight
             
             sheet_nf.Range(sheet_nf.Cells(row, 7), sheet_nf.Cells(row, 8)).Merge()
             
@@ -237,9 +255,9 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_backup.Rows("1:2").Copy(sheet_nf.Rows(f"{row_total}:{row_total+1}"))
             
             # Conserva e atualiza os intervalos das fórmulas de Totais nativas do Excel
-            sheet_nf.Cells(row_total, 9).Formula = f"=SUM(I4:I{row_nf_last})"
             sheet_nf.Cells(row_total, 10).Formula = f"=SUM(J4:J{row_nf_last})"
-            sheet_nf.Cells(row_total+1, 10).Formula = f"=J{row_total}/I{row_total}-1"
+            sheet_nf.Cells(row_total, 11).Formula = f"=SUM(K4:K{row_nf_last})"
+            sheet_nf.Cells(row_total+1, 11).Formula = f"=K{row_total}/J{row_total}-1"
             
         # 4. Restaura a tabela de Resumo do backup dinamicamente
         row_resumo_start = row_total + 4
