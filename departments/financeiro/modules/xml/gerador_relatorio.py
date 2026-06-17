@@ -123,6 +123,55 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_nf.Range("A4:K200").UnMerge()
         except Exception as ex:
             print(f"[{unidade}] Aviso ao desmesclar células antigas: {ex}")
+        
+        # Atualiza os cabeçalhos da linha 3 para garantir nomes corretos
+        # (especialmente após adição da coluna "Prazo de Pagamento")
+        try:
+            sheet_nf.Range("A3:K3").UnMerge()
+        except Exception:
+            pass
+        
+        # Lê a formatação original do cabeçalho a partir de uma célula existente (A3)
+        ref_cell = sheet_nf.Cells(3, 1)
+        hdr_bg_color = ref_cell.Interior.Color
+        hdr_font_color = ref_cell.Font.Color
+        hdr_font_bold = ref_cell.Font.Bold
+        hdr_font_name = ref_cell.Font.Name
+        hdr_font_size = ref_cell.Font.Size
+        
+        cabecalhos = {
+            1: "N° DOC",
+            2: "CMV",
+            3: "TRF",
+            4: "REM",
+            5: "Destinatário",
+            6: "Dt. Emissão",
+            7: "Dt. Vencimento",
+            9: "Prazo de\nPagamento",
+            10: "Total\nItens/Merc.",
+            11: "Total do\nDocumento",
+        }
+        for col_idx, nome in cabecalhos.items():
+            cell = sheet_nf.Cells(3, col_idx)
+            cell.Value = nome
+            cell.WrapText = True
+            cell.Interior.Color = hdr_bg_color
+            cell.Font.Color = hdr_font_color
+            cell.Font.Bold = hdr_font_bold
+            cell.Font.Name = hdr_font_name
+            cell.Font.Size = hdr_font_size
+            cell.VerticalAlignment = -4108   # xlCenter
+            cell.HorizontalAlignment = -4108 # xlCenter
+            # Bordas finas
+            for border_id in [7, 8, 9, 10]:
+                cell.Borders(border_id).LineStyle = 1
+                cell.Borders(border_id).Weight = 2
+        # Aplica a mesma formatação na célula H3 (mergeada com G3)
+        cell_h3 = sheet_nf.Cells(3, 8)
+        cell_h3.Interior.Color = hdr_bg_color
+        cell_h3.Font.Color = hdr_font_color
+        # Mescla G3:H3 para "Dt. Vencimento" (mesma estrutura das linhas de dados)
+        sheet_nf.Range(sheet_nf.Cells(3, 7), sheet_nf.Cells(3, 8)).Merge()
                 
         # Identifica dinamicamente a posição original dos blocos de Totais e Resumos
         orig_resumo_start = None
@@ -254,10 +303,38 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         if orig_total_row:
             sheet_backup.Rows("1:2").Copy(sheet_nf.Rows(f"{row_total}:{row_total+1}"))
             
-            # Conserva e atualiza os intervalos das fórmulas de Totais nativas do Excel
+            # Limpa todas as colunas novas (9-11) nas linhas de totais para remover
+            # fórmulas residuais do backup do modelo antigo (que não tinha "Prazo de Pagamento")
+            for rt in [row_total, row_total+1]:
+                for ct in range(9, 12):
+                    sheet_nf.Cells(rt, ct).ClearContents()
+            
+            # Reescreve as fórmulas de Totais nas posições corretas (colunas J e K)
             sheet_nf.Cells(row_total, 10).Formula = f"=SUM(J4:J{row_nf_last})"
+            sheet_nf.Cells(row_total, 10).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(row_total, 11).Formula = f"=SUM(K4:K{row_nf_last})"
+            sheet_nf.Cells(row_total, 11).NumberFormatLocal = "R$ #.##0,00"
+            
+            # % ICMS ST — fórmula correta na coluna K (11): Total Documento / Total Itens - 1
             sheet_nf.Cells(row_total+1, 11).Formula = f"=K{row_total}/J{row_total}-1"
+            sheet_nf.Cells(row_total+1, 11).NumberFormatLocal = "0,0%"
+            
+            # Aplica formatação consistente nas linhas de totais (colunas 9-11)
+            # Lê a formatação existente de cada linha (coluna 1) para replicar
+            for rt in [row_total, row_total+1]:
+                ref_total = sheet_nf.Cells(rt, 1)
+                rt_bg = ref_total.Interior.Color
+                rt_font_color = ref_total.Font.Color
+                for ct in range(9, 12):
+                    cell_t = sheet_nf.Cells(rt, ct)
+                    cell_t.Interior.Color = rt_bg
+                    cell_t.Font.Color = rt_font_color
+                    cell_t.Font.Name = 'Calibri'
+                    cell_t.Font.Size = 9
+                    cell_t.Font.Bold = True
+                    for border_id in [7, 8, 9, 10]:
+                        cell_t.Borders(border_id).LineStyle = 1
+                        cell_t.Borders(border_id).Weight = 2
             
         # 4. Restaura a tabela de Resumo do backup dinamicamente
         row_resumo_start = row_total + 4
@@ -274,23 +351,35 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             
             # LOJA
             sheet_nf.Cells(r_loja, 5).Formula = '=SUMIFS(Base!T:T, Base!F:F, "LOJA")'
+            sheet_nf.Cells(r_loja, 5).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_loja, 6).Formula = '=SUMIFS(Base!X:X, Base!F:F, "LOJA")'
+            sheet_nf.Cells(r_loja, 6).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_loja, 7).Formula = f'=F{r_loja}/E{r_loja}-1'
+            sheet_nf.Cells(r_loja, 7).NumberFormatLocal = "0,0%"
             
             # VD
             sheet_nf.Cells(r_vd, 5).Formula = '=SUMIFS(Base!T:T, Base!F:F, "VD", Base!D:D, "<700000")'
+            sheet_nf.Cells(r_vd, 5).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_vd, 6).Formula = '=SUMIFS(Base!X:X, Base!F:F, "VD", Base!D:D, "<700000")'
+            sheet_nf.Cells(r_vd, 6).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_vd, 7).Formula = f'=F{r_vd}/E{r_vd}-1'
+            sheet_nf.Cells(r_vd, 7).NumberFormatLocal = "0,0%"
             
             # VD - EUDORA
             sheet_nf.Cells(r_eudora, 5).Formula = '=SUMIFS(Base!T:T, Base!F:F, "VD", Base!D:D, ">=700000")'
+            sheet_nf.Cells(r_eudora, 5).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_eudora, 6).Formula = '=SUMIFS(Base!X:X, Base!F:F, "VD", Base!D:D, ">=700000")'
+            sheet_nf.Cells(r_eudora, 6).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_eudora, 7).Formula = f'=F{r_eudora}/E{r_eudora}-1'
+            sheet_nf.Cells(r_eudora, 7).NumberFormatLocal = "0,00%"
             
             # TOTAL
             sheet_nf.Cells(r_tot, 5).Formula = f'=SUM(E{r_loja}:E{r_eudora})'
+            sheet_nf.Cells(r_tot, 5).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_tot, 6).Formula = f'=SUM(F{r_loja}:F{r_eudora})'
+            sheet_nf.Cells(r_tot, 6).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(r_tot, 7).Formula = f'=F{r_tot}/E{r_tot}-1'
+            sheet_nf.Cells(r_tot, 7).NumberFormatLocal = "0,0%"
             
         # Centraliza todas as informações da tabela de resumo
         if orig_resumo_start and orig_resumo_end:
@@ -321,6 +410,31 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             print(f"  [{unidade}] Cabeçalho atualizado: {min_d} a {max_d}")
         else:
             print(f"  [{unidade}] AVISO: Nenhuma data de emissão válida encontrada para atualizar o cabeçalho")
+        
+        # Estende o merge e formatação das linhas de título (1 e 2) até a coluna K (11)
+        # pois o modelo original ia só até J (10) e agora temos a coluna "Prazo de Pagamento"
+        for row_tit in [1, 2]:
+            try:
+                sheet_nf.Range(f"A{row_tit}:K{row_tit}").UnMerge()
+            except Exception:
+                pass
+            # Lê a formatação da célula A para replicar na extensão
+            ref_tit = sheet_nf.Cells(row_tit, 1)
+            tit_bg = ref_tit.Interior.Color
+            tit_font_color = ref_tit.Font.Color
+            tit_font_bold = ref_tit.Font.Bold
+            tit_font_name = ref_tit.Font.Name
+            tit_font_size = ref_tit.Font.Size
+            # Aplica formatação e mescla toda a faixa A:K
+            for ct in range(1, 12):
+                cell_tit = sheet_nf.Cells(row_tit, ct)
+                cell_tit.Interior.Color = tit_bg
+                cell_tit.Font.Color = tit_font_color
+                cell_tit.Font.Bold = tit_font_bold
+                cell_tit.Font.Name = tit_font_name
+                cell_tit.Font.Size = tit_font_size
+            sheet_nf.Range(f"A{row_tit}:K{row_tit}").Merge()
+            sheet_nf.Range(f"A{row_tit}:K{row_tit}").HorizontalAlignment = -4108  # xlCenter
             
         # Salva o arquivo preservando o formato nativo .xls (Excel 97-2003)
         wb.SaveAs(caminho_saida, FileFormat=56)
