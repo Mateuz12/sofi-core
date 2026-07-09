@@ -1,0 +1,14 @@
+# Configuração de Prazos de Pagamento (dias base)
+# Formato: PDV=DiasBase
+# Use DEFAULT para definir o prazo geral (caso o PDV não possua regra específica).
+# Exemplo: 21274=0 gerará a regra "0+5+x" para a loja 21274.
+
+DEFAULT=45
+
+# Lojas Morumbi (exemplo: 0+5+x)
+21274=0
+
+# Lojas BH (exemplo: 60+5+x)
+13793=60
+22372=60
+21433=60

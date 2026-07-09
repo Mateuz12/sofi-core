@@ -46,6 +46,45 @@ MESES_MAP = {
     9: "09 - Setembro", 10: "10 - Outubro", 11: "11 - Novembro", 12: "12 - Dezembro"
 }
 
+def carregar_regras_prazo():
+    """Carrega as regras de prazo de pagamento a partir do arquivo regras_prazo.txt."""
+    caminho = os.path.join(DIRETORIO_ATUAL, 'regras_prazo.txt')
+    regras = {'DEFAULT': 45}
+    if os.path.exists(caminho):
+        try:
+            with open(caminho, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    if '=' in line:
+                        k, v = line.split('=', 1)
+                        k = k.strip()
+                        v = v.strip()
+                        try:
+                            regras[k] = int(v)
+                        except ValueError:
+                            pass
+        except Exception as e:
+            print(f"Erro ao carregar regras de prazo: {e}")
+    else:
+        # Cria o arquivo com os valores padrão para facilitar futura edição
+        try:
+            with open(caminho, 'w', encoding='utf-8') as f:
+                f.write("# Configuração de Prazos de Pagamento (dias base)\n")
+                f.write("# Formato: PDV=DiasBase\n")
+                f.write("# Use DEFAULT para definir o prazo geral (caso o PDV não possua regra específica).\n\n")
+                f.write("DEFAULT=45\n\n")
+                f.write("# Lojas Morumbi (exemplo: 0+5+x)\n")
+                f.write("21274=0\n\n")
+                f.write("# Lojas BH (exemplo: 60+5+x)\n")
+                f.write("13793=60\n")
+                f.write("22372=60\n")
+                f.write("21433=60\n")
+        except Exception as e:
+            print(f"Erro ao criar arquivo de regras padrão: {e}")
+    return regras
+
 def obter_ordem_lojas(caminho_modelo, aba_nomenclatura):
     """Carrega dinamicamente a ordem dos PDVs conforme aparecem no modelo."""
     import xlrd
@@ -63,6 +102,35 @@ def obter_ordem_lojas(caminho_modelo, aba_nomenclatura):
             print(f"Erro ao obter ordem das lojas do modelo {os.path.basename(caminho_modelo)}: {e}")
     return ordem
 
+def ajustar_larguras_colunas(excel, sheet):
+    """Ajusta as larguras das colunas conforme as dimensões exatas especificadas.
+    A: 6.29
+    B/C/D: 4
+    E: 19.71
+    F: 10.43
+    G/H: 5.43 CADA
+    I: 4.71
+    J: 6.86
+    K: 11.43
+    L: 11.57
+    """
+    larguras = {
+        1: 6.29,   # A
+        2: 4,      # B (CMV)
+        3: 4,      # C (TRF)
+        4: 4,      # D (REM)
+        5: 19.71,  # E
+        6: 11.43,  # F (Dt. Emissão)
+        7: 5.43,   # G (Dt. Vencimento)
+        8: 5.43,   # H (Dt. Vencimento)
+        9: 4.71,   # I (Prazo de Pagamento)
+        10: 6.86,  # J (Detalhe do Prazo)
+        11: 11.43, # K (Total Itens/Merc)
+        12: 11.57, # L (Total do Documento)
+    }
+    for col_idx, width_val in larguras.items():
+        sheet.Columns(col_idx).ColumnWidth = width_val
+
 def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
     """Preenche a aba Base e gera a aba Notas Fiscais dinamicamente mantendo formatação e fórmulas do modelo."""
     if not notas:
@@ -70,6 +138,7 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         return
         
     print(f"[{unidade}] Iniciando preenchimento do Relatório Geral...")
+    regras_prazo = carregar_regras_prazo()
     
     # Inicializa Excel COM — DispatchEx sempre cria nova instância isolada,
     # evitando herdar estado corrompido de sessões anteriores.
@@ -120,14 +189,13 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         
         # Desmescla as células antigas a partir da linha 4 para evitar erros ao redimensionar/limpar
         try:
-            sheet_nf.Range("A4:K200").UnMerge()
+            sheet_nf.Range("A4:L200").UnMerge()
         except Exception as ex:
             print(f"[{unidade}] Aviso ao desmesclar células antigas: {ex}")
         
         # Atualiza os cabeçalhos da linha 3 para garantir nomes corretos
-        # (especialmente após adição da coluna "Prazo de Pagamento")
         try:
-            sheet_nf.Range("A3:K3").UnMerge()
+            sheet_nf.Range("A3:L3").UnMerge()
         except Exception:
             pass
         
@@ -147,14 +215,12 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             5: "Destinatário",
             6: "Dt. Emissão",
             7: "Dt. Vencimento",
-            9: "Prazo de\nPagamento",
-            10: "Total\nItens/Merc.",
-            11: "Total do\nDocumento",
+            9: "Prazo de Pagamento",
+            11: "Total\nItens/Merc.",
+            12: "Total do\nDocumento",
         }
-        for col_idx, nome in cabecalhos.items():
-            cell = sheet_nf.Cells(3, col_idx)
-            cell.Value = nome
-            cell.WrapText = True
+
+        def formatar_celula_cabecalho(cell):
             cell.Interior.Color = hdr_bg_color
             cell.Font.Color = hdr_font_color
             cell.Font.Bold = hdr_font_bold
@@ -162,16 +228,27 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             cell.Font.Size = hdr_font_size
             cell.VerticalAlignment = -4108   # xlCenter
             cell.HorizontalAlignment = -4108 # xlCenter
-            # Bordas finas
+            cell.WrapText = True
             for border_id in [7, 8, 9, 10]:
                 cell.Borders(border_id).LineStyle = 1
                 cell.Borders(border_id).Weight = 2
+
+        for col_idx, nome in cabecalhos.items():
+            cell = sheet_nf.Cells(3, col_idx)
+            cell.Value = nome
+            formatar_celula_cabecalho(cell)
+
         # Aplica a mesma formatação na célula H3 (mergeada com G3)
         cell_h3 = sheet_nf.Cells(3, 8)
-        cell_h3.Interior.Color = hdr_bg_color
-        cell_h3.Font.Color = hdr_font_color
+        formatar_celula_cabecalho(cell_h3)
         # Mescla G3:H3 para "Dt. Vencimento" (mesma estrutura das linhas de dados)
         sheet_nf.Range(sheet_nf.Cells(3, 7), sheet_nf.Cells(3, 8)).Merge()
+
+        # Aplica a mesma formatação na célula J3 (mergeada com I3)
+        cell_j3 = sheet_nf.Cells(3, 10)
+        formatar_celula_cabecalho(cell_j3)
+        # Mescla I3:J3 para "Prazo de Pagamento"
+        sheet_nf.Range(sheet_nf.Cells(3, 9), sheet_nf.Cells(3, 10)).Merge()
                 
         # Identifica dinamicamente a posição original dos blocos de Totais e Resumos
         orig_resumo_start = None
@@ -233,7 +310,7 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             pdv_atual = str(notas[idx].get('PDV', ''))
             current_color = cor_loja_1 if pdv_color_map.get(pdv_atual, 0) == 0 else cor_loja_2
             
-            for col in range(1, 12):
+            for col in range(1, 13):
                 cell = sheet_nf.Cells(row, col)
                 cell.Font.Name = 'Calibri'
                 cell.Font.Size = 9
@@ -268,31 +345,46 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_nf.Cells(row, 7).HorizontalAlignment = -4108
             sheet_nf.Cells(row, 8).Value = ""
             
-            # ── Prazo de Pagamento — formato "45+5+X" ──────────────────────────
-            # X = max(dias entre emissão e vencimento - 50, 0)
-            # Ex: 60 dias → "45+5+10" | 50 dias ou menos → "45+5+0"
+            # ── Prazo de Pagamento (dias totais e detalhe do prazo) ──────────────────
             _dt_emi_str  = notas[idx].get('Dt. Emissão', '')
             _dt_venc_str = notas[idx].get('Dt. Vencimento', '')
             _prazo_texto = ""
+            _prazo_dias_num = None
             if _dt_emi_str and _dt_venc_str:
                 try:
                     _obj_emi  = datetime.strptime(_dt_emi_str,  '%d/%m/%Y')
                     _obj_venc = datetime.strptime(_dt_venc_str, '%d/%m/%Y')
                     _prazo_dias = (_obj_venc - _obj_emi).days
-                    _x = max(_prazo_dias - 50, 0)
-                    _prazo_texto = f"45+5+{_x}"
+                    _prazo_dias_num = _prazo_dias
+                    
+                    # Carrega dias base usando o PDV da nota (ou DEFAULT do TXT)
+                    pdv_atual = str(notas[idx].get('PDV', '')).strip()
+                    base_dias = regras_prazo.get(pdv_atual, regras_prazo.get('DEFAULT', 45))
+                    
+                    _x = max(_prazo_dias - (base_dias + 5), 0)
+                    _prazo_texto = f"{base_dias}+5+{_x}"
                 except Exception:
                     _prazo_texto = ""
-            sheet_nf.Cells(row, 9).Value = _prazo_texto
+                    _prazo_dias_num = None
+            
+            # Escreve prazo de pagamento (dias totais) na coluna 9
+            if _prazo_dias_num is not None:
+                sheet_nf.Cells(row, 9).Value = _prazo_dias_num
+            else:
+                sheet_nf.Cells(row, 9).Value = ""
             sheet_nf.Cells(row, 9).HorizontalAlignment = -4108  # xlCenter
             
-            sheet_nf.Cells(row, 10).Formula = f"=Base!T{row_base}"  # Total Itens
-            sheet_nf.Cells(row, 10).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(row, 10).HorizontalAlignment = -4152   # xlRight
+            # Escreve detalhe do prazo de pagamento na coluna 10
+            sheet_nf.Cells(row, 10).Value = _prazo_texto
+            sheet_nf.Cells(row, 10).HorizontalAlignment = -4108  # xlCenter
             
-            sheet_nf.Cells(row, 11).Formula = f"=Base!X{row_base}" # Total Documento
+            sheet_nf.Cells(row, 11).Formula = f"=Base!T{row_base}"  # Total Itens
             sheet_nf.Cells(row, 11).NumberFormatLocal = "R$ #.##0,00"
             sheet_nf.Cells(row, 11).HorizontalAlignment = -4152   # xlRight
+            
+            sheet_nf.Cells(row, 12).Formula = f"=Base!X{row_base}" # Total Documento
+            sheet_nf.Cells(row, 12).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(row, 12).HorizontalAlignment = -4152   # xlRight
             
             sheet_nf.Range(sheet_nf.Cells(row, 7), sheet_nf.Cells(row, 8)).Merge()
             
@@ -303,29 +395,29 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         if orig_total_row:
             sheet_backup.Rows("1:2").Copy(sheet_nf.Rows(f"{row_total}:{row_total+1}"))
             
-            # Limpa todas as colunas novas (9-11) nas linhas de totais para remover
+            # Limpa todas as colunas novas (9-12) nas linhas de totais para remover
             # fórmulas residuais do backup do modelo antigo (que não tinha "Prazo de Pagamento")
             for rt in [row_total, row_total+1]:
-                for ct in range(9, 12):
+                for ct in range(9, 13):
                     sheet_nf.Cells(rt, ct).ClearContents()
             
-            # Reescreve as fórmulas de Totais nas posições corretas (colunas J e K)
-            sheet_nf.Cells(row_total, 10).Formula = f"=SUM(J4:J{row_nf_last})"
-            sheet_nf.Cells(row_total, 10).NumberFormatLocal = "R$ #.##0,00"
+            # Reescreve as fórmulas de Totais nas posições corretas (colunas K e L)
             sheet_nf.Cells(row_total, 11).Formula = f"=SUM(K4:K{row_nf_last})"
             sheet_nf.Cells(row_total, 11).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(row_total, 12).Formula = f"=SUM(L4:L{row_nf_last})"
+            sheet_nf.Cells(row_total, 12).NumberFormatLocal = "R$ #.##0,00"
             
-            # % ICMS ST — fórmula correta na coluna K (11): Total Documento / Total Itens - 1
-            sheet_nf.Cells(row_total+1, 11).Formula = f"=K{row_total}/J{row_total}-1"
-            sheet_nf.Cells(row_total+1, 11).NumberFormatLocal = "0,0%"
+            # % ICMS ST — fórmula correta na coluna L (12): Total Documento / Total Itens - 1
+            sheet_nf.Cells(row_total+1, 12).Formula = f"=L{row_total}/K{row_total}-1"
+            sheet_nf.Cells(row_total+1, 12).NumberFormatLocal = "0,0%"
             
-            # Aplica formatação consistente nas linhas de totais (colunas 9-11)
+            # Aplica formatação consistente nas linhas de totais (colunas 9-12)
             # Lê a formatação existente de cada linha (coluna 1) para replicar
             for rt in [row_total, row_total+1]:
                 ref_total = sheet_nf.Cells(rt, 1)
                 rt_bg = ref_total.Interior.Color
                 rt_font_color = ref_total.Font.Color
-                for ct in range(9, 12):
+                for ct in range(9, 13):
                     cell_t = sheet_nf.Cells(rt, ct)
                     cell_t.Interior.Color = rt_bg
                     cell_t.Font.Color = rt_font_color
@@ -411,11 +503,11 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
         else:
             print(f"  [{unidade}] AVISO: Nenhuma data de emissão válida encontrada para atualizar o cabeçalho")
         
-        # Estende o merge e formatação das linhas de título (1 e 2) até a coluna K (11)
-        # pois o modelo original ia só até J (10) e agora temos a coluna "Prazo de Pagamento"
+        # Estende o merge e formatação das linhas de título (1 e 2) até a coluna L (12)
+        # pois o modelo original ia só até J (10) e agora temos duas colunas adicionais
         for row_tit in [1, 2]:
             try:
-                sheet_nf.Range(f"A{row_tit}:K{row_tit}").UnMerge()
+                sheet_nf.Range(f"A{row_tit}:L{row_tit}").UnMerge()
             except Exception:
                 pass
             # Lê a formatação da célula A para replicar na extensão
@@ -425,17 +517,23 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             tit_font_bold = ref_tit.Font.Bold
             tit_font_name = ref_tit.Font.Name
             tit_font_size = ref_tit.Font.Size
-            # Aplica formatação e mescla toda a faixa A:K
-            for ct in range(1, 12):
+            # Aplica formatação e mescla toda a faixa A:L
+            for ct in range(1, 13):
                 cell_tit = sheet_nf.Cells(row_tit, ct)
                 cell_tit.Interior.Color = tit_bg
                 cell_tit.Font.Color = tit_font_color
                 cell_tit.Font.Bold = tit_font_bold
                 cell_tit.Font.Name = tit_font_name
                 cell_tit.Font.Size = tit_font_size
-            sheet_nf.Range(f"A{row_tit}:K{row_tit}").Merge()
-            sheet_nf.Range(f"A{row_tit}:K{row_tit}").HorizontalAlignment = -4108  # xlCenter
+            sheet_nf.Range(f"A{row_tit}:L{row_tit}").Merge()
+            sheet_nf.Range(f"A{row_tit}:L{row_tit}").HorizontalAlignment = -4108  # xlCenter
             
+        # Ajusta a largura das colunas do relatório
+        ajustar_larguras_colunas(excel, sheet_nf)
+        
+        # Força o tamanho da fonte da linha 58 para 9
+        sheet_nf.Rows(58).Font.Size = 9
+
         # Salva o arquivo preservando o formato nativo .xls (Excel 97-2003)
         wb.SaveAs(caminho_saida, FileFormat=56)
         wb.Close(True)
