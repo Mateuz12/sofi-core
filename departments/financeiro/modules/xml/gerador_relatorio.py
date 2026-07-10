@@ -6,6 +6,14 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import win32com.client
 
+# Importa o conversor de XMLs para o padrão SEFAZ
+try:
+    from conversor_xml_sefaz import converter_pasta as _converter_pasta_sefaz
+    _CONVERSOR_DISPONIVEL = True
+except ImportError:
+    _CONVERSOR_DISPONIVEL = False
+    print("AVISO: conversor_xml_sefaz.py não encontrado. XMLs não serão convertidas para o padrão SEFAZ.")
+
 # Configura diretórios no sys.path para importações locais e dependências
 DIRETORIO_ATUAL = os.path.dirname(os.path.abspath(__file__))
 # A pasta principal PROJETO fica dois níveis acima
@@ -889,6 +897,15 @@ def gerar_relatorio_calamo():
             xmls_movidos += 1
         print(f"[{xmls_movidos}] XMLs organizados por PDV e salvos em:")
         print(f" => {diretorio_xmls_saida}")
+        
+        # Converte as XMLs recém-organizadas para o padrão SEFAZ
+        if _CONVERSOR_DISPONIVEL and xmls_movidos > 0:
+            print("\n--- Iniciando conversão para o padrão SEFAZ ---")
+            _converter_pasta_sefaz(
+                diretorio_xmls_saida,
+                fazer_backup=False,
+                apenas_meudanfe=True,
+            )
     except Exception as e:
         print(f"Erro ao organizar arquivos XML: {e}")
         
