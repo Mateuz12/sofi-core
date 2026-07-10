@@ -246,6 +246,7 @@ def extrair_dados_xml(caminho_xml):
 
         return {
             'Nº DOC': n_doc,
+            'Arquivo_Original': os.path.basename(caminho_xml),
             'CMV': '',
             'TRF': '',
             'REM': '',

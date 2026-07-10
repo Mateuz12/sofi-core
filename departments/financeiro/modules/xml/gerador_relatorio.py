@@ -724,8 +724,8 @@ def gerar_relatorio_calamo():
     """Função principal que orquestra a leitura do XML, classificação e geração dos 4 relatórios."""
     print("=== INICIANDO PROCESSAMENTO DOS RELATÓRIOS DA CÁLAMO ===")
     
-    if os.path.exists(r"T:\05-FIN\XMLS CÁLAMO"):
-        pasta_xml = r"T:\05-FIN\XMLS CÁLAMO\XML BAIXADOS\TEMP_PROCESSAMENTO"
+    if os.path.exists(r"T:\13-Publica\XMLS CÁLAMO"):
+        pasta_xml = r"T:\13-Publica\XMLS CÁLAMO\XML BAIXADOS\TEMP_PROCESSAMENTO"
     else:
         pasta_xml = os.path.join(DIRETORIO_ATUAL, 'xmls_meudanfe')
         
@@ -816,12 +816,12 @@ def gerar_relatorio_calamo():
         semana_pasta = f"Semana {datetime.now().strftime('%d-%m')}"
         
     # Caminho final estruturado na rede T:
-    base_relatorios = r"T:\05-FIN\XMLS CÁLAMO\RELATÓRIOS COMPLETOS"
-    base_xmls_baixados = r"T:\05-FIN\XMLS CÁLAMO\XML BAIXADOS"
+    base_relatorios = r"T:\13-Publica\XMLS CÁLAMO\RELATÓRIOS COMPLETOS"
+    base_xmls_baixados = r"T:\13-Publica\XMLS CÁLAMO\XML BAIXADOS"
     
     # Se a T: não estiver mapeada, usar fallback local
-    if not os.path.exists(r"T:\05-FIN\XMLS CÁLAMO"):
-        print("AVISO: Drive T:\\05-FIN\\XMLS CÁLAMO não encontrado! Usando pastas locais como fallback.")
+    if not os.path.exists(r"T:\13-Publica\XMLS CÁLAMO"):
+        print("AVISO: Drive T:\\13-Publica\\XMLS CÁLAMO não encontrado! Usando pastas locais como fallback.")
         base_relatorios = os.path.join(DIRETORIO_ATUAL, 'Relatórios Cálamo')
         base_xmls_baixados = os.path.join(DIRETORIO_ATUAL, 'XML BAIXADOS')
         
@@ -848,21 +848,49 @@ def gerar_relatorio_calamo():
         processar_relatorio_geral('UDI', notas_udi, caminho_mod_udi, saida_geral_udi)
         processar_relatorio_matheus('UDI', notas_udi, caminho_mod_matheus_udi, saida_matheus_udi)
         
-    # 5. MOVE OS XMLS PARA A REDE (OU FALLBACK)
+    # 5. ORGANIZA E SALVA OS XMLS POR PDV
     diretorio_xmls_saida = os.path.join(base_xmls_baixados, ano_pasta, mes_pasta, semana_pasta)
     os.makedirs(diretorio_xmls_saida, exist_ok=True)
     xmls_movidos = 0
+    
+    # Monta mapeamento: nome_arquivo_original -> dados da nota (PDV + Nº DOC)
+    mapa_arquivo_nota = {}
+    for nota in (notas_bh + notas_udi):
+        arq_original = nota.get('Arquivo_Original', '')
+        if arq_original:
+            mapa_arquivo_nota[arq_original] = nota
+    
     try:
         for arquivo in arquivos_xml:
             caminho_origem = os.path.join(pasta_xml, arquivo)
-            caminho_destino = os.path.join(diretorio_xmls_saida, arquivo)
+            nota = mapa_arquivo_nota.get(arquivo)
+            
+            if nota:
+                pdv  = str(nota.get('PDV', '')).strip()
+                ndoc = str(nota.get('Nº DOC', '')).strip()
+            else:
+                pdv  = ''
+                ndoc = ''
+            
+            # Define subpasta: apenas o número do PDV, ou pasta especial se não mapeado
+            subpasta = pdv if pdv else 'PDV_SEM_IDENTIFICACAO'
+            pasta_pdv = os.path.join(diretorio_xmls_saida, subpasta)
+            os.makedirs(pasta_pdv, exist_ok=True)
+            
+            # Renomeia para PDV_NºDOC.xml; se não houver dados mantém o nome original
+            if pdv and ndoc:
+                novo_nome = f"{pdv}_{ndoc}.xml"
+            else:
+                novo_nome = arquivo
+            
+            caminho_destino = os.path.join(pasta_pdv, novo_nome)
             shutil.copy2(caminho_origem, caminho_destino)
             os.remove(caminho_origem)
             xmls_movidos += 1
-        print(f"[{xmls_movidos}] XMLs organizados e movidos para:")
+        print(f"[{xmls_movidos}] XMLs organizados por PDV e salvos em:")
         print(f" => {diretorio_xmls_saida}")
     except Exception as e:
-        print(f"Erro ao mover arquivos XML: {e}")
+        print(f"Erro ao organizar arquivos XML: {e}")
         
     print(f"\n=== PROCESSAMENTO CONCLUÍDO COM SUCESSO! ===")
     print(f"Os relatórios Excel foram salvos com sucesso em:")
