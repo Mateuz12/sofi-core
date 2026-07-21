@@ -8,20 +8,98 @@
   },
   "jobs": [
     {
+      "name": "Fluxo Analítico DFC UDI",
+      "enabled": true,
+      "script": "departments/financeiro/modules/fluxo_caixa/extrator_dfc.py",
+      "unidade": "UDI",
+      "schedule": {
+        "type": "cron",
+        "hour": 8,
+        "minute": 0
+      },
+      "dias": 0,
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      }
+    },
+    {
+      "name": "Fluxo Analítico DFC BH",
+      "enabled": true,
+      "script": "departments/financeiro/modules/fluxo_caixa/extrator_dfc_bh.py",
+      "unidade": "BH",
+      "schedule": {
+        "type": "cron",
+        "hour": 8,
+        "minute": 0
+      },
+      "dias": 0,
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      }
+    },
+    {
+      "name": "Retaguarda UDI",
+      "enabled": true,
+      "script": "departments/financeiro/modules/retaguarda/extrator_retaguarda.py",
+      "unidade": "UDI",
+      "schedule": {
+        "type": "cron",
+        "hour": 8,
+        "minute": 0
+      },
+      "dias": 1,
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      }
+    },
+    {
+      "name": "Retaguarda BH",
+      "enabled": true,
+      "script": "departments/financeiro/modules/retaguarda/extrator_retaguarda.py",
+      "unidade": "BH",
+      "schedule": {
+        "type": "cron",
+        "hour": 8,
+        "minute": 0
+      },
+      "dias": 1,
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      }
+    },
+    {
       "name": "Extranet BH",
       "enabled": true,
       "script": "departments/financeiro/modules/extranet/BH/extranet_reports_bh.py",
-      "schedule": { "type": "cron", "hour": 9, "minute": 0 },
+      "schedule": {
+        "type": "cron",
+        "hour": 9,
+        "minute": 0
+      },
       "dias": 5,
-      "retry": { "max_attempts": 3, "delay_seconds": 120 }
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      }
     },
     {
       "name": "Extranet UDI",
       "enabled": true,
       "script": "departments/financeiro/modules/extranet/UDI/extranet_reports_udi.py",
-      "schedule": { "type": "cron", "hour": 9, "minute": 15 },
+      "schedule": {
+        "type": "cron",
+        "hour": 9,
+        "minute": 15
+      },
       "dias": 5,
-      "retry": { "max_attempts": 3, "delay_seconds": 120 }
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      }
     }
   ]
 }
