@@ -126,6 +126,8 @@ def run_job(job_config: dict) -> dict:
     print(f"[Scheduler] Iniciando '{name}' | D-1={date_str} | dias={dias}")
 
     cmd = [sys.executable, str(script), "--data", date_str, "--dias", str(dias)]
+    if "unidade" in job_config:
+        cmd.extend(["--unidade", str(job_config["unidade"])])
 
     inicio = datetime.now()
 
@@ -342,33 +344,37 @@ def start_scheduler() -> "BackgroundScheduler | None":
     all_jobs = config.get("jobs", [])
     _jobs_meta = []
 
-    # Determina o horário do disparo pelo primeiro job habilitado
-    primeiro_habilitado = next(
-        (j for j in all_jobs if j.get("enabled", True)),
-        None,
-    )
+    # Agrupa jobs por horário (hora e minuto)
+    schedule_groups: dict[tuple[int, int], list[dict]] = {}
+    for job_cfg in all_jobs:
+        j_sched = job_cfg.get("schedule", {})
+        h = j_sched.get("hour", 8)
+        m = j_sched.get("minute", 0)
+        schedule_groups.setdefault((h, m), []).append(job_cfg)
 
-    if not primeiro_habilitado:
-        print("[Scheduler] Nenhum job habilitado encontrado. Scheduler não iniciado.")
+    if not schedule_groups:
+        print("[Scheduler] Nenhum job configurado. Scheduler não iniciado.")
         return None
 
-    sched = primeiro_habilitado["schedule"]
-    if sched["type"] != "cron":
-        print(f"[Scheduler] Tipo '{sched['type']}' não suportado. Scheduler não iniciado.")
-        return None
+    # Agenda cada grupo no APScheduler para seu respectivo horário
+    for (h, m), group_jobs in schedule_groups.items():
+        enabled_count = sum(1 for j in group_jobs if j.get("enabled", True))
+        if enabled_count == 0:
+            continue
 
-    # Agenda run_all_jobs com TODOS os configs (habilitados e desabilitados)
-    scheduler.add_job(
-        func=run_all_jobs,
-        trigger="cron",
-        hour=sched["hour"],
-        minute=sched["minute"],
-        args=[all_jobs],
-        id="sofi_daily_jobs",
-        name="SOFI Daily Jobs",
-        max_instances=1,
-        replace_existing=True,
-    )
+        job_id = f"sofi_jobs_{h:02d}_{m:02d}"
+        scheduler.add_job(
+            func=run_all_jobs,
+            trigger="cron",
+            hour=h,
+            minute=m,
+            args=[group_jobs],
+            id=job_id,
+            name=f"SOFI Jobs {h:02d}:{m:02d}",
+            max_instances=1,
+            replace_existing=True,
+        )
+        print(f"[Scheduler] Jobs agendados para {h:02d}:{m:02d} ({tz}): {[j['name'] for j in group_jobs if j.get('enabled', True)]}")
 
     # Monta metadados para get_scheduler_status() — apenas habilitados
     for job_cfg in all_jobs:
@@ -377,15 +383,9 @@ def start_scheduler() -> "BackgroundScheduler | None":
         j_sched = job_cfg.get("schedule", {})
         _jobs_meta.append({
             "name": job_cfg["name"],
-            "hour": j_sched.get("hour", sched["hour"]),
-            "minute": j_sched.get("minute", sched["minute"]),
+            "hour": j_sched.get("hour", 8),
+            "minute": j_sched.get("minute", 0),
         })
-
-    print(
-        f"[Scheduler] run_all_jobs agendado para "
-        f"{sched['hour']:02d}:{sched['minute']:02d} ({tz}). "
-        f"Jobs: {[j['name'] for j in all_jobs]}"
-    )
 
     # Listener para exceções internas do APScheduler
     def _on_job_error(event):
