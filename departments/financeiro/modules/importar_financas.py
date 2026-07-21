@@ -219,7 +219,12 @@ def _fazer_upload_arquivo(page: Page, caminho_arquivo: str) -> None:
 # Função Pública Principal
 # ─────────────────────────────────────────────
 
-def upload_para_financas(arquivos: list[Path], unidade: str) -> None:
+def upload_para_financas(
+    arquivos: list[Path],
+    unidade: str,
+    email: str | None = None,
+    senha: str | None = None,
+) -> None:
     """Importa relatórios para o portal FinançasGB.
 
     Abre o portal, faz login com as credenciais da unidade indicada e
@@ -230,14 +235,20 @@ def upload_para_financas(arquivos: list[Path], unidade: str) -> None:
         arquivos: Lista de Path dos relatórios a importar.
                   Arquivos inexistentes são ignorados com aviso.
         unidade:  'BH' ou 'UDI' — define qual login usar no portal.
+        email:    (Opcional) Se informado, usa este email ao invés do padrão do .env.
+        senha:    (Opcional) Se informado, usa esta senha ao invés do padrão do .env.
     """
     unidade = unidade.upper()
-    if unidade not in CREDENCIAIS:
-        raise ValueError(f"Unidade inválida: '{unidade}'. Use 'BH' ou 'UDI'.")
 
-    credenciais = CREDENCIAIS[unidade]
-    email = credenciais["email"]
-    senha = credenciais["senha"]
+    # Se credenciais foram passadas explicitamente, usa-as diretamente
+    if email and senha:
+        pass  # Usa os valores recebidos por parâmetro
+    elif unidade in CREDENCIAIS:
+        credenciais = CREDENCIAIS[unidade]
+        email = credenciais["email"]
+        senha = credenciais["senha"]
+    else:
+        raise ValueError(f"Unidade inválida: '{unidade}'. Use 'BH' ou 'UDI'.")
 
     if not email or not senha:
         raise RuntimeError(
