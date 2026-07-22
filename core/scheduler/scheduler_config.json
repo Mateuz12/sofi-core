@@ -31,7 +31,7 @@
       "schedule": {
         "type": "cron",
         "hour": 8,
-        "minute": 0
+        "minute": 15
       },
       "dias": 0,
       "retry": {
@@ -47,7 +47,7 @@
       "schedule": {
         "type": "cron",
         "hour": 8,
-        "minute": 0
+        "minute": 30
       },
       "dias": 1,
       "retry": {
@@ -63,7 +63,7 @@
       "schedule": {
         "type": "cron",
         "hour": 8,
-        "minute": 0
+        "minute": 45
       },
       "dias": 1,
       "retry": {

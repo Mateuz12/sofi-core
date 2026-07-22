@@ -1,0 +1,17 @@
+{
+  "last_heartbeat": "2026-07-21T15:54:28.595898",
+  "running": true,
+  "next_job": "SOFI Daily Jobs 09:00",
+  "jobs": [
+    {
+      "name": "Extranet BH",
+      "hour": 9,
+      "minute": 0
+    },
+    {
+      "name": "Extranet UDI",
+      "hour": 9,
+      "minute": 15
+    }
+  ]
+}

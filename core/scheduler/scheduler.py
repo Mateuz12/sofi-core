@@ -373,6 +373,8 @@ def start_scheduler() -> "BackgroundScheduler | None":
             name=f"SOFI Jobs {h:02d}:{m:02d}",
             max_instances=1,
             replace_existing=True,
+            misfire_grace_time=3600,
+            coalesce=True,
         )
         print(f"[Scheduler] Jobs agendados para {h:02d}:{m:02d} ({tz}): {[j['name'] for j in group_jobs if j.get('enabled', True)]}")
 
