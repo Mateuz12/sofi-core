@@ -7,6 +7,9 @@ DEFAULT=45
 
 # Lojas Morumbi (exemplo: 0+5+x)
 21274=0
+22744=0
+17868=0
+21372=0 
 
 # Lojas BH (exemplo: 60+5+x)
 13793=60
