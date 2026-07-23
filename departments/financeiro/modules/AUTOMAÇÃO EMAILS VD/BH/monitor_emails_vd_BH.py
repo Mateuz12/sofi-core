@@ -127,7 +127,10 @@ logging.basicConfig(
 )
 
 def log(msg, nivel="info"):
-    print(msg)  # visível se rodar com python.exe normal
+    try:
+        print(msg)  # visível se rodar com python.exe normal
+    except Exception:
+        pass
     getattr(logging, nivel)(msg)
 
 # ─────────────────────────────────────────────

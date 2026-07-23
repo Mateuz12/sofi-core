@@ -7946,3 +7946,53 @@ Call log:
 21/07/2026 11:39:08 [INFO]   🚀 [PORTAL] Todos os 3 relatórios de 20-07-2026 encontrados. Iniciando upload...
 21/07/2026 11:39:58 [INFO]   ✅ [PORTAL] Upload dos relatórios de 20-07-2026 realizado com sucesso!
 21/07/2026 11:39:58 [INFO]   📌 [PORTAL] Dia 20-07-2026 marcado como concluído (.upload_done criado).
+23/07/2026 14:35:34 [INFO] ==================================================
+23/07/2026 14:36:03 [INFO] ==================================================
+23/07/2026 14:36:03 [INFO] 🚀 Monitor de Emails VD iniciado.
+23/07/2026 14:36:03 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+23/07/2026 14:36:03 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+23/07/2026 14:36:03 [INFO] ==================================================
+23/07/2026 14:36:04 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+23/07/2026 14:38:51 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+23/07/2026 14:38:54 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 22-07-2026
+23/07/2026 14:38:54 [INFO]   Total de anexos: 7
+23/07/2026 14:38:55 [INFO]   Verificando anexo: image.png
+23/07/2026 14:38:55 [INFO]   Verificando anexo: image.png
+23/07/2026 14:38:55 [INFO]   Verificando anexo: image.png
+23/07/2026 14:38:55 [INFO]   Verificando anexo: image.png
+23/07/2026 14:38:55 [INFO]   Verificando anexo: Fechamento de Caixa JP - 22-07-26.xlsm
+23/07/2026 14:38:55 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 22-07-26.xlsm
+23/07/2026 14:38:55 [INFO]   Verificando anexo: Controle de Títulos JP - 22-07-26.xlsx
+23/07/2026 14:38:55 [INFO]   ✅ Anexo correspondente encontrado!
+23/07/2026 14:38:57 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\07 JULHO\22\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 24417.22-07-2026.xls
+23/07/2026 14:38:57 [INFO]   📂 Email processado e movido para 'Arquivados'.
+23/07/2026 14:38:57 [INFO]   ⏳ [PORTAL] Aguardando relatórios de: UDI, ARI para iniciar upload.
+23/07/2026 14:39:00 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa ARI - 22-07-2026
+23/07/2026 14:39:00 [INFO]   Total de anexos: 7
+23/07/2026 14:39:00 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:00 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:00 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:00 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:00 [INFO]   Verificando anexo: Fechamento de Caixa ARI - 22-07-26.xlsm
+23/07/2026 14:39:00 [INFO]   Verificando anexo: PROCESSO CAIXA ARI - 22-07-26.xlsm
+23/07/2026 14:39:00 [INFO]   Verificando anexo: Controle de Títulos ARI - 22-07-26.xlsx
+23/07/2026 14:39:00 [INFO]   ✅ Anexo correspondente encontrado!
+23/07/2026 14:39:02 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\07 JULHO\22\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 23275.22-07-2026.xls
+23/07/2026 14:39:02 [INFO]   📂 Email processado e movido para 'Arquivados'.
+23/07/2026 14:39:02 [INFO]   ⏳ [PORTAL] Aguardando relatórios de: UDI para iniciar upload.
+23/07/2026 14:39:03 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa UDI - 22-07-2026
+23/07/2026 14:39:03 [INFO]   Total de anexos: 7
+23/07/2026 14:39:03 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:03 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:03 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:03 [INFO]   Verificando anexo: image.png
+23/07/2026 14:39:03 [INFO]   Verificando anexo: Fechamento de Caixa UDI - 22-07-26.xlsm
+23/07/2026 14:39:03 [INFO]   Verificando anexo: PROCESSO CAIXA UDI - 22-07-26.xlsm
+23/07/2026 14:39:03 [INFO]   Verificando anexo: Controle de Títulos UDI - 22-07-26.xlsx
+23/07/2026 14:39:03 [INFO]   ✅ Anexo correspondente encontrado!
+23/07/2026 14:39:05 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\07 JULHO\22\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 20844.22-07-2026.xls
+23/07/2026 14:39:05 [INFO]   📂 Email processado e movido para 'Arquivados'.
+23/07/2026 14:39:05 [INFO]   🚀 [PORTAL] Todos os 3 relatórios de 22-07-2026 encontrados. Iniciando upload...
+23/07/2026 14:39:50 [INFO]   ✅ [PORTAL] Upload dos relatórios de 22-07-2026 realizado com sucesso!
+23/07/2026 14:39:50 [INFO]   📌 [PORTAL] Dia 22-07-2026 marcado como concluído (.upload_done criado).
+23/07/2026 14:40:14 [INFO] ✨ Varredura inicial concluída. 9 e-mails processados.

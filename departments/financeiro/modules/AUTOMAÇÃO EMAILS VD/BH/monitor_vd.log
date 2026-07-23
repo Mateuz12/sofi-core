@@ -3849,3 +3849,11 @@ Call log:
 
 21/07/2026 12:14:43 [INFO] ✨ Varredura inicial concluída. 2 e-mails processados.
 21/07/2026 12:14:43 [INFO] 🎧 Aguardando novos emails em tempo real...
+23/07/2026 14:36:22 [INFO] ==================================================
+23/07/2026 14:36:22 [INFO] 🚀 Monitor de Emails VD iniciado.
+23/07/2026 14:36:22 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+23/07/2026 14:36:22 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+23/07/2026 14:36:22 [INFO] ==================================================
+23/07/2026 14:36:23 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+23/07/2026 14:40:22 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+23/07/2026 14:40:28 [INFO] ✨ Varredura inicial concluída. 6 e-mails processados.
