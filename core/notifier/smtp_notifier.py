@@ -234,13 +234,13 @@ def send_scheduler_notification(resultados: list[dict]) -> bool:
         for r in resultados
     )
 
-    # ── Assunto — usa D-1 para indicar o dia de referência dos agendamentos ──
-    from datetime import timedelta
-    data_ref = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
+    # ── Assunto — resume os jobs do grupo ──
+    data_hoje = datetime.now().strftime("%d/%m/%Y")
+    nomes_jobs = ", ".join(r.get("name", "Job") for r in resultados)
     if tem_erro:
-        assunto = f"[SOFI] Agendamentos dia {data_ref} - com ERROS"
+        assunto = f"[SOFI] {data_hoje} - com ERROS | {nomes_jobs}"
     else:
-        assunto = f"[SOFI] Agendamentos dia {data_ref} - OK"
+        assunto = f"[SOFI] {data_hoje} - OK | {nomes_jobs}"
 
     # ── Monta e-mail ──
     msg = MIMEMultipart("alternative")

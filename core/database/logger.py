@@ -44,8 +44,12 @@ class DBStreamCatcher:
         self.log_id = log_id
 
     def write(self, text):
-        # 1. Print no terminal original
-        self.original_stream.write(text)
+        # 1. Print no terminal original (com fallback seguro para Windows cp1252)
+        try:
+            self.original_stream.write(text)
+        except UnicodeEncodeError:
+            # Substitui caracteres incompatíveis com o encoding do terminal
+            self.original_stream.write(text.encode('ascii', errors='replace').decode('ascii'))
         self.original_stream.flush()
         
         # 2. Append no banco

@@ -6,6 +6,10 @@
     "send_on_success": true,
     "send_on_error": true
   },
+  "notification_groups": {
+    "Relatorios": ["Fluxo Analítico DFC UDI", "Fluxo Analítico DFC BH", "Retaguarda UDI", "Retaguarda BH"],
+    "Extranet":   ["Extranet BH", "Extranet UDI"]
+  },
   "jobs": [
     {
       "name": "Fluxo Analítico DFC UDI",

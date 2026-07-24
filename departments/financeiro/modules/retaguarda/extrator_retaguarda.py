@@ -197,7 +197,7 @@ def login(page: Page) -> None:
 
 
 def navigate_to_export(page: Page) -> None:
-    """Navega nos menus: Financeiro → Tesouraria → Exportar Receitas."""
+    """Navega nos menus: Financeiro -> Tesouraria -> Exportar Receitas."""
     print("Navegando nos menus...")
     by_xpath(page, XPATHS["menu_financeiro"]).click()
     by_xpath(page, XPATHS["menu_tesouraria"]).wait_for(state="visible", timeout=10_000)
@@ -274,7 +274,7 @@ def apply_filters(frame, data_str: str) -> None:
     print("Aplicando filtros de Origem e Datas...")
     frame.wait_for_timeout(1_000)
 
-    # Origem → "Todos"
+    # Origem -> "Todos"
     origem_box = by_xpath(frame, XPATHS["origem_container"])
     origem_box.scroll_into_view_if_needed()
     frame.wait_for_timeout(1_000)
@@ -310,7 +310,7 @@ def apply_filters(frame, data_str: str) -> None:
 
     val_ini = frame.evaluate("() => document.getElementById('dataInicial').value")
     val_fim = frame.evaluate("() => document.getElementById('dataFinal').value")
-    print(f"Datas preenchidas → Inicial: '{val_ini}' | Final: '{val_fim}'")
+    print(f"Datas preenchidas -> Inicial: '{val_ini}' | Final: '{val_fim}'")
 
 
 def export_and_download(page: Page, frame) -> Path:
@@ -356,6 +356,10 @@ def parse_args():
     parser.add_argument(
         "--data", type=str, default=None,
         help="Data no formato DD/MM/AAAA (padrão: D-1)"
+    )
+    parser.add_argument(
+        "--dias", type=int, default=1,
+        help="Reservado para compatibilidade com o orquestrador (scheduler)"
     )
     return parser.parse_args()
 
@@ -443,11 +447,13 @@ def _run_extraction(unidade: str, data_referencia: datetime) -> None:
 
     # FASE 2: Upload para o Portal Finanças GB
     print(f"\n--- FASE 2: Iniciando Importação para o Finanças GB via Playwright ---")
-    success = upload_para_financas(arquivos=[output_path], unidade=unidade)
-    if success:
-        print("Processo concluído com SUCESSO!")
-    else:
-        raise Exception("Erro durante o upload do relatório no Finanças GB.")
+    upload_para_financas(arquivos=[output_path], unidade=unidade)
+    print("Processo concluído com SUCESSO!")
+
+
+EXIT_OK        = 0
+EXIT_RETRYABLE = 1
+EXIT_PERMANENT = 2
 
 
 @log_execution(modulo="Retaguarda UDI")
@@ -470,7 +476,7 @@ def main():
             print(f"Data selecionada via argumento CLI: {data_referencia.strftime('%d/%m/%Y')}")
         except ValueError:
             print("ERRO: Formato de data inválido! Use DD/MM/AAAA. Abortando.")
-            sys.exit(1)
+            sys.exit(EXIT_RETRYABLE)
     else:
         data_referencia = datetime.now() - timedelta(days=1)
         print(f"Usando data padrão D-1 (ontem): {data_referencia.strftime('%d/%m/%Y')}")
@@ -482,4 +488,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+        sys.exit(EXIT_OK)
+    except RuntimeError as e:
+        msg = str(e).upper()
+        if "EM BRANCO" in msg or "VAZIO" in msg:
+            sys.exit(EXIT_PERMANENT)
+        sys.exit(EXIT_RETRYABLE)
+    except Exception:
+        sys.exit(EXIT_RETRYABLE)
