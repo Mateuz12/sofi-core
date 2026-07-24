@@ -118,12 +118,13 @@ def run_job(job_config: dict) -> dict:
     max_attempts = job_config["retry"]["max_attempts"]
     delay_s      = job_config["retry"]["delay_seconds"]
 
-    # Congela D-1 no momento do disparo
-    target_date = datetime.now() - timedelta(days=1)
+    # Calcula a data de referência respeitando a configuração do job (D-0 para DFC, D-1 para Retaguarda/Extranet)
+    offset_dias = job_config.get("offset_dias", 0 if dias == 0 else 1)
+    target_date = datetime.now() - timedelta(days=offset_dias)
     date_str    = target_date.strftime("%d/%m/%Y")
 
-    _log("INFO", f"Job '{name}' disparado. Data D-1={date_str}", modulo="Scheduler")
-    print(f"[Scheduler] Iniciando '{name}' | D-1={date_str} | dias={dias}")
+    _log("INFO", f"Job '{name}' disparado. Data de Referência={date_str}", modulo="Scheduler")
+    print(f"[Scheduler] Iniciando '{name}' | Ref={date_str} | dias={dias}")
 
     cmd = [sys.executable, str(script), "--data", date_str, "--dias", str(dias)]
     if "unidade" in job_config:
@@ -197,69 +198,95 @@ def _formatar_duracao(inicio: datetime) -> str:
     minutos, segundos = divmod(total, 60)
     return f"{minutos}m {segundos}s"
 
-
 # ─────────────────────────────────────────────
-# Execução consolidada de todos os jobs
+# Buffer de resultados por grupo de notificação
 # ─────────────────────────────────────────────
 
-def run_all_jobs(jobs_configs: list[dict]) -> None:
-    """
-    Executa todos os jobs sequencialmente (incluindo desabilitados como registro),
-    coleta os resultados e envia e-mail consolidado ao final via Gmail SMTP.
+import threading
 
-    Chamado pelo APScheduler como job único para garantir que a notificação
-    só seja enviada após todos os jobs terminarem.
-    """
-    import traceback
+_group_lock = threading.Lock()
+# { "Relatorios": { "pending": {"DFC UDI", "DFC BH", ...}, "results": [...] }, ... }
+_group_buffers: dict[str, dict] = {}
 
-    config = load_config()
+
+def _find_group(job_name: str, config: dict) -> str | None:
+    """Retorna o nome do grupo de notificação ao qual o job pertence, ou None."""
+    groups = config.get("notification_groups", {})
+    for group_name, members in groups.items():
+        if job_name in members:
+            return group_name
+    return None
+
+
+def _init_group_buffers(config: dict) -> None:
+    """Inicializa os buffers de grupo para o ciclo do dia."""
+    global _group_buffers
+    groups = config.get("notification_groups", {})
+    all_jobs = config.get("jobs", [])
+    enabled_names = {j["name"] for j in all_jobs if j.get("enabled", True)}
+
+    with _group_lock:
+        _group_buffers = {}
+        for group_name, members in groups.items():
+            # Só incluir membros habilitados
+            active = {m for m in members if m in enabled_names}
+            if active:
+                _group_buffers[group_name] = {
+                    "pending": set(active),
+                    "results": [],
+                }
+
+
+def _record_and_maybe_notify(job_name: str, resultado: dict, config: dict) -> None:
+    """
+    Registra o resultado de um job no buffer do grupo.
+    Se era o último pendente, envia a notificação consolidada.
+    """
     notif_cfg = config.get("notification", {})
+    group_name = _find_group(job_name, config)
 
-    nomes = [j["name"] for j in jobs_configs]
-    _log("INFO", f"run_all_jobs iniciado. Jobs configurados: {nomes}", modulo="Scheduler")
-    print(f"[Scheduler] run_all_jobs iniciado. Jobs: {nomes}")
+    if not group_name:
+        # Job sem grupo: envia notificação individual (compatibilidade)
+        _send_notification_if_needed([resultado], notif_cfg)
+        return
 
-    resultados: list[dict] = []
+    should_notify = False
+    group_results = []
 
-    for job_cfg in jobs_configs:
-        name = job_cfg["name"]
-        
-        if not job_cfg.get("enabled", True):
-            # Registra como desabilitado sem executar
-            resultados.append({
-                "name": name,
-                "status": "DESABILITADO",
-                "tentativas": 0,
-                "duracao": "—",
-                "mensagem_erro": "",
-            })
-            print(f"[Scheduler] Job '{name}' desabilitado — ignorado.")
-            continue
+    with _group_lock:
+        buf = _group_buffers.get(group_name)
+        if not buf:
+            # Grupo não inicializado (pode acontecer se config mudou)
+            _send_notification_if_needed([resultado], notif_cfg)
+            return
 
-        try:
-            resultado = run_job(job_cfg)
-        except Exception as exc:
-            tb = traceback.format_exc()
-            msg = f"Exceção não capturada no job '{name}': {exc}\n{tb}"
-            _log("ERRO", msg, modulo="Scheduler")
-            print(f"[Scheduler] EXCEÇÃO NÃO CAPTURADA em '{name}': {exc}")
-            resultado = {
-                "name": name,
-                "status": "ERRO",
-                "tentativas": 0,
-                "duracao": "—",
-                "mensagem_erro": msg,
-            }
-        resultados.append(resultado)
+        buf["results"].append(resultado)
+        buf["pending"].discard(job_name)
 
-    # ── Resumo ──
-    resumo = ", ".join(f"{r['name']}={r['status']}" for r in resultados)
-    _log("INFO", f"run_all_jobs concluído. Resultados: {resumo}", modulo="Scheduler")
-    print(f"[Scheduler] run_all_jobs concluído. Resultados: {resumo}")
+        if not buf["pending"]:
+            # Último job do grupo concluiu!
+            should_notify = True
+            # Ordena na sequência original definida no config
+            members_order = config.get("notification_groups", {}).get(group_name, [])
+            order_map = {name: i for i, name in enumerate(members_order)}
+            group_results = sorted(
+                buf["results"],
+                key=lambda r: order_map.get(r["name"], 999)
+            )
+            # Limpa o buffer para o próximo ciclo
+            buf["results"] = []
 
-    # ── Decide se envia o e-mail ──
+    if should_notify:
+        resumo = ", ".join(f"{r['name']}={r['status']}" for r in group_results)
+        _log("INFO", f"Grupo '{group_name}' completo. Resultados: {resumo}", modulo="Scheduler")
+        print(f"[Scheduler] Grupo '{group_name}' completo. Enviando notificacao consolidada...")
+        _send_notification_if_needed(group_results, notif_cfg)
+
+
+def _send_notification_if_needed(resultados: list[dict], notif_cfg: dict) -> None:
+    """Decide se envia e-mail e envia se necessário."""
     if not notif_cfg.get("enabled", True):
-        print("[Scheduler] Notificações desabilitadas no config. E-mail não enviado.")
+        print("[Scheduler] Notificacoes desabilitadas no config. E-mail nao enviado.")
         return
 
     tem_erro = any(r["status"] not in ("SUCESSO", "DESABILITADO") for r in resultados)
@@ -270,27 +297,86 @@ def run_all_jobs(jobs_configs: list[dict]) -> None:
     )
 
     if not deve_enviar:
-        print("[Scheduler] Condição de notificação não atingida. E-mail não enviado.")
+        print("[Scheduler] Condicao de notificacao nao atingida. E-mail nao enviado.")
         return
 
-    # ── Envia notificação ──
     try:
         from core.notifier import send_scheduler_notification
         send_scheduler_notification(resultados)
     except Exception as exc:
-        # Garante que falha na notificação nunca derruba o scheduler
-        _log("ERRO", f"Erro inesperado ao enviar notificação: {exc}", modulo="Scheduler")
-        print(f"[Scheduler] Erro inesperado ao enviar notificação: {exc}")
+        _log("ERRO", f"Erro inesperado ao enviar notificacao: {exc}", modulo="Scheduler")
+        print(f"[Scheduler] Erro inesperado ao enviar notificacao: {exc}")
 
 
 # ─────────────────────────────────────────────
-# Notificação (mantida para compatibilidade de API)
+# Execução de um job individual (com notificação de grupo)
+# ─────────────────────────────────────────────
+
+def run_single_job(job_config: dict) -> None:
+    """
+    Wrapper para o APScheduler: executa o job e registra o resultado
+    no buffer do grupo de notificação correspondente.
+    """
+    import traceback
+
+    config = load_config()
+    name = job_config["name"]
+
+    if not job_config.get("enabled", True):
+        resultado = {
+            "name": name,
+            "status": "DESABILITADO",
+            "tentativas": 0,
+            "duracao": "--",
+            "mensagem_erro": "",
+        }
+        _record_and_maybe_notify(name, resultado, config)
+        return
+
+    _log("INFO", f"run_single_job iniciado: {name}", modulo="Scheduler")
+    print(f"[Scheduler] run_single_job iniciado: {name}")
+
+    try:
+        resultado = run_job(job_config)
+    except Exception as exc:
+        tb = traceback.format_exc()
+        msg = f"Excecao nao capturada no job '{name}': {exc}\n{tb}"
+        _log("ERRO", msg, modulo="Scheduler")
+        print(f"[Scheduler] EXCECAO NAO CAPTURADA em '{name}': {exc}")
+        resultado = {
+            "name": name,
+            "status": "ERRO",
+            "tentativas": 0,
+            "duracao": "--",
+            "mensagem_erro": msg,
+        }
+
+    _log("INFO", f"run_single_job concluido: {name} = {resultado['status']}", modulo="Scheduler")
+    _record_and_maybe_notify(name, resultado, config)
+
+
+# ─────────────────────────────────────────────
+# Compatibilidade: run_all_jobs (chamado se jobs compartilham horário)
+# ─────────────────────────────────────────────
+
+def run_all_jobs(jobs_configs: list[dict]) -> None:
+    """
+    Executa todos os jobs sequencialmente e registra cada resultado
+    no buffer de grupo. Mantido para compatibilidade e para jobs
+    no mesmo horário.
+    """
+    for job_cfg in jobs_configs:
+        run_single_job(job_cfg)
+
+
+# ─────────────────────────────────────────────
+# Notificação pontual (mantida para compatibilidade de API)
 # ─────────────────────────────────────────────
 
 def send_alert(email: str, job_name: str, error: str) -> None:
     """
     Acionada para alerta pontual de um job específico.
-    Registra o evento no banco; o e-mail consolidado é enviado por run_all_jobs().
+    Registra o evento no banco; o e-mail consolidado é enviado por grupo.
     """
     _log(
         "AVISO",
@@ -312,9 +398,9 @@ def start_scheduler() -> "BackgroundScheduler | None":
     """
     Cria, configura e inicia o BackgroundScheduler.
 
-    Agenda run_all_jobs() no horário do primeiro job habilitado,
-    passando todos os configs (habilitados e desabilitados) para que
-    o e-mail consolidado inclua todos eles.
+    Agenda cada job individualmente no seu horário cron.
+    Resultados são acumulados por notification_group, e o email
+    consolidado só é enviado quando o último job do grupo finaliza.
 
     Deve ser chamado via st.cache_resource para garantir singleton:
 
@@ -329,7 +415,7 @@ def start_scheduler() -> "BackgroundScheduler | None":
     global _scheduler_instance, _jobs_meta
 
     if not _APSCHEDULER_OK:
-        print("[Scheduler] APScheduler não instalado. Instale com: pip install apscheduler")
+        print("[Scheduler] APScheduler nao instalado. Instale com: pip install apscheduler")
         return None
 
     config = load_config()
@@ -344,41 +430,79 @@ def start_scheduler() -> "BackgroundScheduler | None":
     all_jobs = config.get("jobs", [])
     _jobs_meta = []
 
-    # Agrupa jobs por horário (hora e minuto)
+    # Inicializa os buffers de grupo para o dia
+    _init_group_buffers(config)
+
+    # Agenda reinicialização diária dos buffers (meia-noite)
+    def _reset_buffers_daily():
+        _init_group_buffers(load_config())
+        _log("INFO", "Buffers de grupo reinicializados para o novo dia.", modulo="Scheduler")
+        print("[Scheduler] Buffers de grupo reinicializados para o novo dia.")
+
+    scheduler.add_job(
+        func=_reset_buffers_daily,
+        trigger="cron",
+        hour=0,
+        minute=0,
+        id="sofi_reset_buffers",
+        name="Reset buffers diario",
+        max_instances=1,
+        replace_existing=True,
+    )
+
+    # Agrupa jobs por horário — se dois jobs compartilham horário, usa run_all_jobs
     schedule_groups: dict[tuple[int, int], list[dict]] = {}
     for job_cfg in all_jobs:
+        if not job_cfg.get("enabled", True):
+            continue
         j_sched = job_cfg.get("schedule", {})
         h = j_sched.get("hour", 8)
         m = j_sched.get("minute", 0)
         schedule_groups.setdefault((h, m), []).append(job_cfg)
 
     if not schedule_groups:
-        print("[Scheduler] Nenhum job configurado. Scheduler não iniciado.")
+        print("[Scheduler] Nenhum job configurado. Scheduler nao iniciado.")
         return None
 
-    # Agenda cada grupo no APScheduler para seu respectivo horário
     for (h, m), group_jobs in schedule_groups.items():
-        enabled_count = sum(1 for j in group_jobs if j.get("enabled", True))
-        if enabled_count == 0:
-            continue
+        if len(group_jobs) == 1:
+            # Job individual — agenda diretamente
+            job_cfg = group_jobs[0]
+            job_id = f"sofi_{job_cfg['name'].replace(' ', '_').lower()}"
+            scheduler.add_job(
+                func=run_single_job,
+                trigger="cron",
+                hour=h,
+                minute=m,
+                args=[job_cfg],
+                id=job_id,
+                name=job_cfg["name"],
+                max_instances=1,
+                replace_existing=True,
+                misfire_grace_time=3600,
+                coalesce=True,
+            )
+            print(f"[Scheduler] Job '{job_cfg['name']}' agendado para {h:02d}:{m:02d} ({tz})")
+        else:
+            # Múltiplos jobs no mesmo horário — run_all_jobs sequencial
+            job_id = f"sofi_jobs_{h:02d}_{m:02d}"
+            scheduler.add_job(
+                func=run_all_jobs,
+                trigger="cron",
+                hour=h,
+                minute=m,
+                args=[group_jobs],
+                id=job_id,
+                name=f"SOFI Jobs {h:02d}:{m:02d}",
+                max_instances=1,
+                replace_existing=True,
+                misfire_grace_time=3600,
+                coalesce=True,
+            )
+            nomes = [j["name"] for j in group_jobs]
+            print(f"[Scheduler] Jobs agendados para {h:02d}:{m:02d} ({tz}): {nomes}")
 
-        job_id = f"sofi_jobs_{h:02d}_{m:02d}"
-        scheduler.add_job(
-            func=run_all_jobs,
-            trigger="cron",
-            hour=h,
-            minute=m,
-            args=[group_jobs],
-            id=job_id,
-            name=f"SOFI Jobs {h:02d}:{m:02d}",
-            max_instances=1,
-            replace_existing=True,
-            misfire_grace_time=3600,
-            coalesce=True,
-        )
-        print(f"[Scheduler] Jobs agendados para {h:02d}:{m:02d} ({tz}): {[j['name'] for j in group_jobs if j.get('enabled', True)]}")
-
-    # Monta metadados para get_scheduler_status() — apenas habilitados
+    # Monta metadados para get_scheduler_status()
     for job_cfg in all_jobs:
         if not job_cfg.get("enabled", True):
             continue
@@ -393,15 +517,20 @@ def start_scheduler() -> "BackgroundScheduler | None":
     def _on_job_error(event):
         _log(
             "ERRO",
-            f"Exceção inesperada no job '{event.job_id}': {event.exception}",
+            f"Excecao inesperada no job '{event.job_id}': {event.exception}",
             modulo="Scheduler",
         )
-        print(f"[Scheduler] Exceção inesperada capturada pelo listener: {event.exception}")
+        print(f"[Scheduler] Excecao inesperada capturada pelo listener: {event.exception}")
 
     scheduler.add_listener(_on_job_error, EVENT_JOB_ERROR)
 
     scheduler.start()
     _scheduler_instance = scheduler
+
+    # Log dos grupos de notificação
+    groups = config.get("notification_groups", {})
+    for gname, members in groups.items():
+        print(f"[Scheduler] Grupo de notificacao '{gname}': {members}")
 
     _log("INFO", f"Scheduler iniciado. Jobs: {[j['name'] for j in all_jobs]}", modulo="Scheduler")
     print(f"[Scheduler] Iniciado com {len(all_jobs)} job(s) configurado(s).")
@@ -426,13 +555,13 @@ def get_scheduler_status() -> dict:
     Retorno:
         {
             "running": bool,
-            "next_job": str,   # ex: "SOFI Daily Jobs 09:00" ou "—"
+            "next_job": str,   # ex: "SOFI Daily Jobs 09:00" ou "--"
             "jobs": [{"name": str, "hour": int, "minute": int}, ...]
         }
     """
     running = bool(_scheduler_instance and _scheduler_instance.running)
 
-    next_job = "—"
+    next_job = "--"
     if running and _jobs_meta:
         now = datetime.now()
         candidates = []
@@ -450,3 +579,4 @@ def get_scheduler_status() -> dict:
         "next_job": next_job,
         "jobs": list(_jobs_meta),
     }
+

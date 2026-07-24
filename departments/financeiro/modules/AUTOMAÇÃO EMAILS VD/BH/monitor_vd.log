@@ -3857,3 +3857,52 @@ Call log:
 23/07/2026 14:36:23 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
 23/07/2026 14:40:22 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
 23/07/2026 14:40:28 [INFO] ✨ Varredura inicial concluída. 6 e-mails processados.
+24/07/2026 09:21:26 [INFO] ==================================================
+24/07/2026 09:21:26 [INFO] 🚀 Monitor de Emails VD iniciado.
+24/07/2026 09:21:26 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+24/07/2026 09:21:26 [INFO]    Log salvo em: c:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+24/07/2026 09:21:26 [INFO] ==================================================
+24/07/2026 09:21:26 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+24/07/2026 09:21:36 [INFO] 📧 Analisando email de lojavd@attboticario.com.br: Fechamento de caixa Venda Nova 22372 - 23-07-2026
+24/07/2026 09:21:36 [INFO]   Total de anexos: 3
+24/07/2026 09:21:36 [INFO]   Verificando anexo: Controle de titulos Venda Nova 22372 - 23-07-2026.xlsx
+24/07/2026 09:21:36 [INFO]   ✅ Anexo correspondente encontrado!
+24/07/2026 09:21:39 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\07 JULHO\23\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 22372.23-07-2026.xls
+24/07/2026 09:21:39 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+24/07/2026 09:21:39 [INFO]   🚀 [PORTAL] Relatório de VENDA NOVA (23-07-2026) recebido. Iniciando upload individual...
+24/07/2026 09:22:51 [ERROR]   ❌ [PORTAL] Falha no upload individual de VENDA NOVA (23-07-2026): Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("//*[@id=\"mfe-sidebar-react\"]/div/nav/div[2]/div[12]/a") to be visible
+
+24/07/2026 09:23:09 [INFO] 📧 Analisando email de lojavd@attboticario.com.br: Fechamento de caixa Venda Nova 22372 - 23-07-2026
+24/07/2026 09:23:09 [INFO]   Total de anexos: 3
+24/07/2026 09:23:09 [INFO]   Verificando anexo: Controle de titulos Venda Nova 22372 - 23-07-2026.xlsx
+24/07/2026 09:23:09 [INFO]   ✅ Anexo correspondente encontrado!
+24/07/2026 09:23:11 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\07 JULHO\23\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 22372.23-07-2026.xls
+24/07/2026 09:23:11 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+24/07/2026 09:23:11 [INFO]   🚀 [PORTAL] Relatório de VENDA NOVA (23-07-2026) recebido. Iniciando upload individual...
+24/07/2026 09:23:53 [INFO]   ✅ [PORTAL] Upload do relatório de VENDA NOVA (23-07-2026) realizado com sucesso!
+24/07/2026 09:24:00 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES21433 22-07-2026
+24/07/2026 09:24:00 [INFO]   Total de anexos: 3
+24/07/2026 09:24:00 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 22-07-2026.xlsm
+24/07/2026 09:24:00 [INFO]   Verificando anexo: Contole de Titulo ER NEVES 21433 22-07-2026.xls
+24/07/2026 09:24:00 [INFO]   ✅ Anexo correspondente encontrado!
+24/07/2026 09:24:01 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\07 JULHO\22\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.22-07-2026.xls
+24/07/2026 09:24:01 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+24/07/2026 09:24:01 [INFO]   🚀 [PORTAL] Relatório de ER NEVES (22-07-2026) recebido. Iniciando upload individual...
+24/07/2026 09:24:59 [INFO]   ✅ [PORTAL] Upload do relatório de ER NEVES (22-07-2026) realizado com sucesso!
+24/07/2026 09:24:59 [INFO] ✨ Varredura inicial concluída. 15 e-mails processados.
+24/07/2026 09:24:59 [INFO] 🎧 Aguardando novos emails em tempo real...
+24/07/2026 09:42:43 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 23-07-2026
+24/07/2026 09:42:43 [INFO]   Total de anexos: 6
+24/07/2026 09:42:43 [INFO]   Verificando anexo: b759c79d.png
+24/07/2026 09:42:43 [INFO]   Verificando anexo: a99ab85d.png
+24/07/2026 09:42:43 [INFO]   Verificando anexo: c7dffd2e.png
+24/07/2026 09:42:43 [INFO]   Verificando anexo: fcd278d4.png
+24/07/2026 09:42:43 [INFO]   Verificando anexo: PROCESSO DE CAIXA VD ITAPÕA 23-07-2026.xlsx
+24/07/2026 09:42:43 [INFO]   Verificando anexo: Controle de  títulos VD Itapoã 13793- 23-07-2026.xlsx
+24/07/2026 09:42:43 [INFO]   ✅ Anexo correspondente encontrado!
+24/07/2026 09:42:45 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\07 JULHO\23\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.23-07-2026.xls
+24/07/2026 09:42:45 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+24/07/2026 09:42:45 [INFO]   🚀 [PORTAL] Relatório de ITAPÕA (23-07-2026) recebido. Iniciando upload individual...
+24/07/2026 09:43:43 [INFO]   ✅ [PORTAL] Upload do relatório de ITAPÕA (23-07-2026) realizado com sucesso!

@@ -7996,3 +7996,12 @@ Call log:
 23/07/2026 14:39:50 [INFO]   ✅ [PORTAL] Upload dos relatórios de 22-07-2026 realizado com sucesso!
 23/07/2026 14:39:50 [INFO]   📌 [PORTAL] Dia 22-07-2026 marcado como concluído (.upload_done criado).
 23/07/2026 14:40:14 [INFO] ✨ Varredura inicial concluída. 9 e-mails processados.
+24/07/2026 09:24:35 [INFO] ==================================================
+24/07/2026 09:24:35 [INFO] 🚀 Monitor de Emails VD iniciado.
+24/07/2026 09:24:35 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+24/07/2026 09:24:35 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+24/07/2026 09:24:35 [INFO] ==================================================
+24/07/2026 09:24:35 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+24/07/2026 09:24:41 [INFO] ✨ Varredura inicial concluída. 12 e-mails processados.
+24/07/2026 09:24:41 [INFO] 👁️  [WATCHER] Iniciado. Monitorando pasta a cada 5 minutos (dias >= 21/07/2026).
+24/07/2026 09:24:41 [INFO] 🎧 Aguardando novos emails em tempo real + monitoramento de pasta...

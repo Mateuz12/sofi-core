@@ -94,7 +94,7 @@ def _encontrar_e_clicar_aba_dfc(page: Page) -> None:
             return false;
         }""")
         if clicou_js:
-            print("  ✔ Aba 'Fluxo Analítico - DFC' clicada via JS.")
+            print("  [OK] Aba 'Fluxo Analítico - DFC' clicada via JS.")
             page.wait_for_timeout(2000)
             return
     except Exception:
@@ -113,7 +113,7 @@ def _encontrar_e_clicar_aba_dfc(page: Page) -> None:
             if locator.is_visible(timeout=3000) or locator.is_attached():
                 locator.scroll_into_view_if_needed()
                 locator.click(force=True)
-                print(f"  ✔ Aba DFC clicada via seletor: {sel}")
+                print(f"  [OK] Aba DFC clicada via seletor: {sel}")
                 page.wait_for_timeout(2000)
                 return
         except Exception:
@@ -121,7 +121,7 @@ def _encontrar_e_clicar_aba_dfc(page: Page) -> None:
 
     try:
         page.get_by_text("Fluxo Analítico - DFC", exact=False).first.click(force=True)
-        print("  ✔ Clique fallback get_by_text efetuado.")
+        print("  [OK] Clique fallback get_by_text efetuado.")
     except Exception as e:
         raise RuntimeError(f"Não foi possível clicar na aba 'Fluxo Analítico - DFC': {e}")
 
@@ -154,7 +154,7 @@ def _garantir_checkbox(page: Page, xpath: str, descricao: str) -> None:
                 if (cbs[idx]) triggerCheck(cbs[idx]);
             }}
         }}""", xpath)
-        print(f"    ✔ Checkbox {descricao} acionado via JS.")
+        print(f"    [OK] Checkbox {descricao} acionado via JS.")
     except Exception as e:
         print(f"    [Aviso] Clique JS no checkbox {descricao}: {e}")
 
@@ -199,7 +199,7 @@ def _preencher_campo_data_mensal(page: Page, xpath: str, data_str: str, rotulo: 
                 el.dispatchEvent(new Event('blur', {{ bubbles: true }}));
             }}
         }}""", xpath)
-        print(f"    ✔ {rotulo} preenchido com sucesso.")
+        print(f"    [OK] {rotulo} preenchido com sucesso.")
     except Exception as e:
         print(f"    [ERRO] Falha ao preencher {rotulo} via XPath: {e}")
 
@@ -223,7 +223,7 @@ def _aguardar_carregamento_relatorio(page: Page) -> None:
         try:
             print("  Aguardando o encerramento do carregamento...")
             page.wait_for_selector(selectors_loading, state="hidden", timeout=300_000)
-            print("  ✔ Spinner/Mask de carregamento desapareceu. Relatório pronto!")
+            print("  [OK] Spinner/Mask de carregamento desapareceu. Relatório pronto!")
         except Exception as e:
             print(f"  [Aviso] Timeout aguardando remoção do spinner: {e}")
 
@@ -235,7 +235,7 @@ def _aguardar_carregamento_relatorio(page: Page) -> None:
     try:
         print("  Aguardando o botão 'Exportar Excel' estar visível...")
         page.locator('a[data-bind*="Analitico.Exportar"], li[data-original-title*="Exportar"]').first.wait_for(state="visible", timeout=60_000)
-        print("  ✔ Botão 'Exportar Excel' está totalmente visível!")
+        print("  [OK] Botão 'Exportar Excel' está totalmente visível!")
     except Exception:
         print("  [Aviso] Aguarde adicional de 5s para garantia da renderização final do DOM...")
         page.wait_for_timeout(5000)
@@ -262,7 +262,7 @@ def _clicar_exportar_excel(page: Page) -> None:
             return false;
         }""")
         if clicou_js:
-            print("    ✔ Clique em 'Exportar Excel' acionado via binding Knockout (Analitico.Exportar).")
+            print("    [OK] Clique em 'Exportar Excel' acionado via binding Knockout (Analitico.Exportar).")
             return
     except Exception as e:
         print(f"    [Aviso] Acionamento JS de Analitico.Exportar: {e}")
@@ -284,14 +284,14 @@ def _clicar_exportar_excel(page: Page) -> None:
             if el.is_visible(timeout=3000) or el.is_attached():
                 el.scroll_into_view_if_needed()
                 el.click(force=True)
-                print(f"    ✔ Clique efetuado via seletor: {sel}")
+                print(f"    [OK] Clique efetuado via seletor: {sel}")
                 return
         except Exception:
             continue
 
     try:
         page.get_by_text("Exportar Excel", exact=False).first.click(force=True)
-        print("    ✔ Clique fallback via get_by_text efetuado.")
+        print("    [OK] Clique fallback via get_by_text efetuado.")
     except Exception as e:
         raise RuntimeError(f"Não foi possível clicar no botão 'Exportar Excel': {e}")
 
@@ -354,7 +354,7 @@ def _navegar_e_extrair_dfc(page: Page, data_ref: datetime) -> Path:
     target_path = target_dir / target_filename
 
     download.save_as(str(target_path))
-    print(f"  ✔ Relatório DFC UDI gravado com sucesso em: {target_path}")
+    print(f"  [OK] Relatório DFC UDI gravado com sucesso em: {target_path}")
 
     return target_path
 
