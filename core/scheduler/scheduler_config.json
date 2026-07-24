@@ -7,8 +7,16 @@
     "send_on_error": true
   },
   "notification_groups": {
-    "Relatorios": ["Fluxo Analítico DFC UDI", "Fluxo Analítico DFC BH", "Retaguarda UDI", "Retaguarda BH"],
-    "Extranet":   ["Extranet BH", "Extranet UDI"]
+    "Relatorios": [
+      "Fluxo Analítico DFC UDI",
+      "Fluxo Analítico DFC BH",
+      "Retaguarda UDI",
+      "Retaguarda BH"
+    ],
+    "Extranet": [
+      "Extranet BH",
+      "Extranet UDI"
+    ]
   },
   "jobs": [
     {
@@ -18,8 +26,8 @@
       "unidade": "UDI",
       "schedule": {
         "type": "cron",
-        "hour": 7,
-        "minute": 30
+        "hour": 6,
+        "minute": 45
       },
       "dias": 0,
       "retry": {
@@ -35,7 +43,7 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 45
+        "minute": 0
       },
       "dias": 0,
       "retry": {
