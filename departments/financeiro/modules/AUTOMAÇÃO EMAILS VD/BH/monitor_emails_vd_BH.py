@@ -10,6 +10,7 @@ Para rodar em segundo plano (sem janela):
 
 import win32com.client
 import pythoncom
+import pywintypes
 import os
 import re
 import sys
@@ -95,18 +96,17 @@ UNIDADES = {
         "unit_id": "VENDA NOVA",
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 22372"
     },
-    "ER NEVES":{
-        "subject_keyword": ["ER NEVES"],
+    "ER NEVES": {
+        "subject_keyword": ["ER NEVES", "21433"],
         "attachment_prefix": [
-            "Controle de titulos Er Neves 21433",
+            "Contole de Titulo",
+            "Controle de Titulo",
+            "Controle de Titulos",
+            "Controle de Títulos",
+            "Controle de titulos ER Neves 21433",
             "Controle de títulos ER Neves 21433",
-            "Controle de titulo Er Neves 21433",
-            "Controle de título ER Neves 21433",
-            "Contole de titulos Er Neves 21433",
-            "Contole de títulos ER Neves 21433",
-            "Contole de titulo Er Neves 21433",
-            "Contole de título ER Neves 21433",
-            "PLANILHA 360 ER NEVES 21433",
+            "Controle de titulo ER Neves",
+            "Controle de título ER Neves"
         ],
         "unit_id": "ER NEVES",
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433"
@@ -114,7 +114,7 @@ UNIDADES = {
 }
 
 # ─────────────────────────────────────────────
-# LOG (salvo em arquivo, pois roda sem console)
+# LOG (salvo em arquivo próprio para BH)
 # ─────────────────────────────────────────────
 LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "monitor_vd.log")
 
@@ -128,7 +128,7 @@ logging.basicConfig(
 
 def log(msg, nivel="info"):
     try:
-        print(msg)  # visível se rodar com python.exe normal
+        print(msg)
     except Exception:
         pass
     getattr(logging, nivel)(msg)
@@ -136,17 +136,16 @@ def log(msg, nivel="info"):
 # ─────────────────────────────────────────────
 # FUNÇÕES AUXILIARES
 # ─────────────────────────────────────────────
-def normalizar_texto(texto):
-    """Remove acentos e caracteres especiais, converte para minúsculas."""
-    if not texto:
+def remove_accents(input_str):
+    """Remove acentos de uma string para comparação case/accent-insensitive."""
+    nfkd = unicodedata.normalize('NFKD', input_str)
+    return "".join([c for c in nfkd if not unicodedata.combining(c)])
+
+def normalizar_texto(input_str):
+    """Remove acentos e converte para maiúsculo para comparações flexíveis."""
+    if not input_str:
         return ""
-    # Decompõe caracteres acentuados e remove marcas de acentuação
-    texto_norm = unicodedata.normalize('NFD', texto)
-    texto_limpo = "".join(c for c in texto_norm if unicodedata.category(c) != 'Mn')
-    # Substitui caracteres específicos que a normalização NFD pode não pegar ou que variam
-    texto_limpo = texto_limpo.lower().replace("º", "").replace("°", "").strip()
-    # Remove espaços múltiplos consecutivos
-    return " ".join(texto_limpo.split())
+    return remove_accents(str(input_str)).upper()
 
 def get_archive_folder(namespace):
     inbox = namespace.GetDefaultFolder(6)
@@ -155,8 +154,20 @@ def get_archive_folder(namespace):
     except:
         return inbox.Folders.Add(ARCHIVE_FOLDER_NAME)
 
+def get_excel_app():
+    try:
+        return win32com.client.Dispatch("Excel.Application")
+    except Exception:
+        clsid = pywintypes.IID('{00024500-0000-0000-C000-000000000046}')
+        obj = pythoncom.CoCreateInstance(clsid, None, pythoncom.CLSCTX_LOCAL_SERVER, pythoncom.IID_IDispatch)
+        return win32com.client.Dispatch(obj)
+
 def convert_to_xls(temp_path, final_path):
-    excel = win32com.client.gencache.EnsureDispatch("Excel.Application")
+    try:
+        excel = get_excel_app()
+    except Exception as e:
+        log(f"Erro ao iniciar Excel: {e}", "error")
+        return False
     excel.Visible = False
     excel.DisplayAlerts = False
     try:
@@ -168,7 +179,10 @@ def convert_to_xls(temp_path, final_path):
         log(f"Erro na conversão Excel: {e}", "error")
         return False
     finally:
-        excel.Quit()
+        try:
+            excel.Quit()
+        except Exception:
+            pass
 
 def get_sender_email(message):
     """Tenta obter o endereço SMTP real do remetente."""

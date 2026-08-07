@@ -3906,3 +3906,120 @@ Call log:
 24/07/2026 09:42:45 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
 24/07/2026 09:42:45 [INFO]   🚀 [PORTAL] Relatório de ITAPÕA (23-07-2026) recebido. Iniciando upload individual...
 24/07/2026 09:43:43 [INFO]   ✅ [PORTAL] Upload do relatório de ITAPÕA (23-07-2026) realizado com sucesso!
+06/08/2026 12:21:26 [INFO] ==================================================
+06/08/2026 12:21:26 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:21:26 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+06/08/2026 12:21:26 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+06/08/2026 12:21:26 [INFO] ==================================================
+06/08/2026 12:21:27 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:21:39 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433 04-08-2026
+06/08/2026 12:21:39 [INFO]   Total de anexos: 3
+06/08/2026 12:21:39 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 04-08-2026.xlsm
+06/08/2026 12:21:39 [INFO]   Verificando anexo: Contole de Titulo ER NEVES 21433 04-08-2026.xls
+06/08/2026 12:21:39 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:21:41 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:21:42 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: Fechamento de caixa Venda Nova 22372 - 05-08-2026
+06/08/2026 12:21:42 [INFO]   Total de anexos: 8
+06/08/2026 12:21:42 [INFO]   Verificando anexo: image001.png
+06/08/2026 12:21:42 [INFO]   Verificando anexo: image002.png
+06/08/2026 12:21:42 [INFO]   Verificando anexo: image003.png
+06/08/2026 12:21:42 [INFO]   Verificando anexo: image004.png
+06/08/2026 12:21:42 [INFO]   Verificando anexo: image006.png
+06/08/2026 12:21:42 [INFO]   Verificando anexo: Controle de Títulos Venda Nova 22372 - 05-08-2026.xlsx
+06/08/2026 12:21:42 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:21:44 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:21:44 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: 
+06/08/2026 12:21:44 [INFO]   ℹ️  Data não encontrada no assunto, tentará extrair dos anexos...
+06/08/2026 12:21:44 [INFO]   ⚠️  Unidade não identificada no assunto. Palavras-chave esperadas: ['ITAPÕA', 'VENDA NOVA', 'ER NEVES']
+06/08/2026 12:21:45 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 05-08-2026
+06/08/2026 12:21:45 [INFO]   Total de anexos: 6
+06/08/2026 12:21:45 [INFO]   Verificando anexo: b759c79d.png
+06/08/2026 12:21:45 [INFO]   Verificando anexo: a99ab85d.png
+06/08/2026 12:21:45 [INFO]   Verificando anexo: c7dffd2e.png
+06/08/2026 12:21:45 [INFO]   Verificando anexo: fcd278d4.png
+06/08/2026 12:21:45 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 05-08-2026.xlsx
+06/08/2026 12:21:45 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:21:46 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:22:00 [INFO] ✨ Varredura inicial concluída. 47 e-mails processados.
+06/08/2026 12:22:00 [INFO] 🎧 Aguardando novos emails em tempo real...
+06/08/2026 12:23:39 [INFO] ==================================================
+06/08/2026 12:23:39 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:23:39 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+06/08/2026 12:23:39 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+06/08/2026 12:23:39 [INFO] ==================================================
+06/08/2026 12:23:39 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:23:54 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433 04-08-2026
+06/08/2026 12:23:54 [INFO]   Total de anexos: 3
+06/08/2026 12:23:54 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 04-08-2026.xlsm
+06/08/2026 12:23:54 [INFO]   Verificando anexo: Contole de Titulo ER NEVES 21433 04-08-2026.xls
+06/08/2026 12:23:54 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:23:55 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:23:56 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: Fechamento de caixa Venda Nova 22372 - 05-08-2026
+06/08/2026 12:23:56 [INFO]   Total de anexos: 8
+06/08/2026 12:23:56 [INFO]   Verificando anexo: image001.png
+06/08/2026 12:23:56 [INFO]   Verificando anexo: image002.png
+06/08/2026 12:23:56 [INFO]   Verificando anexo: image003.png
+06/08/2026 12:23:56 [INFO]   Verificando anexo: image004.png
+06/08/2026 12:23:56 [INFO]   Verificando anexo: image006.png
+06/08/2026 12:23:56 [INFO]   Verificando anexo: Controle de Títulos Venda Nova 22372 - 05-08-2026.xlsx
+06/08/2026 12:23:56 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:23:58 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:23:59 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: 
+06/08/2026 12:23:59 [INFO]   ℹ️  Data não encontrada no assunto, tentará extrair dos anexos...
+06/08/2026 12:23:59 [INFO]   ⚠️  Unidade não identificada no assunto. Palavras-chave esperadas: ['ITAPÕA', 'VENDA NOVA', 'ER NEVES']
+06/08/2026 12:23:59 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 05-08-2026
+06/08/2026 12:24:00 [INFO]   Total de anexos: 6
+06/08/2026 12:24:00 [INFO]   Verificando anexo: b759c79d.png
+06/08/2026 12:24:00 [INFO]   Verificando anexo: a99ab85d.png
+06/08/2026 12:24:00 [INFO]   Verificando anexo: c7dffd2e.png
+06/08/2026 12:24:00 [INFO]   Verificando anexo: fcd278d4.png
+06/08/2026 12:24:00 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 05-08-2026.xlsx
+06/08/2026 12:24:00 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:24:01 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:24:07 [INFO] ✨ Varredura inicial concluída. 47 e-mails processados.
+06/08/2026 12:24:07 [INFO] 🎧 Aguardando novos emails em tempo real...
+06/08/2026 12:25:45 [INFO] ==================================================
+06/08/2026 12:25:45 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:25:45 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+06/08/2026 12:25:45 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+06/08/2026 12:25:45 [INFO] ==================================================
+06/08/2026 12:25:45 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:25:48 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433 04-08-2026
+06/08/2026 12:25:48 [INFO]   Total de anexos: 3
+06/08/2026 12:25:48 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 04-08-2026.xlsm
+06/08/2026 12:25:48 [INFO]   Verificando anexo: Contole de Titulo ER NEVES 21433 04-08-2026.xls
+06/08/2026 12:25:48 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:25:50 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:25:50 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: Fechamento de caixa Venda Nova 22372 - 05-08-2026
+06/08/2026 12:25:50 [INFO]   Total de anexos: 8
+06/08/2026 12:25:50 [INFO]   Verificando anexo: image001.png
+06/08/2026 12:25:50 [INFO]   Verificando anexo: image002.png
+06/08/2026 12:25:50 [INFO]   Verificando anexo: image003.png
+06/08/2026 12:25:50 [INFO]   Verificando anexo: image004.png
+06/08/2026 12:25:50 [INFO]   Verificando anexo: image006.png
+06/08/2026 12:25:50 [INFO]   Verificando anexo: Controle de Títulos Venda Nova 22372 - 05-08-2026.xlsx
+06/08/2026 12:25:50 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:25:51 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:25:51 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: 
+06/08/2026 12:25:51 [INFO]   ℹ️  Data não encontrada no assunto, tentará extrair dos anexos...
+06/08/2026 12:25:51 [INFO]   ⚠️  Unidade não identificada no assunto. Palavras-chave esperadas: ['ITAPÕA', 'VENDA NOVA', 'ER NEVES']
+06/08/2026 12:25:51 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 05-08-2026
+06/08/2026 12:25:51 [INFO]   Total de anexos: 6
+06/08/2026 12:25:51 [INFO]   Verificando anexo: b759c79d.png
+06/08/2026 12:25:51 [INFO]   Verificando anexo: a99ab85d.png
+06/08/2026 12:25:51 [INFO]   Verificando anexo: c7dffd2e.png
+06/08/2026 12:25:51 [INFO]   Verificando anexo: fcd278d4.png
+06/08/2026 12:25:51 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 05-08-2026.xlsx
+06/08/2026 12:25:51 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:25:53 [ERROR] Erro ao processar email: [WinError 1326] The user name or password is incorrect: '\\\\srv-dc01\\File Server\\'
+06/08/2026 12:25:53 [INFO] ✨ Varredura inicial concluída. 47 e-mails processados.
+06/08/2026 12:25:53 [INFO] 🎧 Aguardando novos emails em tempo real...
+06/08/2026 12:32:35 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433 05-08-2026
+06/08/2026 12:32:35 [INFO]   Total de anexos: 3
+06/08/2026 12:32:35 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 05-08-2026.xlsm
+06/08/2026 12:32:35 [INFO]   Verificando anexo: Contole de Titulo ER NEVES 21433 05-08-2026.xls
+06/08/2026 12:32:35 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:32:35 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\05\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.05-08-2026.xls
+06/08/2026 12:32:35 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+06/08/2026 12:32:35 [INFO]   🚀 [PORTAL] Relatório de ER NEVES (05-08-2026) recebido. Iniciando upload individual...
+06/08/2026 12:32:35 [ERROR]   ❌ [PORTAL] Falha no upload individual de ER NEVES (05-08-2026): Credenciais do FinançasGB para a unidade 'BH' não encontradas no .env. Verifique FINANCAS_BH_USER e FINANCAS_BH_PASS.

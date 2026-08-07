@@ -8005,3 +8005,241 @@ Call log:
 24/07/2026 09:24:41 [INFO] ✨ Varredura inicial concluída. 12 e-mails processados.
 24/07/2026 09:24:41 [INFO] 👁️  [WATCHER] Iniciado. Monitorando pasta a cada 5 minutos (dias >= 21/07/2026).
 24/07/2026 09:24:41 [INFO] 🎧 Aguardando novos emails em tempo real + monitoramento de pasta...
+06/08/2026 12:21:26 [INFO] ==================================================
+06/08/2026 12:21:26 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:21:26 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+06/08/2026 12:21:26 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+06/08/2026 12:21:26 [INFO] ==================================================
+06/08/2026 12:21:27 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:21:39 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 05-08-2026
+06/08/2026 12:21:39 [INFO]   Total de anexos: 7
+06/08/2026 12:21:39 [INFO]   Verificando anexo: image.png
+06/08/2026 12:21:39 [INFO]   Verificando anexo: image.png
+06/08/2026 12:21:39 [INFO]   Verificando anexo: image.png
+06/08/2026 12:21:39 [INFO]   Verificando anexo: image.png
+06/08/2026 12:21:39 [INFO]   Verificando anexo: Fechamento de Caixa JP - 05-08-26.xlsm
+06/08/2026 12:21:39 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 05-08-26.xlsm
+06/08/2026 12:21:39 [INFO]   Verificando anexo: Controle de Títulos JP - 05-08-26.xlsx
+06/08/2026 12:21:39 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:23:39 [INFO] ==================================================
+06/08/2026 12:23:39 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:23:39 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+06/08/2026 12:23:39 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+06/08/2026 12:23:39 [INFO] ==================================================
+06/08/2026 12:23:39 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:23:44 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 05-08-2026
+06/08/2026 12:23:44 [INFO]   Total de anexos: 7
+06/08/2026 12:23:44 [INFO]   Verificando anexo: image.png
+06/08/2026 12:23:44 [INFO]   Verificando anexo: image.png
+06/08/2026 12:23:44 [INFO]   Verificando anexo: image.png
+06/08/2026 12:23:44 [INFO]   Verificando anexo: image.png
+06/08/2026 12:23:44 [INFO]   Verificando anexo: Fechamento de Caixa JP - 05-08-26.xlsm
+06/08/2026 12:23:44 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 05-08-26.xlsm
+06/08/2026 12:23:44 [INFO]   Verificando anexo: Controle de Títulos JP - 05-08-26.xlsx
+06/08/2026 12:23:44 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:25:45 [INFO] ==================================================
+06/08/2026 12:25:45 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:25:45 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+06/08/2026 12:25:45 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+06/08/2026 12:25:45 [INFO] ==================================================
+06/08/2026 12:25:45 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:25:45 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 05-08-2026
+06/08/2026 12:25:45 [INFO]   Total de anexos: 7
+06/08/2026 12:25:45 [INFO]   Verificando anexo: image.png
+06/08/2026 12:25:45 [INFO]   Verificando anexo: image.png
+06/08/2026 12:25:45 [INFO]   Verificando anexo: image.png
+06/08/2026 12:25:45 [INFO]   Verificando anexo: image.png
+06/08/2026 12:25:45 [INFO]   Verificando anexo: Fechamento de Caixa JP - 05-08-26.xlsm
+06/08/2026 12:25:45 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 05-08-26.xlsm
+06/08/2026 12:25:45 [INFO]   Verificando anexo: Controle de Títulos JP - 05-08-26.xlsx
+06/08/2026 12:25:45 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:20 [INFO] ==================================================
+06/08/2026 12:31:20 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:31:20 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+06/08/2026 12:31:20 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+06/08/2026 12:31:20 [INFO] ==================================================
+06/08/2026 12:31:20 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:31:20 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 05-08-2026
+06/08/2026 12:31:20 [INFO]   Total de anexos: 7
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Fechamento de Caixa JP - 05-08-26.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 05-08-26.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Controle de Títulos JP - 05-08-26.xlsx
+06/08/2026 12:31:20 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:20 [ERROR] Erro ao processar email: (-2147221005, 'Invalid class string', None, None)
+06/08/2026 12:31:20 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa ARI - 05-08-2026
+06/08/2026 12:31:20 [INFO]   Total de anexos: 7
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Fechamento de Caixa ARI - 05-08-2026.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: PROCESSO CAIXA ARI - 05-08-26.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Controle de Títulos ARI - 05-08-26.xlsx
+06/08/2026 12:31:20 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:20 [ERROR] Erro ao processar email: (-2147221005, 'Invalid class string', None, None)
+06/08/2026 12:31:20 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa UDI - 05-08-2026
+06/08/2026 12:31:20 [INFO]   Total de anexos: 7
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Fechamento de Caixa UDI - 05-08-26..xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: PROCESSO CAIXA UDI - 05-08-26.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Controle de Títulos UDI - 05-08-26.xlsx
+06/08/2026 12:31:20 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:20 [ERROR] Erro ao processar email: (-2147221005, 'Invalid class string', None, None)
+06/08/2026 12:31:20 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa UDI - 04-08-2026
+06/08/2026 12:31:20 [INFO]   Total de anexos: 7
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Fechamento de Caixa UDI - 04-08-26..xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: PROCESSO CAIXA UDI - 04-08-26.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Controle de Títulos UDI - 04-08-26.xlsx
+06/08/2026 12:31:20 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:20 [ERROR] Erro ao processar email: (-2147221005, 'Invalid class string', None, None)
+06/08/2026 12:31:20 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 04-08-2026
+06/08/2026 12:31:20 [INFO]   Total de anexos: 7
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Fechamento de Caixa JP - 04-08-26.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 04-08-26.xlsm
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Controle de Títulos JP - 04-08-26.xlsx
+06/08/2026 12:31:20 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:20 [ERROR] Erro ao processar email: (-2147221005, 'Invalid class string', None, None)
+06/08/2026 12:31:20 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa ARI - 04-08-2026
+06/08/2026 12:31:20 [INFO]   Total de anexos: 7
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:20 [INFO]   Verificando anexo: Fechamento de Caixa ARI - 04-08-2026.xlsm
+06/08/2026 12:31:21 [INFO]   Verificando anexo: PROCESSO CAIXA ARI - 04-08-26.xlsm
+06/08/2026 12:31:21 [INFO]   Verificando anexo: Controle de Títulos ARI - 04-08-26.xlsx
+06/08/2026 12:31:21 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:21 [ERROR] Erro ao processar email: (-2147221005, 'Invalid class string', None, None)
+06/08/2026 12:31:21 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa UDI - 04-08-2026
+06/08/2026 12:31:21 [INFO]   Total de anexos: 7
+06/08/2026 12:31:21 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:21 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:21 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:21 [INFO]   Verificando anexo: image.png
+06/08/2026 12:31:21 [INFO]   Verificando anexo: Fechamento de Caixa UDI - 04-08-26..xlsm
+06/08/2026 12:31:21 [INFO]   Verificando anexo: PROCESSO CAIXA UDI - 04-08-26.xlsm
+06/08/2026 12:31:21 [INFO]   Verificando anexo: Controle de Títulos UDI - 04-08-26.xlsx
+06/08/2026 12:31:21 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:31:21 [ERROR] Erro ao processar email: (-2147221005, 'Invalid class string', None, None)
+06/08/2026 12:31:21 [INFO] ✨ Varredura inicial concluída. 46 e-mails processados.
+06/08/2026 12:31:21 [INFO] 👁️  [WATCHER] Iniciado. Monitorando pasta a cada 5 minutos (dias >= 21/07/2026).
+06/08/2026 12:31:21 [INFO] 🎧 Aguardando novos emails em tempo real + monitoramento de pasta...
+06/08/2026 12:51:07 [INFO] ==================================================
+06/08/2026 12:51:07 [INFO] 🚀 Monitor de Emails VD iniciado.
+06/08/2026 12:51:07 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+06/08/2026 12:51:07 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+06/08/2026 12:51:07 [INFO] ==================================================
+06/08/2026 12:51:07 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+06/08/2026 12:51:08 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 05-08-2026
+06/08/2026 12:51:08 [INFO]   Total de anexos: 7
+06/08/2026 12:51:08 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:08 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:08 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:08 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:08 [INFO]   Verificando anexo: Fechamento de Caixa JP - 05-08-26.xlsm
+06/08/2026 12:51:08 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 05-08-26.xlsm
+06/08/2026 12:51:08 [INFO]   Verificando anexo: Controle de Títulos JP - 05-08-26.xlsx
+06/08/2026 12:51:08 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:51:10 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\08 AGOSTO\05\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 24417.05-08-2026.xls
+06/08/2026 12:51:10 [INFO]   📂 Email processado e movido para 'Arquivados'.
+06/08/2026 12:51:10 [INFO]   ⏳ [PORTAL] Aguardando relatórios de: UDI, ARI para iniciar upload.
+06/08/2026 12:51:10 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa ARI - 05-08-2026
+06/08/2026 12:51:10 [INFO]   Total de anexos: 7
+06/08/2026 12:51:10 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:10 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:10 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:10 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:10 [INFO]   Verificando anexo: Fechamento de Caixa ARI - 05-08-2026.xlsm
+06/08/2026 12:51:10 [INFO]   Verificando anexo: PROCESSO CAIXA ARI - 05-08-26.xlsm
+06/08/2026 12:51:10 [INFO]   Verificando anexo: Controle de Títulos ARI - 05-08-26.xlsx
+06/08/2026 12:51:10 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:51:15 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\08 AGOSTO\05\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 23275.05-08-2026.xls
+06/08/2026 12:51:15 [INFO]   📂 Email processado e movido para 'Arquivados'.
+06/08/2026 12:51:15 [INFO]   ⏳ [PORTAL] Aguardando relatórios de: UDI para iniciar upload.
+06/08/2026 12:51:15 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa UDI - 05-08-2026
+06/08/2026 12:51:15 [INFO]   Total de anexos: 7
+06/08/2026 12:51:15 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:15 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:15 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:15 [INFO]   Verificando anexo: image.png
+06/08/2026 12:51:15 [INFO]   Verificando anexo: Fechamento de Caixa UDI - 05-08-26..xlsm
+06/08/2026 12:51:15 [INFO]   Verificando anexo: PROCESSO CAIXA UDI - 05-08-26.xlsm
+06/08/2026 12:51:15 [INFO]   Verificando anexo: Controle de Títulos UDI - 05-08-26.xlsx
+06/08/2026 12:51:15 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:51:19 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\08 AGOSTO\05\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 20844.05-08-2026.xls
+06/08/2026 12:51:19 [INFO]   📂 Email processado e movido para 'Arquivados'.
+06/08/2026 12:51:19 [INFO]   🚀 [PORTAL] Todos os 3 relatórios de 05-08-2026 encontrados. Iniciando upload...
+06/08/2026 12:52:02 [INFO]   ✅ [PORTAL] Upload dos relatórios de 05-08-2026 realizado com sucesso!
+06/08/2026 12:52:02 [INFO]   📌 [PORTAL] Dia 05-08-2026 marcado como concluído (.upload_done criado).
+06/08/2026 12:52:02 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa UDI - 04-08-2026
+06/08/2026 12:52:02 [INFO]   Total de anexos: 7
+06/08/2026 12:52:02 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:02 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:02 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:02 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:02 [INFO]   Verificando anexo: Fechamento de Caixa UDI - 04-08-26..xlsm
+06/08/2026 12:52:02 [INFO]   Verificando anexo: PROCESSO CAIXA UDI - 04-08-26.xlsm
+06/08/2026 12:52:02 [INFO]   Verificando anexo: Controle de Títulos UDI - 04-08-26.xlsx
+06/08/2026 12:52:02 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:52:07 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\08 AGOSTO\04\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 20844.04-08-2026.xls
+06/08/2026 12:52:07 [INFO]   📂 Email processado e movido para 'Arquivados'.
+06/08/2026 12:52:07 [INFO]   ⏳ [PORTAL] Aguardando relatórios de: ARI, Jardim Patrícia para iniciar upload.
+06/08/2026 12:52:07 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa JP - 04-08-2026
+06/08/2026 12:52:07 [INFO]   Total de anexos: 7
+06/08/2026 12:52:07 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:07 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:07 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:07 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:07 [INFO]   Verificando anexo: Fechamento de Caixa JP - 04-08-26.xlsm
+06/08/2026 12:52:07 [INFO]   Verificando anexo: PROCESSO CAIXA JP - 04-08-26.xlsm
+06/08/2026 12:52:07 [INFO]   Verificando anexo: Controle de Títulos JP - 04-08-26.xlsx
+06/08/2026 12:52:07 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:52:12 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\08 AGOSTO\04\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 24417.04-08-2026.xls
+06/08/2026 12:52:12 [INFO]   📂 Email processado e movido para 'Arquivados'.
+06/08/2026 12:52:12 [INFO]   ⏳ [PORTAL] Aguardando relatórios de: ARI para iniciar upload.
+06/08/2026 12:52:12 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa ARI - 04-08-2026
+06/08/2026 12:52:12 [INFO]   Total de anexos: 7
+06/08/2026 12:52:12 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:12 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:12 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:12 [INFO]   Verificando anexo: image.png
+06/08/2026 12:52:12 [INFO]   Verificando anexo: Fechamento de Caixa ARI - 04-08-2026.xlsm
+06/08/2026 12:52:12 [INFO]   Verificando anexo: PROCESSO CAIXA ARI - 04-08-26.xlsm
+06/08/2026 12:52:12 [INFO]   Verificando anexo: Controle de Títulos ARI - 04-08-26.xlsx
+06/08/2026 12:52:12 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:52:16 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\08 AGOSTO\04\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 23275.04-08-2026.xls
+06/08/2026 12:52:16 [INFO]   📂 Email processado e movido para 'Arquivados'.
+06/08/2026 12:52:16 [INFO]   🚀 [PORTAL] Todos os 3 relatórios de 04-08-2026 encontrados. Iniciando upload...
+06/08/2026 12:53:11 [INFO]   ✅ [PORTAL] Upload dos relatórios de 04-08-2026 realizado com sucesso!
+06/08/2026 12:53:11 [INFO]   📌 [PORTAL] Dia 04-08-2026 marcado como concluído (.upload_done criado).
+06/08/2026 12:53:11 [INFO] 📧 Analisando email de assistentevd@udiboticario.com.br: Fechamento de Caixa UDI - 04-08-2026
+06/08/2026 12:53:11 [INFO]   Total de anexos: 7
+06/08/2026 12:53:11 [INFO]   Verificando anexo: image.png
+06/08/2026 12:53:11 [INFO]   Verificando anexo: image.png
+06/08/2026 12:53:11 [INFO]   Verificando anexo: image.png
+06/08/2026 12:53:11 [INFO]   Verificando anexo: image.png
+06/08/2026 12:53:11 [INFO]   Verificando anexo: Fechamento de Caixa UDI - 04-08-26..xlsm
+06/08/2026 12:53:11 [INFO]   Verificando anexo: PROCESSO CAIXA UDI - 04-08-26.xlsm
+06/08/2026 12:53:11 [INFO]   Verificando anexo: Controle de Títulos UDI - 04-08-26.xlsx
+06/08/2026 12:53:11 [INFO]   ✅ Anexo correspondente encontrado!
+06/08/2026 12:53:13 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\UDI\2026\08 AGOSTO\04\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 20844.04-08-2026.xls
+06/08/2026 12:53:14 [INFO]   📂 Email processado e movido para 'Arquivados'.
+06/08/2026 12:53:14 [INFO]   ⏭️  [PORTAL] Upload de 04-08-2026 já realizado anteriormente. Pulando.
+06/08/2026 12:53:14 [INFO] ✨ Varredura inicial concluída. 39 e-mails processados.
+06/08/2026 12:53:14 [INFO] 👁️  [WATCHER] Iniciado. Monitorando pasta a cada 5 minutos (dias >= 21/07/2026).
+06/08/2026 12:53:14 [INFO] 🎧 Aguardando novos emails em tempo real + monitoramento de pasta...
