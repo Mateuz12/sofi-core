@@ -10,6 +10,7 @@ Para rodar em segundo plano (sem janela):
 
 import win32com.client
 import pythoncom
+import pywintypes
 import os
 import re
 import sys
@@ -103,8 +104,20 @@ def get_archive_folder(namespace):
     except:
         return inbox.Folders.Add(ARCHIVE_FOLDER_NAME)
 
+def get_excel_app():
+    try:
+        return win32com.client.Dispatch("Excel.Application")
+    except Exception:
+        clsid = pywintypes.IID('{00024500-0000-0000-C000-000000000046}')
+        obj = pythoncom.CoCreateInstance(clsid, None, pythoncom.CLSCTX_LOCAL_SERVER, pythoncom.IID_IDispatch)
+        return win32com.client.Dispatch(obj)
+
 def convert_to_xls(temp_path, final_path):
-    excel = win32com.client.gencache.EnsureDispatch("Excel.Application")
+    try:
+        excel = get_excel_app()
+    except Exception as e:
+        log(f"Erro ao iniciar Excel: {e}", "error")
+        return False
     excel.Visible = False
     excel.DisplayAlerts = False
     try:
@@ -116,7 +129,10 @@ def convert_to_xls(temp_path, final_path):
         log(f"Erro na conversão Excel: {e}", "error")
         return False
     finally:
-        excel.Quit()
+        try:
+            excel.Quit()
+        except Exception:
+            pass
 
 def get_sender_email(message):
     """Tenta obter o endereço SMTP real do remetente."""
