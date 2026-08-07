@@ -58,8 +58,8 @@
       "unidade": "UDI",
       "schedule": {
         "type": "cron",
-        "hour": 8,
-        "minute": 30
+        "hour": 7,
+        "minute": 15
       },
       "dias": 1,
       "retry": {
@@ -74,8 +74,8 @@
       "unidade": "BH",
       "schedule": {
         "type": "cron",
-        "hour": 8,
-        "minute": 45
+        "hour": 7,
+        "minute": 30
       },
       "dias": 1,
       "retry": {
