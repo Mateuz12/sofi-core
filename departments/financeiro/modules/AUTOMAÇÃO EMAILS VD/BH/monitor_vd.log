@@ -4023,3 +4023,224 @@ Call log:
 06/08/2026 12:32:35 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
 06/08/2026 12:32:35 [INFO]   🚀 [PORTAL] Relatório de ER NEVES (05-08-2026) recebido. Iniciando upload individual...
 06/08/2026 12:32:35 [ERROR]   ❌ [PORTAL] Falha no upload individual de ER NEVES (05-08-2026): Credenciais do FinançasGB para a unidade 'BH' não encontradas no .env. Verifique FINANCAS_BH_USER e FINANCAS_BH_PASS.
+07/08/2026 12:10:16 [INFO] ==================================================
+07/08/2026 12:10:16 [INFO] 🚀 Monitor de Emails VD iniciado.
+07/08/2026 12:10:16 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+07/08/2026 12:10:16 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+07/08/2026 12:10:16 [INFO] ==================================================
+07/08/2026 12:10:16 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+07/08/2026 12:10:16 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: Fechamento de caixa Venda Nova 22372 – 06-08-2026
+07/08/2026 12:10:16 [INFO]   Total de anexos: 7
+07/08/2026 12:10:16 [INFO]   Verificando anexo: b759c79d.png
+07/08/2026 12:10:16 [INFO]   Verificando anexo: a99ab85d.png
+07/08/2026 12:10:16 [INFO]   Verificando anexo: c7dffd2e.png
+07/08/2026 12:10:16 [INFO]   Verificando anexo: fcd278d4.png
+07/08/2026 12:10:16 [INFO]   Verificando anexo: Controle de Títulos Venda Nova 22372 - 06-08-2026.xlsx
+07/08/2026 12:10:16 [INFO]   ✅ Anexo correspondente encontrado!
+07/08/2026 12:10:20 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\06\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 22372.06-08-2026.xls
+07/08/2026 12:10:20 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+07/08/2026 12:10:20 [INFO]   🚀 [PORTAL] Relatório de VENDA NOVA (06-08-2026) recebido. Iniciando upload individual...
+07/08/2026 12:10:57 [INFO]   ✅ [PORTAL] Upload do relatório de VENDA NOVA (06-08-2026) realizado com sucesso!
+07/08/2026 12:10:57 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433 06-08-2026
+07/08/2026 12:10:57 [INFO]   Total de anexos: 3
+07/08/2026 12:10:57 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 06-08-2026.xlsm
+07/08/2026 12:10:57 [INFO]   Verificando anexo: Controle de Titulos ER NEVES 21433 06-08-2026.xls
+07/08/2026 12:10:57 [INFO]   ✅ Anexo correspondente encontrado!
+07/08/2026 12:10:57 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\06\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.06-08-2026.xls
+07/08/2026 12:10:57 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+07/08/2026 12:10:57 [INFO]   🚀 [PORTAL] Relatório de ER NEVES (06-08-2026) recebido. Iniciando upload individual...
+07/08/2026 12:11:37 [INFO]   ✅ [PORTAL] Upload do relatório de ER NEVES (06-08-2026) realizado com sucesso!
+07/08/2026 12:11:37 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 06-08-2026
+07/08/2026 12:11:37 [INFO]   Total de anexos: 6
+07/08/2026 12:11:37 [INFO]   Verificando anexo: b759c79d.png
+07/08/2026 12:11:37 [INFO]   Verificando anexo: a99ab85d.png
+07/08/2026 12:11:37 [INFO]   Verificando anexo: c7dffd2e.png
+07/08/2026 12:11:37 [INFO]   Verificando anexo: fcd278d4.png
+07/08/2026 12:11:37 [INFO]   Verificando anexo: PROCESSO DE CAIXA VD ITAPÕA 06-08-2026.xlsx
+07/08/2026 12:11:37 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 06-08-2026.xlsx
+07/08/2026 12:11:37 [INFO]   ✅ Anexo correspondente encontrado!
+07/08/2026 12:11:42 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\06\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.06-08-2026.xls
+07/08/2026 12:12:24 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The operation failed.  The messaging interfaces have returned an unknown error. If the problem persists, restart Outlook.', None, 0, -2147221223), None)
+07/08/2026 12:12:24 [ERROR] Erro ao obter email pelo ID: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The operation failed. An object cannot be found.', None, 0, -2147221233), None)
+07/08/2026 12:12:24 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433 04-08-2026
+07/08/2026 12:12:24 [INFO]   Total de anexos: 3
+07/08/2026 12:12:24 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 04-08-2026.xlsm
+07/08/2026 12:12:24 [INFO]   Verificando anexo: Contole de Titulo ER NEVES 21433 04-08-2026.xls
+07/08/2026 12:12:24 [INFO]   ✅ Anexo correspondente encontrado!
+07/08/2026 12:12:24 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\04\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.04-08-2026.xls
+07/08/2026 12:12:24 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+07/08/2026 12:12:24 [INFO]   🚀 [PORTAL] Relatório de ER NEVES (04-08-2026) recebido. Iniciando upload individual...
+07/08/2026 12:13:04 [INFO]   ✅ [PORTAL] Upload do relatório de ER NEVES (04-08-2026) realizado com sucesso!
+07/08/2026 12:13:04 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: Fechamento de caixa Venda Nova 22372 - 05-08-2026
+07/08/2026 12:13:04 [INFO]   Total de anexos: 8
+07/08/2026 12:13:04 [INFO]   Verificando anexo: image001.png
+07/08/2026 12:13:04 [INFO]   Verificando anexo: image002.png
+07/08/2026 12:13:04 [INFO]   Verificando anexo: image003.png
+07/08/2026 12:13:04 [INFO]   Verificando anexo: image004.png
+07/08/2026 12:13:04 [INFO]   Verificando anexo: image006.png
+07/08/2026 12:13:04 [INFO]   Verificando anexo: Controle de Títulos Venda Nova 22372 - 05-08-2026.xlsx
+07/08/2026 12:13:04 [INFO]   ✅ Anexo correspondente encontrado!
+07/08/2026 12:13:09 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\05\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 22372.05-08-2026.xls
+07/08/2026 12:13:09 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+07/08/2026 12:13:09 [INFO]   🚀 [PORTAL] Relatório de VENDA NOVA (05-08-2026) recebido. Iniciando upload individual...
+07/08/2026 12:13:48 [INFO]   ✅ [PORTAL] Upload do relatório de VENDA NOVA (05-08-2026) realizado com sucesso!
+07/08/2026 12:13:48 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: 
+07/08/2026 12:13:48 [INFO]   ℹ️  Data não encontrada no assunto, tentará extrair dos anexos...
+07/08/2026 12:13:48 [INFO]   ⚠️  Unidade não identificada no assunto. Palavras-chave esperadas: ['ITAPÕA', 'VENDA NOVA', 'ER NEVES']
+07/08/2026 12:13:48 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 05-08-2026
+07/08/2026 12:13:48 [INFO]   Total de anexos: 6
+07/08/2026 12:13:48 [INFO]   Verificando anexo: b759c79d.png
+07/08/2026 12:13:48 [INFO]   Verificando anexo: a99ab85d.png
+07/08/2026 12:13:48 [INFO]   Verificando anexo: c7dffd2e.png
+07/08/2026 12:13:48 [INFO]   Verificando anexo: fcd278d4.png
+07/08/2026 12:13:48 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 05-08-2026.xlsx
+07/08/2026 12:13:48 [INFO]   ✅ Anexo correspondente encontrado!
+07/08/2026 12:13:53 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\05\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.05-08-2026.xls
+07/08/2026 12:13:54 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+07/08/2026 12:13:54 [INFO]   🚀 [PORTAL] Relatório de ITAPÕA (05-08-2026) recebido. Iniciando upload individual...
+07/08/2026 12:14:33 [INFO]   ✅ [PORTAL] Upload do relatório de ITAPÕA (05-08-2026) realizado com sucesso!
+07/08/2026 12:14:33 [INFO] ✨ Varredura inicial concluída. 43 e-mails processados.
+07/08/2026 12:14:33 [INFO] 🎧 Aguardando novos emails em tempo real...
+07/08/2026 12:27:03 [ERROR] Erro ao obter email pelo ID: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The operation failed. An object cannot be found.', None, 0, -2147221233), None)
+07/08/2026 15:11:09 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 06-08-2026
+07/08/2026 15:11:09 [INFO]   Total de anexos: 6
+07/08/2026 15:11:09 [INFO]   Verificando anexo: b759c79d.png
+07/08/2026 15:11:09 [INFO]   Verificando anexo: a99ab85d.png
+07/08/2026 15:11:09 [INFO]   Verificando anexo: c7dffd2e.png
+07/08/2026 15:11:09 [INFO]   Verificando anexo: fcd278d4.png
+07/08/2026 15:11:09 [INFO]   Verificando anexo: PROCESSO DE CAIXA VD ITAPÕA 06-08-2026.xlsx
+07/08/2026 15:11:09 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 06-08-2026.xlsx
+07/08/2026 15:11:09 [INFO]   ✅ Anexo correspondente encontrado!
+07/08/2026 15:11:12 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\06\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.06-08-2026.xls
+07/08/2026 15:11:12 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+07/08/2026 15:11:12 [INFO]   🚀 [PORTAL] Relatório de ITAPÕA (06-08-2026) recebido. Iniciando upload individual...
+07/08/2026 15:11:48 [INFO]   ✅ [PORTAL] Upload do relatório de ITAPÕA (06-08-2026) realizado com sucesso!
+10/08/2026 10:09:38 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES  21433-08-08-2026
+10/08/2026 10:09:38 [INFO]   Total de anexos: 3
+10/08/2026 10:09:38 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 08-08-2026.xlsm
+10/08/2026 10:09:38 [INFO]   Verificando anexo: CONTROLE DE TITULOS ER NEVES 21433-08-08-2026.xls
+10/08/2026 10:09:38 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 10:09:38 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\08\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.08-08-2026.xls
+10/08/2026 10:09:38 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 11:49:05 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433-07-08-2026
+10/08/2026 11:49:05 [INFO]   Total de anexos: 3
+10/08/2026 11:49:05 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 07-08-2026.xlsm
+10/08/2026 11:49:05 [INFO]   Verificando anexo: CONTROLE DE TITULOS ER NEVES 21433-07-08-2026.xls
+10/08/2026 11:49:05 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 11:49:06 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\07\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.07-08-2026.xls
+10/08/2026 11:49:06 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 12:19:50 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 07/08/2026
+10/08/2026 12:19:50 [INFO]   Total de anexos: 6
+10/08/2026 12:19:50 [INFO]   Verificando anexo: b759c79d.png
+10/08/2026 12:19:50 [INFO]   Verificando anexo: a99ab85d.png
+10/08/2026 12:19:50 [INFO]   Verificando anexo: c7dffd2e.png
+10/08/2026 12:19:50 [INFO]   Verificando anexo: fcd278d4.png
+10/08/2026 12:19:50 [INFO]   Verificando anexo: PROCESSO DE CAIXA VD ITAPÕA 07-08-2026.xlsx
+10/08/2026 12:19:50 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 07-08-2026.xlsx
+10/08/2026 12:19:50 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:19:54 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\07\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.07-08-2026.xls
+10/08/2026 12:19:54 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 12:20:45 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 08/08/2026
+10/08/2026 12:20:45 [INFO]   Total de anexos: 6
+10/08/2026 12:20:45 [INFO]   Verificando anexo: b759c79d.png
+10/08/2026 12:20:45 [INFO]   Verificando anexo: a99ab85d.png
+10/08/2026 12:20:45 [INFO]   Verificando anexo: c7dffd2e.png
+10/08/2026 12:20:45 [INFO]   Verificando anexo: fcd278d4.png
+10/08/2026 12:20:45 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 08-08-2026.xlsx
+10/08/2026 12:20:45 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:20:49 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\08\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.08-08-2026.xls
+10/08/2026 12:20:49 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 12:21:16 [INFO] ==================================================
+10/08/2026 12:21:16 [INFO] 🚀 Monitor de Emails VD iniciado.
+10/08/2026 12:21:16 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+10/08/2026 12:21:16 [INFO]    Log salvo em: C:\Users\Administrator\Documents\GitHub\sofi-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+10/08/2026 12:21:16 [INFO] ==================================================
+10/08/2026 12:21:16 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+10/08/2026 12:21:16 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 08/08/2026
+10/08/2026 12:21:16 [INFO]   Total de anexos: 6
+10/08/2026 12:21:16 [INFO]   Verificando anexo: b759c79d.png
+10/08/2026 12:21:16 [INFO]   Verificando anexo: a99ab85d.png
+10/08/2026 12:21:16 [INFO]   Verificando anexo: c7dffd2e.png
+10/08/2026 12:21:16 [INFO]   Verificando anexo: fcd278d4.png
+10/08/2026 12:21:16 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 08-08-2026.xlsx
+10/08/2026 12:21:16 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:21:21 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\08\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.08-08-2026.xls
+10/08/2026 12:21:21 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 12:21:21 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 07/08/2026
+10/08/2026 12:21:21 [INFO]   Total de anexos: 6
+10/08/2026 12:21:21 [INFO]   Verificando anexo: b759c79d.png
+10/08/2026 12:21:21 [INFO]   Verificando anexo: a99ab85d.png
+10/08/2026 12:21:21 [INFO]   Verificando anexo: c7dffd2e.png
+10/08/2026 12:21:21 [INFO]   Verificando anexo: fcd278d4.png
+10/08/2026 12:21:21 [INFO]   Verificando anexo: PROCESSO DE CAIXA VD ITAPÕA 07-08-2026.xlsx
+10/08/2026 12:21:21 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 07-08-2026.xlsx
+10/08/2026 12:21:21 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:21:25 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\07\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.07-08-2026.xls
+10/08/2026 12:21:25 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 12:21:25 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433-07-08-2026
+10/08/2026 12:21:25 [INFO]   Total de anexos: 3
+10/08/2026 12:21:25 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 07-08-2026.xlsm
+10/08/2026 12:21:25 [INFO]   Verificando anexo: CONTROLE DE TITULOS ER NEVES 21433-07-08-2026.xls
+10/08/2026 12:21:25 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:21:25 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\07\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.07-08-2026.xls
+10/08/2026 12:21:25 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 12:21:25 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES  21433-08-08-2026
+10/08/2026 12:21:25 [INFO]   Total de anexos: 3
+10/08/2026 12:21:25 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 08-08-2026.xlsm
+10/08/2026 12:21:25 [INFO]   Verificando anexo: CONTROLE DE TITULOS ER NEVES 21433-08-08-2026.xls
+10/08/2026 12:21:25 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:21:26 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\08\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.08-08-2026.xls
+10/08/2026 12:21:26 [ERROR] Erro ao processar email: (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The items were copied instead of moved because the original items cannot be deleted. The operation cannot be performed because the message has been changed.', None, 0, -2147221239), None)
+10/08/2026 12:21:26 [INFO] 📧 Analisando email de viviane.reis@attboticario.com.br: 
+10/08/2026 12:21:26 [INFO]   ℹ️  Data não encontrada no assunto, tentará extrair dos anexos...
+10/08/2026 12:21:26 [INFO]   ⚠️  Unidade não identificada no assunto. Palavras-chave esperadas: ['ITAPÕA', 'VENDA NOVA', 'ER NEVES']
+10/08/2026 12:21:26 [INFO] ✨ Varredura inicial concluída. 53 e-mails processados.
+10/08/2026 12:21:26 [INFO] 🎧 Aguardando novos emails em tempo real...
+10/08/2026 12:23:38 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+10/08/2026 12:23:38 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 08/08/2026
+10/08/2026 12:23:38 [INFO]   Total de anexos: 6
+10/08/2026 12:23:38 [INFO]   Verificando anexo: b759c79d.png
+10/08/2026 12:23:38 [INFO]   Verificando anexo: a99ab85d.png
+10/08/2026 12:23:38 [INFO]   Verificando anexo: c7dffd2e.png
+10/08/2026 12:23:38 [INFO]   Verificando anexo: fcd278d4.png
+10/08/2026 12:23:38 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 08-08-2026.xlsx
+10/08/2026 12:23:38 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:23:43 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\08\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.08-08-2026.xls
+10/08/2026 12:23:43 [INFO]   🚀 [PORTAL] Relatório de ITAPÕA (08-08-2026) recebido. Iniciando upload individual...
+10/08/2026 12:24:19 [INFO]   ✅ [PORTAL] Upload do relatório de ITAPÕA (08-08-2026) realizado com sucesso!
+10/08/2026 12:24:19 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+10/08/2026 12:24:19 [INFO] 📧 Analisando email de faturamento.vd@attboticario.com.br: Fechamento de caixa VD Itapoã- 13793 07/08/2026
+10/08/2026 12:24:19 [INFO]   Total de anexos: 6
+10/08/2026 12:24:19 [INFO]   Verificando anexo: b759c79d.png
+10/08/2026 12:24:19 [INFO]   Verificando anexo: a99ab85d.png
+10/08/2026 12:24:19 [INFO]   Verificando anexo: c7dffd2e.png
+10/08/2026 12:24:19 [INFO]   Verificando anexo: fcd278d4.png
+10/08/2026 12:24:19 [INFO]   Verificando anexo: PROCESSO DE CAIXA VD ITAPÕA 07-08-2026.xlsx
+10/08/2026 12:24:19 [INFO]   Verificando anexo: CONTROLE DE TÍTULOS VD Itapoã 13793- 07-08-2026.xlsx
+10/08/2026 12:24:19 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:24:24 [INFO]   💾 Arquivo salvo: \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\07\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793.07-08-2026.xls
+10/08/2026 12:24:24 [INFO]   🚀 [PORTAL] Relatório de ITAPÕA (07-08-2026) recebido. Iniciando upload individual...
+10/08/2026 12:24:58 [ERROR]   ❌ [PORTAL] Falha no upload individual de ITAPÕA (07-08-2026): Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("//*[@id=\"email\"]") to be visible
+
+10/08/2026 12:24:59 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+10/08/2026 12:24:59 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES 21433-07-08-2026
+10/08/2026 12:24:59 [INFO]   Total de anexos: 3
+10/08/2026 12:24:59 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 07-08-2026.xlsm
+10/08/2026 12:24:59 [INFO]   Verificando anexo: CONTROLE DE TITULOS ER NEVES 21433-07-08-2026.xls
+10/08/2026 12:24:59 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:24:59 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\07\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.07-08-2026.xls
+10/08/2026 12:24:59 [INFO]   🚀 [PORTAL] Relatório de ER NEVES (07-08-2026) recebido. Iniciando upload individual...
+10/08/2026 12:25:38 [INFO]   ✅ [PORTAL] Upload do relatório de ER NEVES (07-08-2026) realizado com sucesso!
+10/08/2026 12:25:38 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+10/08/2026 12:25:38 [INFO] 📧 Analisando email de caixaerneves@attboticario.com.br: FECHAMENTO DO CAIXA ER NEVES  21433-08-08-2026
+10/08/2026 12:25:38 [INFO]   Total de anexos: 3
+10/08/2026 12:25:38 [INFO]   Verificando anexo: FECHAMENTO CAIXA ER NEVES 21433 08-08-2026.xlsm
+10/08/2026 12:25:38 [INFO]   Verificando anexo: CONTROLE DE TITULOS ER NEVES 21433-08-08-2026.xls
+10/08/2026 12:25:38 [INFO]   ✅ Anexo correspondente encontrado!
+10/08/2026 12:25:38 [INFO]   💾 Arquivo salvo (sem conversão): \\srv-dc01\File Server\05-FIN\FECHAMENTO DE CAIXA\IMPORTAÇÃO FINANÇAS GB\BH\2026\08 AGOSTO\08\05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 21433.08-08-2026.xls
+10/08/2026 12:25:38 [INFO]   🚀 [PORTAL] Relatório de ER NEVES (08-08-2026) recebido. Iniciando upload individual...
+10/08/2026 12:26:18 [INFO]   ✅ [PORTAL] Upload do relatório de ER NEVES (08-08-2026) realizado com sucesso!
+10/08/2026 12:26:18 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
+10/08/2026 12:26:18 [INFO] ✨ Varredura inicial concluída. 49 e-mails processados.

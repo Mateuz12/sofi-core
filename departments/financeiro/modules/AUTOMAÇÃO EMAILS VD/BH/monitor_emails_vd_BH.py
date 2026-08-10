@@ -61,8 +61,14 @@ MESES_PT = {
 
 UNIDADES = {
     "ITAPÕA": {
-        "subject_keyword": ["ITAPÕA", "ITAPOÃ", "13793"],  # Variações de acentuação e código da loja
+        "subject_keyword": ["ITAPÕA", "ITAPOÃ", "ITAPOÁ", "ITAPOA", "13793"],  # Variações de acentuação e código da loja
         "attachment_prefix": [
+            "Controle de titulos",
+            "Controle de títulos",
+            "Controle de titulo",
+            "Controle de título",
+            "CONTROLE DE TÍTULOS",
+            "CONTROLE DE TITULOS",
             "Controle de titulos VD Itapoã 13793",
             "Controle de títulos VD Itapoã",
             "Controle de titulos VD Itapõa 13793",
@@ -75,7 +81,7 @@ UNIDADES = {
             "Controle de título VD Itapõa",
             "Controle de  título VD Itapoã",
             "Controle de  titulo VD Itapoã",
-        ],  # Puxa tanto Titulo quanto Titulos, Itapoã e Itapõa
+        ],  # Puxa tanto Titulo quanto Titulos, Itapoã, Itapoá e acentuações diversas
         "unit_id": "ITAPÕA",
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793"
     },
@@ -322,12 +328,16 @@ def process_message(message, namespace):
                 break
 
         if attachment_processed:
-            archive_folder = get_archive_folder(namespace)
-            message.Move(archive_folder)
-            log(f"  📂 Email processado e movido para '{ARCHIVE_FOLDER_NAME}'.")
-            
-            # Disparo do upload automático individual
+            # 1. Disparo do upload automático individual primeiro
             upload_individual(final_path, extracted_date_full, matched_unidade["unit_id"])
+
+            # 2. Tenta mover o email no Outlook (protegido contra exceções de movimentação do Outlook)
+            try:
+                archive_folder = get_archive_folder(namespace)
+                message.Move(archive_folder)
+                log(f"  📂 Email processado e movido para '{ARCHIVE_FOLDER_NAME}'.")
+            except Exception as move_err:
+                log(f"  ⚠️ Não foi possível mover o email no Outlook: {move_err}. O relatório foi salvo e o upload realizado.", "warning")
         else:
             log("  ❌ Nenhum anexo correspondente encontrado para os critérios.")
 
