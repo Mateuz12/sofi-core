@@ -387,11 +387,11 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             sheet_nf.Cells(row, 10).HorizontalAlignment = -4108  # xlCenter
             
             sheet_nf.Cells(row, 11).Formula = f"=Base!T{row_base}"  # Total Itens
-            sheet_nf.Cells(row, 11).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(row, 11).NumberFormat = '"R$" #,##0.00'
             sheet_nf.Cells(row, 11).HorizontalAlignment = -4152   # xlRight
             
             sheet_nf.Cells(row, 12).Formula = f"=Base!X{row_base}" # Total Documento
-            sheet_nf.Cells(row, 12).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(row, 12).NumberFormat = '"R$" #,##0.00'
             sheet_nf.Cells(row, 12).HorizontalAlignment = -4152   # xlRight
             
             sheet_nf.Range(sheet_nf.Cells(row, 7), sheet_nf.Cells(row, 8)).Merge()
@@ -411,13 +411,13 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             
             # Reescreve as fórmulas de Totais nas posições corretas (colunas K e L)
             sheet_nf.Cells(row_total, 11).Formula = f"=SUM(K4:K{row_nf_last})"
-            sheet_nf.Cells(row_total, 11).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(row_total, 11).NumberFormat = '"R$" #,##0.00'
             sheet_nf.Cells(row_total, 12).Formula = f"=SUM(L4:L{row_nf_last})"
-            sheet_nf.Cells(row_total, 12).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(row_total, 12).NumberFormat = '"R$" #,##0.00'
             
             # % ICMS ST — fórmula correta na coluna L (12): Total Documento / Total Itens - 1
-            sheet_nf.Cells(row_total+1, 12).Formula = f"=L{row_total}/K{row_total}-1"
-            sheet_nf.Cells(row_total+1, 12).NumberFormatLocal = "0,0%"
+            sheet_nf.Cells(row_total+1, 12).Formula = f"=IF(K{row_total}=0, 0, L{row_total}/K{row_total}-1)"
+            sheet_nf.Cells(row_total+1, 12).NumberFormat = "0.0%"
             
             # Aplica formatação consistente nas linhas de totais (colunas 9-12)
             # Lê a formatação existente de cada linha (coluna 1) para replicar
@@ -451,35 +451,35 @@ def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
             
             # LOJA
             sheet_nf.Cells(r_loja, 5).Formula = '=SUMIFS(Base!T:T, Base!F:F, "LOJA")'
-            sheet_nf.Cells(r_loja, 5).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(r_loja, 5).NumberFormat = '"R$" #,##0.00'
             sheet_nf.Cells(r_loja, 6).Formula = '=SUMIFS(Base!X:X, Base!F:F, "LOJA")'
-            sheet_nf.Cells(r_loja, 6).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(r_loja, 7).Formula = f'=F{r_loja}/E{r_loja}-1'
-            sheet_nf.Cells(r_loja, 7).NumberFormatLocal = "0,0%"
+            sheet_nf.Cells(r_loja, 6).NumberFormat = '"R$" #,##0.00'
+            sheet_nf.Cells(r_loja, 7).Formula = f'=IF(E{r_loja}=0, 0, F{r_loja}/E{r_loja}-1)'
+            sheet_nf.Cells(r_loja, 7).NumberFormat = "0.0%"
             
-            # VD
-            sheet_nf.Cells(r_vd, 5).Formula = '=SUMIFS(Base!T:T, Base!F:F, "VD", Base!D:D, "<700000")'
-            sheet_nf.Cells(r_vd, 5).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(r_vd, 6).Formula = '=SUMIFS(Base!X:X, Base!F:F, "VD", Base!D:D, "<700000")'
-            sheet_nf.Cells(r_vd, 6).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(r_vd, 7).Formula = f'=F{r_vd}/E{r_vd}-1'
-            sheet_nf.Cells(r_vd, 7).NumberFormatLocal = "0,0%"
+            # VD (Sem filtro restritivo de Nº DOC, soma todas as notas do canal VD)
+            sheet_nf.Cells(r_vd, 5).Formula = '=SUMIFS(Base!T:T, Base!F:F, "VD")'
+            sheet_nf.Cells(r_vd, 5).NumberFormat = '"R$" #,##0.00'
+            sheet_nf.Cells(r_vd, 6).Formula = '=SUMIFS(Base!X:X, Base!F:F, "VD")'
+            sheet_nf.Cells(r_vd, 6).NumberFormat = '"R$" #,##0.00'
+            sheet_nf.Cells(r_vd, 7).Formula = f'=IF(E{r_vd}=0, 0, F{r_vd}/E{r_vd}-1)'
+            sheet_nf.Cells(r_vd, 7).NumberFormat = "0.0%"
             
-            # VD - EUDORA
-            sheet_nf.Cells(r_eudora, 5).Formula = '=SUMIFS(Base!T:T, Base!F:F, "VD", Base!D:D, ">=700000")'
-            sheet_nf.Cells(r_eudora, 5).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(r_eudora, 6).Formula = '=SUMIFS(Base!X:X, Base!F:F, "VD", Base!D:D, ">=700000")'
-            sheet_nf.Cells(r_eudora, 6).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(r_eudora, 7).Formula = f'=F{r_eudora}/E{r_eudora}-1'
-            sheet_nf.Cells(r_eudora, 7).NumberFormatLocal = "0,00%"
+            # VD - EUDORA (Zerado, sem distinção por canal)
+            sheet_nf.Cells(r_eudora, 5).Value = 0
+            sheet_nf.Cells(r_eudora, 5).NumberFormat = '"R$" #,##0.00'
+            sheet_nf.Cells(r_eudora, 6).Value = 0
+            sheet_nf.Cells(r_eudora, 6).NumberFormat = '"R$" #,##0.00'
+            sheet_nf.Cells(r_eudora, 7).Value = 0
+            sheet_nf.Cells(r_eudora, 7).NumberFormat = "0.0%"
             
             # TOTAL
             sheet_nf.Cells(r_tot, 5).Formula = f'=SUM(E{r_loja}:E{r_eudora})'
-            sheet_nf.Cells(r_tot, 5).NumberFormatLocal = "R$ #.##0,00"
+            sheet_nf.Cells(r_tot, 5).NumberFormat = '"R$" #,##0.00'
             sheet_nf.Cells(r_tot, 6).Formula = f'=SUM(F{r_loja}:F{r_eudora})'
-            sheet_nf.Cells(r_tot, 6).NumberFormatLocal = "R$ #.##0,00"
-            sheet_nf.Cells(r_tot, 7).Formula = f'=F{r_tot}/E{r_tot}-1'
-            sheet_nf.Cells(r_tot, 7).NumberFormatLocal = "0,0%"
+            sheet_nf.Cells(r_tot, 6).NumberFormat = '"R$" #,##0.00'
+            sheet_nf.Cells(r_tot, 7).Formula = f'=IF(E{r_tot}=0, 0, F{r_tot}/E{r_tot}-1)'
+            sheet_nf.Cells(r_tot, 7).NumberFormat = "0.0%"
             
         # Centraliza todas as informações da tabela de resumo
         if orig_resumo_start and orig_resumo_end:
