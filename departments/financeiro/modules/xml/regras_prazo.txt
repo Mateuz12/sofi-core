@@ -3,15 +3,20 @@
 # Use DEFAULT para definir o prazo geral (caso o PDV não possua regra específica).
 # Exemplo: 21274=0 gerará a regra "0+5+x" para a loja 21274.
 
-DEFAULT=45
+DEFAULT=30
 
 # Lojas Morumbi (exemplo: 0+5+x)
 21274=0
 22744=0
 17868=0
 21372=0 
+23269=0
+19964=0
 
 # Lojas BH (exemplo: 60+5+x)
 13793=60
 22372=60
 21433=60
+20884=45 
+23275=45
+24417=45
