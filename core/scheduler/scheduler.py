@@ -450,21 +450,33 @@ def start_scheduler() -> "BackgroundScheduler | None":
         replace_existing=True,
     )
 
-    # Agrupa jobs por horário — se dois jobs compartilham horário, usa run_all_jobs
-    schedule_groups: dict[tuple[int, int], list[dict]] = {}
+    # Agrupa jobs por horário e dia da semana
+    schedule_groups: dict[tuple[int, int, str], list[dict]] = {}
     for job_cfg in all_jobs:
         if not job_cfg.get("enabled", True):
             continue
         j_sched = job_cfg.get("schedule", {})
         h = j_sched.get("hour", 8)
         m = j_sched.get("minute", 0)
-        schedule_groups.setdefault((h, m), []).append(job_cfg)
+        dow = str(j_sched.get("day_of_week", "mon-fri")).lower().strip()
+        # Normalização de termos em português para padrão APScheduler
+        if dow in ("seg-sex", "segunda-sexta", "segunda_a_sexta", "dias_uteis"):
+            dow = "mon-fri"
+        elif dow in ("todos", "diario", "diário"):
+            dow = "*"
+        schedule_groups.setdefault((h, m, dow), []).append(job_cfg)
 
     if not schedule_groups:
         print("[Scheduler] Nenhum job configurado. Scheduler nao iniciado.")
         return None
 
-    for (h, m), group_jobs in schedule_groups.items():
+    for (h, m, dow), group_jobs in schedule_groups.items():
+        trigger_kwargs = {"hour": h, "minute": m}
+        if dow and dow != "*":
+            trigger_kwargs["day_of_week"] = dow
+
+        dow_label = f" ({dow})" if dow and dow != "*" else ""
+
         if len(group_jobs) == 1:
             # Job individual — agenda diretamente
             job_cfg = group_jobs[0]
@@ -472,8 +484,6 @@ def start_scheduler() -> "BackgroundScheduler | None":
             scheduler.add_job(
                 func=run_single_job,
                 trigger="cron",
-                hour=h,
-                minute=m,
                 args=[job_cfg],
                 id=job_id,
                 name=job_cfg["name"],
@@ -481,16 +491,16 @@ def start_scheduler() -> "BackgroundScheduler | None":
                 replace_existing=True,
                 misfire_grace_time=3600,
                 coalesce=True,
+                **trigger_kwargs,
             )
-            print(f"[Scheduler] Job '{job_cfg['name']}' agendado para {h:02d}:{m:02d} ({tz})")
+            print(f"[Scheduler] Job '{job_cfg['name']}' agendado para {h:02d}:{m:02d}{dow_label} ({tz})")
         else:
             # Múltiplos jobs no mesmo horário — run_all_jobs sequencial
-            job_id = f"sofi_jobs_{h:02d}_{m:02d}"
+            clean_dow = dow.replace("-", "_").replace(",", "_")
+            job_id = f"sofi_jobs_{h:02d}_{m:02d}_{clean_dow}"
             scheduler.add_job(
                 func=run_all_jobs,
                 trigger="cron",
-                hour=h,
-                minute=m,
                 args=[group_jobs],
                 id=job_id,
                 name=f"SOFI Jobs {h:02d}:{m:02d}",
@@ -498,9 +508,10 @@ def start_scheduler() -> "BackgroundScheduler | None":
                 replace_existing=True,
                 misfire_grace_time=3600,
                 coalesce=True,
+                **trigger_kwargs,
             )
             nomes = [j["name"] for j in group_jobs]
-            print(f"[Scheduler] Jobs agendados para {h:02d}:{m:02d} ({tz}): {nomes}")
+            print(f"[Scheduler] Jobs agendados para {h:02d}:{m:02d}{dow_label} ({tz}): {nomes}")
 
     # Monta metadados para get_scheduler_status()
     for job_cfg in all_jobs:
@@ -511,6 +522,7 @@ def start_scheduler() -> "BackgroundScheduler | None":
             "name": job_cfg["name"],
             "hour": j_sched.get("hour", 8),
             "minute": j_sched.get("minute", 0),
+            "day_of_week": j_sched.get("day_of_week", "mon-fri"),
         })
 
     # Listener para exceções internas do APScheduler

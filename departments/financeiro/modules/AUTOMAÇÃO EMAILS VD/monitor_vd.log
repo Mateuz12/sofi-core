@@ -8315,3 +8315,12 @@ Call log:
 10/08/2026 12:21:16 [INFO] ✨ Varredura inicial concluída. 53 e-mails processados.
 10/08/2026 12:21:16 [INFO] 👁️  [WATCHER] Iniciado. Monitorando pasta a cada 5 minutos (dias >= 21/07/2026).
 10/08/2026 12:21:16 [INFO] 🎧 Aguardando novos emails em tempo real + monitoramento de pasta...
+12/08/2026 11:52:16 [INFO] ==================================================
+12/08/2026 11:52:16 [INFO] 🚀 Monitor de Emails VD iniciado.
+12/08/2026 11:52:16 [INFO]    Aguardando emails de: assistentevd@udiboticario.com.br
+12/08/2026 11:52:16 [INFO]    Log salvo em: C:\Users\luma.dias\Documents\PROJETO\SOFI-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\monitor_vd.log
+12/08/2026 11:52:16 [INFO] ==================================================
+12/08/2026 11:52:16 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+12/08/2026 11:52:17 [INFO] ✨ Varredura inicial concluída. 5 e-mails processados.
+12/08/2026 11:52:17 [INFO] 👁️  [WATCHER] Iniciado. Monitorando pasta a cada 5 minutos (dias >= 21/07/2026).
+12/08/2026 11:52:17 [INFO] 🎧 Aguardando novos emails em tempo real + monitoramento de pasta...

@@ -11,7 +11,8 @@
       "Fluxo Analítico DFC UDI",
       "Fluxo Analítico DFC BH",
       "Retaguarda UDI",
-      "Retaguarda BH"
+      "Retaguarda BH",
+      "XML Retaguarda Entrada"
     ],
     "Extranet": [
       "Extranet BH",
@@ -108,6 +109,21 @@
         "minute": 15
       },
       "dias": 5,
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      }
+    },
+    {
+      "name": "XML Retaguarda Entrada",
+      "enabled": true,
+      "script": "departments/financeiro/modules/xml/extrator_retaguarda_xml.py",
+      "schedule": {
+        "type": "cron",
+        "hour": 7,
+        "minute": 0,
+        "day_of_week": "mon-fri"
+      },
       "retry": {
         "max_attempts": 3,
         "delay_seconds": 120

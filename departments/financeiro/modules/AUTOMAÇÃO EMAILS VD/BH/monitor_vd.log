@@ -4244,3 +4244,11 @@ Call log:
 10/08/2026 12:26:18 [INFO]   ✅ [PORTAL] Upload do relatório de ER NEVES (08-08-2026) realizado com sucesso!
 10/08/2026 12:26:18 [INFO]   📂 Email processado e movido para 'Arquivados BH'.
 10/08/2026 12:26:18 [INFO] ✨ Varredura inicial concluída. 49 e-mails processados.
+12/08/2026 11:52:16 [INFO] ==================================================
+12/08/2026 11:52:16 [INFO] 🚀 Monitor de Emails VD iniciado.
+12/08/2026 11:52:16 [INFO]    Aguardando emails de: faturamento.vd@attboticario.com.br, lojavd@attboticario.com.br, caixaerneves@attboticario.com.br, financeiro@attboticario.com.br, fechamentodecaixa@attboticario.com.br, viviane.reis@attboticario.com.br, lojavd1@attboticario.com.br, estoque.erneves@attboticario.com.br
+12/08/2026 11:52:16 [INFO]    Log salvo em: C:\Users\luma.dias\Documents\PROJETO\SOFI-core\departments\financeiro\modules\AUTOMAÇÃO EMAILS VD\BH\monitor_vd.log
+12/08/2026 11:52:16 [INFO] ==================================================
+12/08/2026 11:52:16 [INFO] 🔍 Iniciando varredura de emails existentes (a partir de 21/07/2026)...
+12/08/2026 11:52:17 [INFO] ✨ Varredura inicial concluída. 5 e-mails processados.
+12/08/2026 11:52:17 [INFO] 🎧 Aguardando novos emails em tempo real...
