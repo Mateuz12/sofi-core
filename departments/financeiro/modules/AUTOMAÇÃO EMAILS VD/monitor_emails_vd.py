@@ -18,6 +18,7 @@ import tempfile
 import logging
 import threading
 import time
+import socket
 from datetime import datetime, date
 from pathlib import Path
 
@@ -104,22 +105,49 @@ def get_archive_folder(namespace):
     except:
         return inbox.Folders.Add(ARCHIVE_FOLDER_NAME)
 
+_SINGLE_INSTANCE_SOCKET = None
+
+def ensure_single_instance(port=45451, name="UDI"):
+    global _SINGLE_INSTANCE_SOCKET
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(("127.0.0.1", port))
+        s.listen(1)
+        _SINGLE_INSTANCE_SOCKET = s
+        return True
+    except socket.error:
+        log(f"⚠️ [SINGLE INSTANCE] Já existe uma instância do Monitor VD ({name}) em execução (porta {port} ocupada). Encerrando nova execução.", "warning")
+        return False
+
 def get_excel_app():
     try:
-        return win32com.client.Dispatch("Excel.Application")
-    except Exception:
-        clsid = pywintypes.IID('{00024500-0000-0000-C000-000000000046}')
-        obj = pythoncom.CoCreateInstance(clsid, None, pythoncom.CLSCTX_LOCAL_SERVER, pythoncom.IID_IDispatch)
-        return win32com.client.Dispatch(obj)
+        return win32com.client.DispatchEx("Excel.Application")
+    except Exception as e:
+        log(f"Aviso ao usar DispatchEx para Excel: {e}. Tentando Dispatch padrao...", "warning")
+        try:
+            return win32com.client.Dispatch("Excel.Application")
+        except Exception:
+            clsid = pywintypes.IID('{00024500-0000-0000-C000-000000000046}')
+            obj = pythoncom.CoCreateInstance(clsid, None, pythoncom.CLSCTX_LOCAL_SERVER, pythoncom.IID_IDispatch)
+            return win32com.client.Dispatch(obj)
 
 def convert_to_xls(temp_path, final_path):
+    excel = None
     try:
         excel = get_excel_app()
     except Exception as e:
         log(f"Erro ao iniciar Excel: {e}", "error")
         return False
-    excel.Visible = False
-    excel.DisplayAlerts = False
+
+    try:
+        excel.Visible = False
+    except Exception:
+        pass
+    try:
+        excel.DisplayAlerts = False
+    except Exception:
+        pass
+
     try:
         wb = excel.Workbooks.Open(temp_path)
         wb.SaveAs(final_path, FileFormat=56)  # 56 = xlExcel8
@@ -129,10 +157,11 @@ def convert_to_xls(temp_path, final_path):
         log(f"Erro na conversão Excel: {e}", "error")
         return False
     finally:
-        try:
-            excel.Quit()
-        except Exception:
-            pass
+        if excel:
+            try:
+                excel.Quit()
+            except Exception:
+                pass
 
 def get_sender_email(message):
     """Tenta obter o endereço SMTP real do remetente."""
@@ -459,6 +488,9 @@ def scan_inbox(namespace):
         log(f"Erro na varredura inicial: {e}", "error")
 
 def main():
+    if not ensure_single_instance(port=45451, name="UDI"):
+        sys.exit(0)
+
     pythoncom.CoInitialize()
 
     log("=" * 50)
@@ -468,11 +500,22 @@ def main():
     log("=" * 50)
 
     try:
-        # 1. Dispatch com Eventos
-        outlook_app = win32com.client.DispatchWithEvents(
-            "Outlook.Application",
-            OutlookEventHandler
-        )
+        # 1. Dispatch com Eventos (com retry)
+        outlook_app = None
+        for tentativa in range(1, 6):
+            try:
+                outlook_app = win32com.client.DispatchWithEvents(
+                    "Outlook.Application",
+                    OutlookEventHandler
+                )
+                break
+            except Exception as com_err:
+                log(f"⚠️ [COM RETRY {tentativa}/5] Aguardando conexão com Outlook... ({com_err})", "warning")
+                time.sleep(5)
+
+        if not outlook_app:
+            log("❌ Não foi possível conectar ao Outlook via COM após 5 tentativas.", "error")
+            return
         
         # 2. Configurar Namespace
         namespace = outlook_app.GetNamespace("MAPI")
