@@ -380,6 +380,100 @@ def salvar_xml(nome_arquivo, conteudo_xml, pasta):
     return caminho
 
 
+def executar_download_chaves(
+    caminho_planilha: str | Path | None = None,
+    pasta_saida: str | Path | None = None,
+    apenas_baixar: bool = False,
+    limite: int = 0,
+    gerar_relatorio_ao_final: bool = False
+) -> tuple[int, int]:
+    """
+    Executa a leitura da planilha, adiciona as notas na API MeuDanfe e baixa os XMLs.
+    
+    Returns:
+        tuple[int, int]: (total_chaves_encontradas, total_xmls_baixados)
+    """
+    if not API_KEY:
+        log("API Key do MeuDanfe não configurada no .env (MEUDANFE_API_KEY)!", "ERRO")
+        return (0, 0)
+        
+    pasta_destino = str(pasta_saida) if pasta_saida else PASTA_XMLS
+
+    # 0. Limpar pasta temporária
+    if os.path.exists(pasta_destino):
+        shutil.rmtree(pasta_destino)
+    os.makedirs(pasta_destino, exist_ok=True)
+    log(f"Pasta temporária '{pasta_destino}' pronta.")
+
+    # 1. Localizar planilha
+    planilha_alvo = str(caminho_planilha) if caminho_planilha else obter_planilha_recente()
+    if not planilha_alvo or not os.path.exists(planilha_alvo):
+        if os.path.exists(PLANILHA_ENTRADA_FALLBACK):
+            planilha_alvo = PLANILHA_ENTRADA_FALLBACK
+            log(f"Usando fallback local: {planilha_alvo}")
+        else:
+            log("Nenhuma planilha base encontrada para processar.", "AVISO")
+            return (0, 0)
+            
+    chaves = ler_chaves_planilha(planilha_alvo)
+    if not chaves:
+        log(f"Nenhuma chave NFe válida encontrada na planilha: {planilha_alvo}", "AVISO")
+        return (0, 0)
+
+    if limite > 0:
+        chaves = chaves[:limite]
+        log(f"Processamento limitado a {limite} chaves.")
+
+    # 2. Adicionar notas via API (se não for apenas-baixar)
+    resultados_add = {}
+    if not apenas_baixar:
+        log(f"ETAPA 1: Adicionando {len(chaves)} notas via API MeuDanfe...")
+        for i, chave in enumerate(chaves, 1):
+            log(f"[{i}/{len(chaves)}] Adicionando chave: {chave}")
+            resultado = adicionar_nota(chave)
+            if resultado:
+                status = resultado.get("status", "")
+                resultados_add[chave] = status
+                if status in ("WAITING", "SEARCHING"):
+                    sucesso = aguardar_processamento(chave)
+                    resultados_add[chave] = "OK" if sucesso else "TIMEOUT"
+            else:
+                resultados_add[chave] = "ERRO_REQUEST"
+
+            if i < len(chaves):
+                time.sleep(DELAY_ENTRE_REQUESTS)
+
+    # 3. Baixar XMLs
+    log(f"ETAPA 2: Baixando XMLs para '{pasta_destino}'...")
+    xmls_baixados = 0
+    for i, chave in enumerate(chaves, 1):
+        if chave in resultados_add and resultados_add[chave] not in ("OK", "WAITING", "SEARCHING"):
+            log(f"[{i}/{len(chaves)}] Pulando {chave[-10:]}... (status add: {resultados_add[chave]})")
+            continue
+
+        log(f"[{i}/{len(chaves)}] Baixando XML: {chave}")
+        resultado_xml = baixar_xml(chave)
+        if resultado_xml:
+            caminho = salvar_xml(resultado_xml["nome"], resultado_xml["xml"], pasta_destino)
+            log(f"  -> Salvo: {caminho}")
+            xmls_baixados += 1
+
+        if i < len(chaves):
+            time.sleep(DELAY_ENTRE_REQUESTS)
+
+    log(f"Resumo MeuDanfe: {len(chaves)} chaves | {xmls_baixados} XMLs baixados.")
+
+    # 4. Geração de relatório opcional
+    if gerar_relatorio_ao_final and xmls_baixados > 0:
+        try:
+            from gerador_relatorio import gerar_relatorio_calamo
+            gerar_relatorio_calamo()
+        except Exception as e:
+            log(f"Erro ao gerar relatórios finais: {e}", "ERRO")
+
+    return (len(chaves), xmls_baixados)
+
+
 @log_execution(modulo="XML (MeuDanfe Debug)")
 def main():
     parser = argparse.ArgumentParser(description="Debug MeuDanfe - Busca XMLs via API")
@@ -399,189 +493,13 @@ def main():
     print(" DEBUG - MeuDanfe API v2 ".center(70, "="))
     sep()
     
-    # Validar API Key
-    if not API_KEY:
-        print("\n" + "=" * 70)
-        print(" AVISO IMPORTANTE ".center(70, "!"))
-        print("=" * 70)
-        print("Você precisa configurar a API Key do MeuDanfe!")
-        print("1. Acesse: https://web.meudanfe.com.br")
-        print("2. Vá em: API / Integração")
-        print("3. Crie ou copie sua API Key")
-        print("4. Cole no arquivo .env: MEUDANFE_API_KEY=sua_chave_aqui")
-        print("=" * 70)
-        sys.exit(1)
-    
-    log(f"API Key: {API_KEY[:8]}...{API_KEY[-4:]}")
-    log(f"Base URL: {BASE_URL}")
-    log(f"Delay entre requests: {DELAY_ENTRE_REQUESTS}s")
-    sep("-")
-    
-    # 0. Limpar a pasta temporária de XMLs locais
-    if os.path.exists(args.pasta_saida):
-        shutil.rmtree(args.pasta_saida)
-    os.makedirs(args.pasta_saida, exist_ok=True)
-    log(f"Pasta temporária local '{args.pasta_saida}' limpa com sucesso.")
-    sep("-")
-    
-    # 1. Definir e ler chaves da planilha
-    caminho_planilha = args.planilha
-    if not caminho_planilha:
-        caminho_planilha = obter_planilha_recente()
-        if not caminho_planilha:
-            log("AVISO: Pasta na rede Z: indisponível ou vazia.", "AVISO")
-            if os.path.exists(PLANILHA_ENTRADA_FALLBACK):
-                caminho_planilha = PLANILHA_ENTRADA_FALLBACK
-                log(f"Usando fallback local: {caminho_planilha}")
-            else:
-                log("Nenhuma planilha base encontrada. Encerrando.", "ERRO")
-                sys.exit(1)
-        else:
-            log(f"Planilha mais recente encontrada na Z:: {os.path.basename(caminho_planilha)}")
-            
-    chaves = ler_chaves_planilha(caminho_planilha)
-    
-    if not chaves:
-        log("Nenhuma chave válida encontrada na planilha!", "ERRO")
-        sys.exit(1)
-    
-    # Aplicar limite se especificado
-    if args.limite > 0:
-        chaves = chaves[:args.limite]
-        log(f"Limitado a {args.limite} chaves para processamento")
-    
-    sep("-")
-    
-    # 2. Adicionar notas (se não for apenas-baixar)
-    resultados_add = {}
-    
-    if not args.apenas_baixar:
-        log(f"ETAPA 1: Adicionando {len(chaves)} notas via API...")
-        sep("-")
-        
-        for i, chave in enumerate(chaves, 1):
-            log(f"[{i}/{len(chaves)}] Adicionando chave: {chave}")
-            resultado = adicionar_nota(chave)
-            
-            if resultado:
-                status = resultado.get("status", "")
-                resultados_add[chave] = status
-                
-                # Se está em processamento, aguardar
-                if status in ("WAITING", "SEARCHING"):
-                    sucesso = aguardar_processamento(chave)
-                    resultados_add[chave] = "OK" if sucesso else "TIMEOUT"
-            else:
-                resultados_add[chave] = "ERRO_REQUEST"
-                
-                # Se deu erro 401, parar tudo
-                if resultado is None and i == 1:
-                    log("Primeira requisição falhou. Verifique a API Key.", "ERRO")
-                    # Continuar para tentar as outras, pode ser problema temporário
-            
-            # Rate limiting
-            if i < len(chaves):
-                time.sleep(DELAY_ENTRE_REQUESTS)
-        
-        sep("-")
-        
-        # Resumo da etapa de adição
-        ok_count = sum(1 for s in resultados_add.values() if s == "OK")
-        fail_count = len(resultados_add) - ok_count
-        log(f"RESUMO ADIÇÃO: {ok_count} OK | {fail_count} falhas")
-        
-        if fail_count > 0:
-            log("Chaves com falha:")
-            for chave, status in resultados_add.items():
-                if status != "OK":
-                    log(f"  {chave} -> {status}", "AVISO")
-        
-        sep("-")
-    
-    # 3. Baixar XMLs
-    log(f"ETAPA 2: Baixando XMLs para '{args.pasta_saida}'...")
-    sep("-")
-    
-    xmls_baixados = 0
-    xmls_falha = 0
-    chaves_falha_xml = []
-    
-    for i, chave in enumerate(chaves, 1):
-        # Se temos resultado da adição e não foi OK, pular
-        if chave in resultados_add and resultados_add[chave] not in ("OK", "WAITING", "SEARCHING"):
-            log(f"[{i}/{len(chaves)}] Pulando {chave[-10:]}... (status add: {resultados_add[chave]})")
-            xmls_falha += 1
-            chaves_falha_xml.append(chave)
-            continue
-        
-        log(f"[{i}/{len(chaves)}] Baixando XML: {chave}")
-        resultado_xml = baixar_xml(chave)
-        
-        if resultado_xml:
-            caminho = salvar_xml(resultado_xml["nome"], resultado_xml["xml"], args.pasta_saida)
-            log(f"  -> Salvo: {caminho}")
-            xmls_baixados += 1
-        else:
-            xmls_falha += 1
-            chaves_falha_xml.append(chave)
-        
-        # Rate limiting
-        if i < len(chaves):
-            time.sleep(DELAY_ENTRE_REQUESTS)
-    
-    sep("=")
-    print(" RESULTADO FINAL ".center(70, "="))
-    sep("=")
-    log(f"Total de chaves processadas: {len(chaves)}")
-    log(f"XMLs baixados com sucesso:   {xmls_baixados}")
-    log(f"XMLs com falha:              {xmls_falha}")
-    log(f"Pasta de saída:              {args.pasta_saida}")
-    
-    if chaves_falha_xml:
-        print()
-        log("Chaves que falharam no download:")
-        for chave in chaves_falha_xml:
-            log(f"  {chave}", "AVISO")
-    
-    sep("=")
-    
-    # 4. Gerar relatório (opcional)
-    if args.gerar_relatorio and xmls_baixados > 0:
-        log("ETAPA 3: Gerando relatório final...")
-        try:
-            # Importa a função de geração de relatório do leitor_xml
-            from leitor_xml import gerar_relatorio
-            
-            # Temporariamente muda a pasta de XMLs para a do MeuDanfe
-            import leitor_xml
-            pasta_original = 'xmls_recebidos'
-            leitor_xml.gerar_relatorio.__globals__  # acessar apenas para verificar
-            
-            # Copia XMLs para pasta padrão do leitor
-            pasta_temp = "xmls_recebidos"
-            os.makedirs(pasta_temp, exist_ok=True)
-            
-            for arquivo in os.listdir(args.pasta_saida):
-                if arquivo.lower().endswith('.xml'):
-                    shutil.copy2(
-                        os.path.join(args.pasta_saida, arquivo),
-                        os.path.join(pasta_temp, arquivo)
-                    )
-            
-            gerar_relatorio()
-            log("Relatório gerado com sucesso!")
-        except Exception as e:
-            log(f"Erro ao gerar relatório: {e}", "ERRO")
-            log("Você pode gerar manualmente executando: python leitor_xml.py")
-    
-    elif xmls_baixados > 0:
-        print()
-        log("Para gerar o relatório final, execute:")
-        log(f"  python debug_meudanfe.py --apenas-baixar --gerar-relatorio")
-        log("  ou")
-        log(f"  python leitor_xml.py")
-    
-    print()
+    executar_download_chaves(
+        caminho_planilha=args.planilha or None,
+        pasta_saida=args.pasta_saida,
+        apenas_baixar=args.apenas_baixar,
+        limite=args.limite,
+        gerar_relatorio_ao_final=args.gerar_relatorio
+    )
 
 
 if __name__ == "__main__":
