@@ -18,6 +18,7 @@ import tempfile
 import logging
 import threading
 import time
+import socket
 from datetime import datetime, date
 from pathlib import Path
 
@@ -104,22 +105,49 @@ def get_archive_folder(namespace):
     except:
         return inbox.Folders.Add(ARCHIVE_FOLDER_NAME)
 
+_SINGLE_INSTANCE_SOCKET = None
+
+def ensure_single_instance(port=45451, name="UDI"):
+    global _SINGLE_INSTANCE_SOCKET
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(("127.0.0.1", port))
+        s.listen(1)
+        _SINGLE_INSTANCE_SOCKET = s
+        return True
+    except socket.error:
+        log(f"⚠️ [SINGLE INSTANCE] Já existe uma instância do Monitor VD ({name}) em execução (porta {port} ocupada). Encerrando nova execução.", "warning")
+        return False
+
 def get_excel_app():
     try:
-        return win32com.client.Dispatch("Excel.Application")
-    except Exception:
-        clsid = pywintypes.IID('{00024500-0000-0000-C000-000000000046}')
-        obj = pythoncom.CoCreateInstance(clsid, None, pythoncom.CLSCTX_LOCAL_SERVER, pythoncom.IID_IDispatch)
-        return win32com.client.Dispatch(obj)
+        return win32com.client.DispatchEx("Excel.Application")
+    except Exception as e:
+        log(f"Aviso ao usar DispatchEx para Excel: {e}. Tentando Dispatch padrao...", "warning")
+        try:
+            return win32com.client.Dispatch("Excel.Application")
+        except Exception:
+            clsid = pywintypes.IID('{00024500-0000-0000-C000-000000000046}')
+            obj = pythoncom.CoCreateInstance(clsid, None, pythoncom.CLSCTX_LOCAL_SERVER, pythoncom.IID_IDispatch)
+            return win32com.client.Dispatch(obj)
 
 def convert_to_xls(temp_path, final_path):
+    excel = None
     try:
         excel = get_excel_app()
     except Exception as e:
         log(f"Erro ao iniciar Excel: {e}", "error")
         return False
-    excel.Visible = False
-    excel.DisplayAlerts = False
+
+    try:
+        excel.Visible = False
+    except Exception:
+        pass
+    try:
+        excel.DisplayAlerts = False
+    except Exception:
+        pass
+
     try:
         wb = excel.Workbooks.Open(temp_path)
         wb.SaveAs(final_path, FileFormat=56)  # 56 = xlExcel8
@@ -129,10 +157,11 @@ def convert_to_xls(temp_path, final_path):
         log(f"Erro na conversão Excel: {e}", "error")
         return False
     finally:
-        try:
-            excel.Quit()
-        except Exception:
-            pass
+        if excel:
+            try:
+                excel.Quit()
+            except Exception:
+                pass
 
 def get_sender_email(message):
     """Tenta obter o endereço SMTP real do remetente."""
@@ -162,7 +191,7 @@ def process_message(message, namespace):
 
         extracted_date = date_match.group(1).replace("/", "-") # Normaliza para hifen
         date_parts = extracted_date.split("-")
-        
+
         if len(date_parts[2]) == 4:
             date_2dig = f"{date_parts[0]}-{date_parts[1]}-{date_parts[2][2:]}"
             date_4dig = extracted_date
@@ -183,21 +212,21 @@ def process_message(message, namespace):
             log(f"  ⚠️  Unidade não identificada no assunto. Palavras-chave esperadas: {list(UNIDADES.keys())}")
             return
 
-        # Procurar e processar anexo
+        # Identificar o anexo correto (sem salvar ainda)
         log(f"  Total de anexos: {message.Attachments.Count}")
-        attachment_processed = False
+        target_attachment = None
 
         for attachment in message.Attachments:
             nome = attachment.FileName
             log(f"  Verificando anexo: {nome}")
-            
+
             # Normalizar para comparação sem acentos (básico) e minúsculas
             nome_clean = nome.lower().replace("í", "i").replace("á", "a")
             prefixo_ref = matched_unidade["attachment_prefix"].lower()
             unidade_ref = matched_unidade["unit_id"].lower()
-            
+
             prefixo_ok = prefixo_ref in nome_clean and unidade_ref in nome_clean
-            
+
             # Normalizar data — testa tanto com "-" quanto com "/"
             date_2dig_slash = date_2dig.replace("-", "/")
             date_4dig_slash = date_4dig.replace("-", "/")
@@ -206,45 +235,59 @@ def process_message(message, namespace):
 
             if prefixo_ok and data_ok:
                 log(f"  ✅ Anexo correspondente encontrado!")
-
-                date_dt = datetime.strptime(extracted_date_full, "%d-%m-%Y")
-                mes_folder = MESES_PT[date_dt.month]
-                dia_folder = f"{date_dt.day:02d}"
-
-                final_dir = os.path.join(BASE_PATH, mes_folder, dia_folder)
-                if not os.path.exists(final_dir):
-                    os.makedirs(final_dir)
-                    log(f"  📁 Diretório criado: {final_dir}")
-
-                final_filename = f"{matched_unidade['final_name_prefix']}.{extracted_date_full}.xls"
-                final_path = os.path.join(final_dir, final_filename)
-
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-                    temp_save_path = tmp.name
-
-                attachment.SaveAsFile(temp_save_path)
-
-                if convert_to_xls(temp_save_path, final_path):
-                    log(f"  💾 Arquivo salvo: {final_path}")
-                    attachment_processed = True
-
-                if os.path.exists(temp_save_path):
-                    os.remove(temp_save_path)
-
+                target_attachment = attachment
+                target_nome = nome
                 break
 
-        if attachment_processed:
+        if target_attachment is None:
+            log("  ❌ Nenhum anexo correspondente encontrado para os critérios.")
+            return
+
+        # PASSO 1: Montar caminhos de destino
+        date_dt = datetime.strptime(extracted_date_full, "%d-%m-%Y")
+        mes_folder = MESES_PT[date_dt.month]
+        dia_folder = f"{date_dt.day:02d}"
+
+        final_dir = os.path.join(BASE_PATH, mes_folder, dia_folder)
+        if not os.path.exists(final_dir):
+            os.makedirs(final_dir)
+            log(f"  📁 Diretório criado: {final_dir}")
+
+        final_filename = f"{matched_unidade['final_name_prefix']}.{extracted_date_full}.xls"
+        final_path = os.path.join(final_dir, final_filename)
+
+        # PASSO 2: Mover email ANTES de salvar o anexo
+        # (Evita erro do Outlook "The operation cannot be performed because the message has been changed")
+        try:
             archive_folder = get_archive_folder(namespace)
             message.Move(archive_folder)
-            log(f"  📂 Email processado e movido para '{ARCHIVE_FOLDER_NAME}'.")
-            
-            # Verificação para disparo do upload automático
+            log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}' antes de processar.")
+        except Exception as move_err:
+            log(f"  ⚠️ Não foi possível mover o email: {move_err}. Continuando processamento...", "warning")
+
+        # PASSO 3: Salvar o anexo
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+            temp_save_path = tmp.name
+
+        target_attachment.SaveAsFile(temp_save_path)
+
+        attachment_processed = False
+        if convert_to_xls(temp_save_path, final_path):
+            log(f"  💾 Arquivo salvo: {final_path}")
+            attachment_processed = True
+
+        if os.path.exists(temp_save_path):
+            os.remove(temp_save_path)
+
+        # PASSO 4: Verificar e disparar upload automático
+        if attachment_processed:
             check_and_upload(final_dir, extracted_date_full)
         else:
-            log("  ❌ Nenhum anexo correspondente encontrado para os critérios.")
+            log("  ❌ Falha ao salvar o arquivo do anexo.")
 
     except Exception as e:
         log(f"Erro ao processar email: {e}", "error")
+
 
 def check_and_upload(final_dir, date_str):
     """Verifica se os 3 arquivos do dia existem e dispara o upload."""
@@ -360,14 +403,27 @@ def folder_watcher_loop():
         
         time.sleep(WATCHER_INTERVAL)
 
+def inbox_poller_loop():
+    """Varre a caixa de entrada periodicamente a cada 3 minutos como segurança caso eventos COM falhem."""
+    log("🔄 [POLLER] Poller de caixa de entrada ativado (intervalo: 3 minutos).")
+    pythoncom.CoInitialize()
+    try:
+        while True:
+            time.sleep(180)
+            try:
+                outlook = win32com.client.Dispatch("Outlook.Application")
+                ns = outlook.GetNamespace("MAPI")
+                scan_inbox(ns)
+            except Exception as e:
+                log(f"Erro no poller de caixa de entrada: {e}", "error")
+    finally:
+        pythoncom.CoUninitialize()
+
 # ─────────────────────────────────────────────
 # HANDLER DE EVENTOS DO OUTLOOK
 # ─────────────────────────────────────────────
 class OutlookEventHandler:
     """Recebe eventos do Outlook. OnNewMailEx é chamado para cada email novo."""
-
-    def __init__(self):
-        self.namespace = None
 
     def OnNewMailEx(self, entryIDCollection):
         """
@@ -375,13 +431,22 @@ class OutlookEventHandler:
         entryIDCollection é uma string com IDs separados por vírgula.
         """
         ids = entryIDCollection.split(",")
+        try:
+            outlook = win32com.client.Dispatch("Outlook.Application")
+            namespace = outlook.GetNamespace("MAPI")
+        except Exception as e:
+            log(f"Erro ao obter namespace MAPI no evento OnNewMailEx: {e}", "error")
+            return
+
         for entry_id in ids:
             entry_id = entry_id.strip()
+            if not entry_id:
+                continue
             try:
-                message = self.namespace.GetItemFromID(entry_id)
-                process_message(message, self.namespace)
+                message = namespace.GetItemFromID(entry_id)
+                process_message(message, namespace)
             except Exception as e:
-                log(f"Erro ao obter email pelo ID: {e}", "error")
+                log(f"Erro ao obter email pelo ID {entry_id}: {e}", "error")
 
 # ─────────────────────────────────────────────
 # VARREDURA E PONTO DE ENTRADA
@@ -400,7 +465,7 @@ def scan_inbox(namespace):
         analisados = 0
         # Percorremos os emails enquanto forem recentes
         for i in range(1, len(messages) + 1):
-            if analisados >= 100: # Limite de segurança para não varrer o histórico infinito
+            if analisados >= 1000: # Limite de segurança para não varrer o histórico infinito
                 break
                 
             try:
@@ -423,6 +488,9 @@ def scan_inbox(namespace):
         log(f"Erro na varredura inicial: {e}", "error")
 
 def main():
+    if not ensure_single_instance(port=45451, name="UDI"):
+        sys.exit(0)
+
     pythoncom.CoInitialize()
 
     log("=" * 50)
@@ -432,24 +500,37 @@ def main():
     log("=" * 50)
 
     try:
-        # 1. Dispatch com Eventos
-        outlook_app = win32com.client.DispatchWithEvents(
-            "Outlook.Application",
-            OutlookEventHandler
-        )
+        # 1. Dispatch com Eventos (com retry)
+        outlook_app = None
+        for tentativa in range(1, 6):
+            try:
+                outlook_app = win32com.client.DispatchWithEvents(
+                    "Outlook.Application",
+                    OutlookEventHandler
+                )
+                break
+            except Exception as com_err:
+                log(f"⚠️ [COM RETRY {tentativa}/5] Aguardando conexão com Outlook... ({com_err})", "warning")
+                time.sleep(5)
+
+        if not outlook_app:
+            log("❌ Não foi possível conectar ao Outlook via COM após 5 tentativas.", "error")
+            return
         
         # 2. Configurar Namespace
         namespace = outlook_app.GetNamespace("MAPI")
-        outlook_app.namespace = namespace # Isso injeta o namespace no handler (mesma instância)
         
         # 3. Varredura Inicial (Emails que já estão lá)
         scan_inbox(namespace)
 
-        # 4. Iniciar Watcher de Pasta em thread separada
+        # 4. Iniciar Watcher de Pasta e Poller de Inbox em threads separadas
         watcher_thread = threading.Thread(target=folder_watcher_loop, daemon=True)
         watcher_thread.start()
 
-        log("🎧 Aguardando novos emails em tempo real + monitoramento de pasta...")
+        poller_thread = threading.Thread(target=inbox_poller_loop, daemon=True)
+        poller_thread.start()
+
+        log("🎧 Aguardando novos emails em tempo real + poller (3min) + monitoramento de pasta...")
         # 5. Loop de eventos do Windows
         pythoncom.PumpMessages()
 
