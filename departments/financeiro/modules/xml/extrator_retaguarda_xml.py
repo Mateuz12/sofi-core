@@ -515,6 +515,58 @@ def executar_extracao(
             browser.close()
 
 
+def processar_pipeline_completo(caminho_planilha: Path) -> bool:
+    """
+    Lê as chaves da planilha extraída do Retaguarda.
+    - Se houver novas notas faturadas: baixa os XMLs via MeuDanfe e dispara a geração dos relatórios finais.
+    - Se não houver notas faturadas (planilha vazia / sem chaves): remove a planilha temporária e encerra.
+    """
+    print("\n" + "=" * 70)
+    print("  VERIFICAÇÃO DE NOVAS NOTAS FISCAIS FATURADAS")
+    print("=" * 70)
+
+    if not caminho_planilha or not caminho_planilha.exists():
+        print("[XML Pipeline] Arquivo de planilha não encontrado para validação.")
+        return False
+
+    try:
+        from debug_meudanfe import ler_chaves_planilha, executar_download_chaves
+        from gerador_relatorio import gerar_relatorio_calamo
+    except ImportError as err:
+        print(f"[XML Pipeline] Erro ao importar módulos de XML: {err}")
+        return False
+
+    chaves = ler_chaves_planilha(str(caminho_planilha))
+    if not chaves:
+        print("[XML Pipeline] Nenhuma nova nota fiscal faturada encontrada no período.")
+        print("[XML Pipeline] Excluindo planilha temporária para evitar arquivos vazios...")
+        try:
+            os.remove(caminho_planilha)
+            print(f"[XML Pipeline] Arquivo temporário removido: {caminho_planilha.name}")
+        except Exception as e:
+            print(f"[XML Pipeline] Erro ao remover planilha temporária: {e}")
+        print("[XML Pipeline] Processo finalizado com sucesso (sem novas notas para processar).")
+        return True
+
+    print(f"[XML Pipeline] {len(chaves)} nota(s) faturada(s) identificada(s) na planilha!")
+    print("[XML Pipeline] Disparando busca e download de XMLs via API MeuDanfe...")
+
+    total_chaves, xmls_baixados = executar_download_chaves(
+        caminho_planilha=str(caminho_planilha),
+        gerar_relatorio_ao_final=False
+    )
+
+    if xmls_baixados > 0:
+        print(f"[XML Pipeline] {xmls_baixados} XML(s) baixado(s) com sucesso!")
+        print("[XML Pipeline] Disparando geração dos relatórios finais da Cálamo e organização por PDV...")
+        gerar_relatorio_calamo()
+        print("[XML Pipeline] Pipeline completo concluído com SUCESSO!")
+        return True
+    else:
+        print(f"[XML Pipeline] Aviso: Nenhum XML pôde ser baixado pela API MeuDanfe para as {len(chaves)} chaves encontradas.")
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(description="Automação Retaguarda — Relatório de Notas Fiscais de Entrada (XMLs Cálamo)")
     parser.add_argument("--data-inicio", type=str, help="Data inicial (DD/MM/YYYY)")
@@ -522,6 +574,7 @@ def main():
     parser.add_argument("--data", type=str, help="Data de referência (DD/MM/YYYY) para calcular a semana")
     parser.add_argument("--dias", type=int, default=0, help="Dias retroativos (compatibilidade com scheduler)")
     parser.add_argument("--headless", action="store_true", help="Executar em modo headless")
+    parser.add_argument("--apenas-extrair", action="store_true", help="Apenas extrai a planilha do portal sem disparar MeuDanfe/relatórios")
 
     args = parser.parse_args()
 
@@ -546,9 +599,13 @@ def main():
             headless=headless_final
         )
         if arquivo_gerado and arquivo_gerado.exists():
-            print(f"\n[SUCESSO] Processo finalizado! Arquivo gerado em: {arquivo_gerado}")
+            print(f"\n[RETAGUARDA] Planilha gerada em: {arquivo_gerado}")
+            if not args.apenas_extrair:
+                processar_pipeline_completo(arquivo_gerado)
+            else:
+                print("[AVISO] Parâmetro --apenas-extrair ativo. Etapa de XMLs/relatórios não executada.")
         else:
-            print("\n[AVISO] Processo concluído, mas o arquivo de saída não foi localizado.")
+            print("\n[AVISO] Processo de extração concluído, mas o arquivo de saída não foi localizado.")
     except Exception as exc:
         print(f"\n[FALHA] Falha na execução da extração: {exc}")
         sys.exit(1)
