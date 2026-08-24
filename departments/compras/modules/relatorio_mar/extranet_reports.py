@@ -12,6 +12,8 @@ from playwright.sync_api import Locator, Page, TimeoutError as PlaywrightTimeout
 ROOT = Path(__file__).resolve().parent
 DOWNLOADS_DIR = ROOT / "downloads"
 
+URL_RELATORIOS = "https://extranet.grupoboticario.com.br/mfe/portais-de-credito/portal-do-franqueado/relatorios"
+
 # XPaths estáveis (IDs fixos do portal, não mudam entre sessões)
 XPATHS = {
     "user": '//*[@id="signInName"]',
@@ -41,7 +43,7 @@ def get_target_path(target_date: datetime, filename: str) -> Path:
 
 
 def get_overpayment_target_path(target_date: datetime, filename: str) -> Path:
-    """Caminho específico para o relatório de Boletos a Maior (IMPORTAÇÃO SAGE\BH)."""
+    r"""Caminho específico para o relatório de Boletos a Maior (IMPORTAÇÃO SAGE\BH)."""
     base_dir = Path(r"\\srv-dc01\File Server\05-FIN\CRP\IMPORTAÇÃO SAGE\BH")
     
     year_str = str(target_date.year)
@@ -557,11 +559,8 @@ def wait_for_portal_after_login(page: Page, url: str) -> None:
         page.wait_for_timeout(5_000)
 
     print(f"URL final depois do login: {page.url}")
-
-    # Aguarda a sidebar com o menu Financeiro ficar visivel
-    print("  Aguardando sidebar carregar...")
-    page.get_by_text("Financeiro", exact=True).first.wait_for(state="visible", timeout=120_000)
-    print("  Sidebar carregada.")
+    print("Redirecionamento pós-login detectado.")
+    page.wait_for_timeout(3_000)
 
 
 def login(page: Page, url: str, user: str, password: str) -> None:
@@ -724,35 +723,12 @@ def _tratar_popup_avaliacao(page: Page) -> None:
 
 
 def open_reports_area(page: Page) -> None:
-    print("Abrindo menu Financeiro > Relatorios...")
-
-    # Clica em "Financeiro" na sidebar esquerda
-    financeiro = page.get_by_text("Financeiro", exact=True).first
-    financeiro.click()
-    page.wait_for_timeout(1_500)
-
-    # O botão Relatórios pode estar direto em "Mais acessados" ou dentro de "Portal de gestão de crédito"
-    relatorios = page.get_by_text("Relatórios", exact=True)
-    
-    # Tenta clicar em "Portal de gestão de crédito" para abrir o submenu caso Relatórios não esteja visível
+    print(f"Acessando diretamente a tela de relatórios: {URL_RELATORIOS}...")
+    safe_goto(page, URL_RELATORIOS)
+    page.wait_for_load_state("domcontentloaded", timeout=60_000)
+    page.wait_for_timeout(3_000)
     try:
-        if relatorios.count() == 0 or not relatorios.first.is_visible():
-            portal_credito = page.get_by_text("Portal de gestão de crédito")
-            if portal_credito.count() > 0 and portal_credito.first.is_visible():
-                print("  Abrindo submenu 'Portal de gestão de crédito'...")
-                portal_credito.first.click()
-                page.wait_for_timeout(1_500)
-    except Exception:
-        pass
-
-    # Aguarda o botão Relatórios ficar visível e clica
-    relatorios.first.wait_for(state="visible", timeout=10_000)
-    relatorios.first.click()
-    page.wait_for_timeout(2_000)
-
-    # Aguarda a página de relatórios carregar (URL deve conter 'relatorios')
-    try:
-        page.wait_for_url(lambda u: "relatorios" in u.lower(), timeout=15_000)
+        page.wait_for_url(lambda u: "relatorios" in u.lower(), timeout=20_000)
         print(f"  Página de relatórios carregada: {page.url}")
     except PlaywrightTimeoutError:
         print(f"  Aviso: URL não mudou para relatórios. URL atual: {page.url}")
@@ -760,18 +736,14 @@ def open_reports_area(page: Page) -> None:
     # Trata o popup de avaliação
     _tratar_popup_avaliacao(page)
 
-    # Fecha o dropdown do menu clicando fora dele ou pressionando Escape
+    # Fecha eventuais dropdowns ou modais
     page.keyboard.press("Escape")
     page.wait_for_timeout(500)
 
-    # Clica no corpo da página para garantir que o dropdown fechou
     try:
         page.locator("main").first.click(position={"x": 500, "y": 300})
     except Exception:
-        try:
-            page.locator("body").click(position={"x": 500, "y": 300})
-        except Exception:
-            pass
+        pass
     page.wait_for_timeout(500)
 
 

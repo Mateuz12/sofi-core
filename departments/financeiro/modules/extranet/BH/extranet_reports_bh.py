@@ -45,6 +45,8 @@ DOWNLOADS_DIR = ROOT / "downloads"
 UNIDADE     = "BH"
 STORE_CODES = ["13793", "21433", "22372"]
 
+URL_RELATORIOS = "https://extranet.grupoboticario.com.br/mfe/portais-de-credito/portal-do-franqueado/relatorios"
+
 XPATHS = {
     "user":      '//*[@id="signInName"]',
     "password":  '//*[@id="password"]',
@@ -467,7 +469,8 @@ def wait_for_portal_after_login(page: Page, url: str) -> None:
     else:
         safe_goto(page, url)
         page.wait_for_timeout(5_000)
-    page.get_by_text("Financeiro", exact=True).first.wait_for(state="visible", timeout=120_000)
+    print("Redirecionamento pós-login detectado.")
+    page.wait_for_timeout(3_000)
 
 
 def login(page: Page, url: str, user: str, password: str) -> None:
@@ -629,27 +632,16 @@ def _tratar_popup_avaliacao(page: Page) -> None:
 
 
 def open_reports_area(page: Page) -> None:
-    print("Abrindo menu Financeiro > Relatórios...")
-    page.get_by_text("Financeiro", exact=True).first.click()
-    page.wait_for_timeout(1_500)
-    relatorios = page.get_by_text("Relatórios", exact=True)
+    print(f"Acessando diretamente a tela de relatórios: {URL_RELATORIOS}...")
+    safe_goto(page, URL_RELATORIOS)
+    page.wait_for_load_state("domcontentloaded", timeout=60_000)
+    page.wait_for_timeout(3_000)
     try:
-        if relatorios.count() == 0 or not relatorios.first.is_visible():
-            portal_credito = page.get_by_text("Portal de gestão de crédito")
-            if portal_credito.count() > 0 and portal_credito.first.is_visible():
-                portal_credito.first.click()
-                page.wait_for_timeout(1_500)
-    except Exception:
-        pass
-    relatorios.first.wait_for(state="visible", timeout=10_000)
-    relatorios.first.click()
-    page.wait_for_timeout(2_000)
-    try:
-        page.wait_for_url(lambda u: "relatorios" in u.lower(), timeout=15_000)
+        page.wait_for_url(lambda u: "relatorios" in u.lower(), timeout=20_000)
     except PlaywrightTimeoutError:
         pass
     
-    # Trata o popup de avaliação
+    # Trata o popup de avaliação (se presente)
     _tratar_popup_avaliacao(page)
     
     page.keyboard.press("Escape")
