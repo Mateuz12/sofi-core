@@ -73,7 +73,7 @@ Object.defineProperty(navigator, 'languages', { get: () => ['pt-BR', 'pt', 'en-U
 
 def calcular_periodo_semana_corrente(data_base: datetime | None = None) -> tuple[str, str, datetime, datetime]:
     """
-    Calcula as datas de Segunda-feira e Domingo correspondentes à semana da data_base informada.
+    Calcula as datas de início (Segunda-feira) e término (Domingo) da semana referente.
     
     Returns:
         tuple[str, str, datetime, datetime]:
@@ -82,9 +82,9 @@ def calcular_periodo_semana_corrente(data_base: datetime | None = None) -> tuple
     if data_base is None:
         data_base = datetime.now()
     
-    # weekday(): Segunda = 0, Domingo = 6
-    dia_semana = data_base.weekday()
-    segunda = data_base - timedelta(days=dia_semana)
+    # Segunda-feira da semana corrente
+    segunda = data_base - timedelta(days=data_base.weekday())
+    # Domingo da semana corrente
     domingo = segunda + timedelta(days=6)
     
     return (
@@ -125,35 +125,70 @@ def wait_click(locator, timeout: int = 15_000, delay_after: float = 1.5):
     time.sleep(delay_after)
 
 
-def fazer_login(page: Page) -> None:
-    """Efetua login no portal Retaguarda com tolerância e esperas de estabilização."""
+def fazer_login(page: Page, max_tentativas: int = 3) -> None:
+    """Efetua login no portal Retaguarda com retry robusto.
+    
+    O portal usa reCAPTCHA v3 que gera um token unico por carregamento de pagina.
+    Quando o login falha ('Nao autorizado'), e necessario recarregar a pagina
+    inteira para que o reCAPTCHA gere um novo token valido.
+    """
     url_login = RETAGUARDA_URL
     if not url_login.endswith("/app/#/login") and "#" not in url_login:
         url_login = f"{url_login.rstrip('/')}/app/#/login"
 
-    print(f"[RETAGUARDA] Acessando URL: {url_login}")
-    page.goto(url_login, wait_until="networkidle", timeout=60_000)
-    page.wait_for_timeout(2_000)
+    for tentativa in range(1, max_tentativas + 1):
+        print(f"[RETAGUARDA] Tentativa de login {tentativa}/{max_tentativas}...")
+        print(f"[RETAGUARDA] Acessando URL: {url_login}")
+        page.goto(url_login, wait_until="networkidle", timeout=60_000)
 
-    try:
-        user_input = page.get_by_role("textbox", name="Usuário")
-        user_input.wait_for(state="visible", timeout=15_000)
-        
-        print("[RETAGUARDA] Preenchendo credenciais...")
-        user_input.fill(RETAGUARDA_USER)
-        page.wait_for_timeout(500)
-        page.get_by_role("textbox", name="Senha").fill(RETAGUARDA_PASS)
-        page.wait_for_timeout(1_000)
-        
-        btn_entrar = page.get_by_role("button", name="Entrar")
-        btn_entrar.wait_for(state="visible", timeout=10_000)
-        btn_entrar.click()
-        print("[RETAGUARDA] Botão Entrar acionado. Aguardando estabilização do portal...")
-        page.wait_for_timeout(5_000)
-    except Exception as e:
-        print(f"[RETAGUARDA] Tela de login não encontrada ou já autenticado: {e}")
+        # Espera progressiva para carregamento do reCAPTCHA v3
+        wait_secs = 15 + (tentativa - 1) * 5
+        print(f"[RETAGUARDA] Aguardando {wait_secs}s para inicializacao dos scripts de autenticacao (reCAPTCHA)...")
+        page.wait_for_timeout(wait_secs * 1_000)
 
-    page.wait_for_timeout(3_000)
+        try:
+            user_input = page.get_by_role("textbox", name="Usuário")
+            user_input.wait_for(state="visible", timeout=15_000)
+
+            print("[RETAGUARDA] Preenchendo credenciais...")
+            user_input.fill("")
+            page.get_by_role("textbox", name="Senha").fill("")
+            page.wait_for_timeout(500)
+            user_input.fill(RETAGUARDA_USER)
+            page.wait_for_timeout(500)
+            page.get_by_role("textbox", name="Senha").fill(RETAGUARDA_PASS)
+            page.wait_for_timeout(1_000)
+
+            btn_entrar = page.get_by_role("button", name="Entrar")
+            btn_entrar.wait_for(state="visible", timeout=10_000)
+            btn_entrar.click()
+            print("[RETAGUARDA] Botao Entrar acionado. Aguardando estabilizacao do portal...")
+            page.wait_for_timeout(5_000)
+        except Exception as e:
+            print(f"[RETAGUARDA] Tela de login nao encontrada ou ja autenticado: {e}")
+
+        # Verificar se o login foi bem-sucedido (procura menu lateral ou URL sem /login)
+        if "login" not in page.url.lower():
+            print("[RETAGUARDA] Login realizado com sucesso!")
+            page.wait_for_timeout(3_000)
+            return
+
+        # Checar se tem conteudo de dashboard carregado
+        try:
+            page.locator("div.sidemenu, div[class*='sidemenu']").first.wait_for(state="visible", timeout=10_000)
+            print("[RETAGUARDA] Login realizado com sucesso!")
+            page.wait_for_timeout(3_000)
+            return
+        except Exception:
+            pass
+
+        print(f"[RETAGUARDA] Login nao confirmado na tentativa {tentativa}.")
+        if tentativa < max_tentativas:
+            print(f"[RETAGUARDA] Aguardando 5s antes de recarregar para nova tentativa...")
+            page.wait_for_timeout(5_000)
+        else:
+            print("[RETAGUARDA] Todas as tentativas falharam. Prosseguindo mesmo assim...")
+            page.wait_for_timeout(3_000)
 
 
 def navegar_para_nota_fiscal_entrada(page: Page) -> None:
@@ -337,55 +372,47 @@ def selecionar_fornecedor_calamo(frame) -> None:
 
 
 def preencher_datas(frame, data_inicio: str, data_fim: str, data_ini_obj: datetime, data_fim_obj: datetime) -> None:
-    """Preenche o intervalo de datas (Segunda a Domingo) no formulário do relatório."""
-    print(f"[RETAGUARDA] Configurando período: {data_inicio} até {data_fim}...")
+    """Preenche o intervalo de datas de emissão (Segunda a Domingo) no formulário de Nota Fiscal de Entrada."""
+    print(f"[RETAGUARDA] Configurando período de emissão: {data_inicio} até {data_fim}...")
     
-    # Injeção JS para garantir preenchimento dos campos de data
+    # Preenchimento direto via IDs exatos dos campos de emissão (deixando entrada vazio)
     try:
         frame.evaluate(f"""([dtIni, dtFim]) => {{
-            if (typeof $.fn.datepicker !== 'undefined') {{
-                $('input.hasDatepicker, #dataInicial, #dataFinal, input[name*="data"]').each(function(idx) {{
-                    if (idx === 0) $(this).datepicker('setDate', dtIni);
-                    if (idx === 1) $(this).datepicker('setDate', dtFim);
-                }});
+            var elemEmissaoIni = document.getElementById('periodo_emissao_inicio');
+            var elemEmissaoFim = document.getElementById('periodo_emissao_termino');
+            var elemEntradaIni = document.getElementById('periodo_entrada_inicio');
+            var elemEntradaFim = document.getElementById('periodo_entrada_termino');
+
+            // Limpa os campos de período de entrada (não devem ser preenchidos)
+            if (elemEntradaIni) {{
+                elemEntradaIni.value = '';
+                elemEntradaIni.dispatchEvent(new Event('change', {{ bubbles: true }}));
             }}
-            var inputs = document.querySelectorAll('input[type="text"]');
-            inputs.forEach(input => {{
-                if (input.name && (input.name.toLowerCase().includes('dataini') || input.name.toLowerCase().includes('inicial'))) {{
-                    input.value = dtIni;
-                    input.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                }}
-                if (input.name && (input.name.toLowerCase().includes('datafim') || input.name.toLowerCase().includes('final'))) {{
-                    input.value = dtFim;
-                    input.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                }}
-            }});
+            if (elemEntradaFim) {{
+                elemEntradaFim.value = '';
+                elemEntradaFim.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+
+            // Preenche APENAS os campos de período de emissão
+            if (elemEmissaoIni) {{
+                elemEmissaoIni.value = dtIni;
+                elemEmissaoIni.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+            if (elemEmissaoFim) {{
+                elemEmissaoFim.value = dtFim;
+                elemEmissaoFim.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+
+            // Atualização complementar via jQuery datepicker se ativo
+            if (typeof $ !== 'undefined' && $.fn) {{
+                if (elemEntradaIni) $('#periodo_entrada_inicio').val('');
+                if (elemEntradaFim) $('#periodo_entrada_termino').val('');
+                if (elemEmissaoIni && $.fn.datepicker) $('#periodo_emissao_inicio').datepicker('setDate', dtIni);
+                if (elemEmissaoFim && $.fn.datepicker) $('#periodo_emissao_termino').datepicker('setDate', dtFim);
+            }}
         }}""", [data_inicio, data_fim])
     except Exception as e:
-        print(f"[RETAGUARDA] Aviso na injeção JS de datas: {e}")
-
-    frame.wait_for_timeout(1_500)
-
-    # Interação complementar com calendário visual se disponível
-    try:
-        btn_calendario = frame.locator(".icon-calendar").first
-        if btn_calendario.is_visible():
-            btn_calendario.click()
-            frame.wait_for_timeout(1_000)
-            dia_ini = str(data_ini_obj.day)
-            dia_fim = str(data_fim_obj.day)
-            
-            cell_ini = frame.get_by_role("cell", name=dia_ini, exact=True).first
-            if cell_ini.is_visible():
-                cell_ini.click()
-                frame.wait_for_timeout(500)
-            
-            cell_fim = frame.get_by_role("cell", name=dia_fim, exact=True).first
-            if cell_fim.is_visible():
-                cell_fim.click()
-                frame.wait_for_timeout(500)
-    except Exception as e:
-        print(f"[RETAGUARDA] Interação de calendário concluída: {e}")
+        print(f"[RETAGUARDA] Aviso na configuração de datas: {e}")
 
     frame.wait_for_timeout(1_500)
 
@@ -449,7 +476,7 @@ def executar_extracao(
 
     print("=" * 70)
     print(f"  EXTRAÇÃO RELATÓRIO RETAGUARDA — XML ENTRADA")
-    print(f"  Período: {dt_ini_str} até {dt_fim_str} (Segunda a Domingo)")
+    print(f"  Período de Emissão: {dt_ini_str} até {dt_fim_str} (Segunda a Domingo)")
     print(f"  Modo Headless: {headless}")
     print("=" * 70)
 
@@ -515,11 +542,19 @@ def executar_extracao(
             browser.close()
 
 
-def processar_pipeline_completo(caminho_planilha: Path) -> bool:
+# Exit status codes para integração com o Scheduler SOFI
+EXIT_OK = 0
+EXIT_RETRYABLE = 1
+EXIT_PERMANENT = 2
+EXIT_SEM_FATURAMENTO = 3
+
+
+def processar_pipeline_completo(caminho_planilha: Path) -> int:
     """
     Lê as chaves da planilha extraída do Retaguarda.
-    - Se houver novas notas faturadas: baixa os XMLs via MeuDanfe e dispara a geração dos relatórios finais.
-    - Se não houver notas faturadas (planilha vazia / sem chaves): remove a planilha temporária e encerra.
+    - Se houver novas notas faturadas: baixa os XMLs via MeuDanfe e dispara a geração dos relatórios finais. Retorna 0 (EXIT_OK).
+    - Se não houver notas faturadas (planilha vazia / sem chaves): remove a planilha temporária e encerra. Retorna 3 (EXIT_SEM_FATURAMENTO).
+    - Em caso de erro: retorna 1 (EXIT_RETRYABLE) ou 2 (EXIT_PERMANENT).
     """
     print("\n" + "=" * 70)
     print("  VERIFICAÇÃO DE NOVAS NOTAS FISCAIS FATURADAS")
@@ -527,14 +562,14 @@ def processar_pipeline_completo(caminho_planilha: Path) -> bool:
 
     if not caminho_planilha or not caminho_planilha.exists():
         print("[XML Pipeline] Arquivo de planilha não encontrado para validação.")
-        return False
+        return EXIT_RETRYABLE
 
     try:
         from debug_meudanfe import ler_chaves_planilha, executar_download_chaves
         from gerador_relatorio import gerar_relatorio_calamo
     except ImportError as err:
         print(f"[XML Pipeline] Erro ao importar módulos de XML: {err}")
-        return False
+        return EXIT_RETRYABLE
 
     chaves = ler_chaves_planilha(str(caminho_planilha))
     if not chaves:
@@ -545,8 +580,8 @@ def processar_pipeline_completo(caminho_planilha: Path) -> bool:
             print(f"[XML Pipeline] Arquivo temporário removido: {caminho_planilha.name}")
         except Exception as e:
             print(f"[XML Pipeline] Erro ao remover planilha temporária: {e}")
-        print("[XML Pipeline] Processo finalizado com sucesso (sem novas notas para processar).")
-        return True
+        print("[XML Pipeline] Processo finalizado com SUCESSO (sem novas notas para processar no período).")
+        return EXIT_SEM_FATURAMENTO
 
     print(f"[XML Pipeline] {len(chaves)} nota(s) faturada(s) identificada(s) na planilha!")
     print("[XML Pipeline] Disparando busca e download de XMLs via API MeuDanfe...")
@@ -561,10 +596,10 @@ def processar_pipeline_completo(caminho_planilha: Path) -> bool:
         print("[XML Pipeline] Disparando geração dos relatórios finais da Cálamo e organização por PDV...")
         gerar_relatorio_calamo()
         print("[XML Pipeline] Pipeline completo concluído com SUCESSO!")
-        return True
+        return EXIT_OK
     else:
         print(f"[XML Pipeline] Aviso: Nenhum XML pôde ser baixado pela API MeuDanfe para as {len(chaves)} chaves encontradas.")
-        return False
+        return EXIT_RETRYABLE
 
 
 def main():
@@ -601,15 +636,19 @@ def main():
         if arquivo_gerado and arquivo_gerado.exists():
             print(f"\n[RETAGUARDA] Planilha gerada em: {arquivo_gerado}")
             if not args.apenas_extrair:
-                processar_pipeline_completo(arquivo_gerado)
+                res_code = processar_pipeline_completo(arquivo_gerado)
+                sys.exit(res_code)
             else:
                 print("[AVISO] Parâmetro --apenas-extrair ativo. Etapa de XMLs/relatórios não executada.")
+                sys.exit(EXIT_OK)
         else:
             print("\n[AVISO] Processo de extração concluído, mas o arquivo de saída não foi localizado.")
+            sys.exit(EXIT_PERMANENT)
     except Exception as exc:
         print(f"\n[FALHA] Falha na execução da extração: {exc}")
-        sys.exit(1)
+        sys.exit(EXIT_RETRYABLE)
 
 
 if __name__ == "__main__":
     main()
+

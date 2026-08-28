@@ -139,6 +139,98 @@ def ajustar_larguras_colunas(excel, sheet):
     for col_idx, width_val in larguras.items():
         sheet.Columns(col_idx).ColumnWidth = width_val
 
+def carregar_notas_existentes_semana(saida_geral, saida_matheus, unidade):
+    """
+    Carrega as notas fiscais previamente gravadas nos relatórios da semana
+    (saida_geral e saida_matheus), permitindo acumular faturamentos novos sem sobrescrever.
+    """
+    import xlrd
+    notas_existentes = []
+    mapa_pedidos = {}
+
+    # 1. Tenta ler os números de pedido da aba 'Notas Fiscais' do relatório do Matheus (se existir)
+    if os.path.exists(saida_matheus):
+        try:
+            wb_m = xlrd.open_workbook(saida_matheus)
+            if 'Notas Fiscais' in wb_m.sheet_names():
+                sheet_m = wb_m.sheet_by_name('Notas Fiscais')
+                start_col = 0 if unidade == "BH" else 5
+                for r in range(3, sheet_m.nrows):
+                    val_pdv = sheet_m.cell_value(r, start_col)
+                    val_nf = sheet_m.cell_value(r, start_col + 3)
+                    val_ped = sheet_m.cell_value(r, start_col + 4)
+                    
+                    if str(val_pdv).strip() != "" and str(val_nf).strip() != "":
+                        pdv_s = str(int(val_pdv)) if isinstance(val_pdv, (int, float)) else str(val_pdv).strip()
+                        nf_s = str(int(val_nf)) if isinstance(val_nf, (int, float)) else str(val_nf).strip()
+                        ped_s = int(val_ped) if isinstance(val_ped, float) and val_ped.is_integer() else val_ped
+                        mapa_pedidos[(pdv_s, nf_s)] = ped_s
+        except Exception as e:
+            print(f"[{unidade}] Aviso ao carregar pedidos do relatório do Matheus: {e}")
+
+    # 2. Lê os registros da aba 'Base' do relatório Geral (se existir)
+    if os.path.exists(saida_geral):
+        try:
+            wb_g = xlrd.open_workbook(saida_geral)
+            if 'Base' in wb_g.sheet_names():
+                sheet_b = wb_g.sheet_by_name('Base')
+                for r in range(1, sheet_b.nrows):
+                    val_pdv = sheet_b.cell_value(r, 0)
+                    val_ndoc = sheet_b.cell_value(r, 3)
+
+                    if str(val_pdv).strip() == "" and str(val_ndoc).strip() == "":
+                        continue
+
+                    pdv_str = str(int(val_pdv)) if isinstance(val_pdv, (int, float)) else str(val_pdv).strip()
+                    ndoc_str = str(int(val_ndoc)) if isinstance(val_ndoc, (int, float)) else str(val_ndoc).strip()
+
+                    canal = str(sheet_b.cell_value(r, 5)).strip() if sheet_b.ncols > 5 else 'LOJA'
+                    dt_emissao = str(sheet_b.cell_value(r, 7)).strip() if sheet_b.ncols > 7 else ''
+                    dt_venc = str(sheet_b.cell_value(r, 8)).strip() if sheet_b.ncols > 8 else ''
+
+                    # Converte formato de data serial do Excel se necessário
+                    if isinstance(sheet_b.cell_value(r, 7), float):
+                        try:
+                            dt_t = xlrd.xldate_as_tuple(sheet_b.cell_value(r, 7), wb_g.datemode)
+                            dt_emissao = f"{dt_t[2]:02d}/{dt_t[1]:02d}/{dt_t[0]}"
+                        except Exception:
+                            pass
+
+                    if isinstance(sheet_b.cell_value(r, 8), float):
+                        try:
+                            dt_t = xlrd.xldate_as_tuple(sheet_b.cell_value(r, 8), wb_g.datemode)
+                            dt_venc = f"{dt_t[2]:02d}/{dt_t[1]:02d}/{dt_t[0]}"
+                        except Exception:
+                            pass
+
+                    val_tot_itens = sheet_b.cell_value(r, 19) if sheet_b.ncols > 19 else 0.0
+                    val_tot_doc = sheet_b.cell_value(r, 23) if sheet_b.ncols > 23 else 0.0
+
+                    try: tot_itens = float(val_tot_itens)
+                    except: tot_itens = 0.0
+
+                    try: tot_doc = float(val_tot_doc)
+                    except: tot_doc = 0.0
+
+                    ped_val = mapa_pedidos.get((pdv_str, ndoc_str), '')
+
+                    nota = {
+                        'Nº DOC': int(ndoc_str) if ndoc_str.isdigit() else ndoc_str,
+                        'PDV': int(pdv_str) if pdv_str.isdigit() else pdv_str,
+                        'Canal': canal,
+                        'Dt. Emissão': dt_emissao,
+                        'Dt. Vencimento': dt_venc,
+                        'Total Itens/Merc.': tot_itens,
+                        'Total do Documento': tot_doc,
+                        'Nosso Pedido': ped_val,
+                        'Unidade': unidade,
+                    }
+                    notas_existentes.append(nota)
+        except Exception as e:
+            print(f"[{unidade}] Aviso ao carregar notas do relatório geral existente: {e}")
+
+    return notas_existentes
+
 def processar_relatorio_geral(unidade, notas, caminho_modelo, caminho_saida):
     """Preenche a aba Base e gera a aba Notas Fiscais dinamicamente mantendo formatação e fórmulas do modelo."""
     if not notas:
@@ -755,12 +847,22 @@ def gerar_relatorio_calamo():
     notas_bh = []
     notas_udi = []
     notas_ignoradas = 0
+    notas_sem_vencimento = 0
     datas_emissao = []
     
     for arquivo in arquivos_xml:
         caminho_completo = os.path.join(pasta_xml, arquivo)
         dados = extrair_dados_xml(caminho_completo)
         if dados:
+            # ── Filtro: ignora notas sem data de vencimento ──
+            dt_venc = (dados.get('Dt. Vencimento') or '').strip()
+            if not dt_venc:
+                ndoc = dados.get('Nº DOC', '?')
+                pdv = dados.get('PDV', '?')
+                print(f"  [IGNORADA] Nota {ndoc} (PDV {pdv}) sem data de vencimento — não será incluída nos relatórios.")
+                notas_sem_vencimento += 1
+                continue
+
             unidade = dados.get('Unidade')
             dt_emi = dados.get('Dt. Emissão')
             
@@ -780,6 +882,8 @@ def gerar_relatorio_calamo():
                 print(f"Diagnóstico: Nota {dados.get('Nº DOC')} com destinatário '{dados.get('Destinatário')}' não está mapeada em BH nem em UDI.")
                 
     print(f"Notas lidas com sucesso: BH={len(notas_bh)}, UDI={len(notas_udi)} (Total processado: {len(arquivos_xml)})")
+    if notas_sem_vencimento:
+        print(f"  ⚠️  {notas_sem_vencimento} nota(s) ignorada(s) por não possuírem data de vencimento.")
     
     if not notas_bh and not notas_udi:
         print("Nenhuma nota processada dos XMLs. Abortando geração.")
@@ -847,14 +951,39 @@ def gerar_relatorio_calamo():
     caminho_mod_matheus_bh = os.path.join(pasta_modelos, 'MODELO_MATHEUS_BH.xls')
     caminho_mod_matheus_udi = os.path.join(pasta_modelos, 'MODELO_MATHEUS_UDI.xls')
     
-    # Executa a geração para cada um dos 4 arquivos de forma robusta
-    if notas_bh:
-        processar_relatorio_geral('BH', notas_bh, caminho_mod_bh, saida_geral_bh)
-        processar_relatorio_matheus('BH', notas_bh, caminho_mod_matheus_bh, saida_matheus_bh)
+    # Carrega notas previamente existentes na semana (se os relatórios já existirem)
+    existentes_bh = carregar_notas_existentes_semana(saida_geral_bh, saida_matheus_bh, 'BH')
+    existentes_udi = carregar_notas_existentes_semana(saida_geral_udi, saida_matheus_udi, 'UDI')
+
+    # Mescla notas existentes com novas notas (desduplicando por PDV + Nº DOC)
+    chaves_bh = set()
+    notas_bh_combinadas = []
+    for n in (existentes_bh + notas_bh):
+        k = (str(n.get('PDV', '')).strip(), str(n.get('Nº DOC', '')).strip())
+        if k not in chaves_bh:
+            chaves_bh.add(k)
+            notas_bh_combinadas.append(n)
+
+    chaves_udi = set()
+    notas_udi_combinadas = []
+    for n in (existentes_udi + notas_udi):
+        k = (str(n.get('PDV', '')).strip(), str(n.get('Nº DOC', '')).strip())
+        if k not in chaves_udi:
+            chaves_udi.add(k)
+            notas_udi_combinadas.append(n)
+
+    # Reordena as notas combinadas conforme a ordem física dos PDVs nas planilhas
+    notas_bh_combinadas.sort(key=ordenar_bh)
+    notas_udi_combinadas.sort(key=ordenar_udi)
+
+    # Executa a geração para cada um dos 4 arquivos com os dados acumulados da semana
+    if notas_bh_combinadas:
+        processar_relatorio_geral('BH', notas_bh_combinadas, caminho_mod_bh, saida_geral_bh)
+        processar_relatorio_matheus('BH', notas_bh_combinadas, caminho_mod_matheus_bh, saida_matheus_bh)
         
-    if notas_udi:
-        processar_relatorio_geral('UDI', notas_udi, caminho_mod_udi, saida_geral_udi)
-        processar_relatorio_matheus('UDI', notas_udi, caminho_mod_matheus_udi, saida_matheus_udi)
+    if notas_udi_combinadas:
+        processar_relatorio_geral('UDI', notas_udi_combinadas, caminho_mod_udi, saida_geral_udi)
+        processar_relatorio_matheus('UDI', notas_udi_combinadas, caminho_mod_matheus_udi, saida_matheus_udi)
         
     # 5. ORGANIZA E SALVA OS XMLS POR PDV
     diretorio_xmls_saida = os.path.join(base_xmls_baixados, ano_pasta, mes_pasta, semana_pasta)

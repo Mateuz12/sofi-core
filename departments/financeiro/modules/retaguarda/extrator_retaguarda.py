@@ -175,25 +175,56 @@ def save_to_excel_97_2003(df: pd.DataFrame, path: Path) -> None:
 # Fluxo do Portal Retaguarda
 # ─────────────────────────────────────────────
 
-def login(page: Page) -> None:
-    """Faz login no portal Retaguarda."""
-    print("Abrindo o portal Retaguarda...")
-    page.goto(PORTAL_URL, wait_until="domcontentloaded", timeout=60_000)
+def login(page: Page, max_tentativas: int = 3) -> None:
+    """Faz login no portal Retaguarda com retry robusto.
+    
+    O portal usa reCAPTCHA v3 que gera um token único por carregamento de página.
+    Quando o login falha ('Não autorizado'), é necessário recarregar a página
+    inteira para que o reCAPTCHA gere um novo token válido.
+    """
+    for tentativa in range(1, max_tentativas + 1):
+        print(f"Tentativa de login {tentativa}/{max_tentativas}...")
+        print("Abrindo o portal Retaguarda...")
+        page.goto(PORTAL_URL, wait_until="networkidle", timeout=60_000)
 
-    try:
-        user_field = by_xpath(page, XPATHS["login_user"])
-        user_field.wait_for(state="visible", timeout=15_000)
-        user_field.fill(PORTAL_USER)
-        by_xpath(page, XPATHS["login_pass"]).fill(PORTAL_PASS)
-        print("Credenciais preenchidas. Aguardando 10 segundos antes do clique...")
-        page.wait_for_timeout(10_000)
-        by_xpath(page, XPATHS["btn_login"]).click()
-    except Exception as e:
-        print(f"Tela de login não encontrada ou já logado. Prosseguindo... ({e})")
+        try:
+            user_field = by_xpath(page, XPATHS["login_user"])
+            user_field.wait_for(state="visible", timeout=15_000)
 
-    print("Aguardando login completo (menu financeiro)...")
-    by_xpath(page, XPATHS["menu_financeiro"]).wait_for(state="visible", timeout=60_000)
-    print("Login realizado com sucesso!")
+            # Espera progressiva para carregamento do reCAPTCHA v3
+            wait_secs = 15 + (tentativa - 1) * 5
+            print(f"Aguardando {wait_secs}s para inicializacao dos scripts de autenticacao (reCAPTCHA)...")
+            page.wait_for_timeout(wait_secs * 1_000)
+
+            # Limpar e preencher credenciais
+            user_field.fill("")
+            by_xpath(page, XPATHS["login_pass"]).fill("")
+            page.wait_for_timeout(500)
+            user_field.fill(PORTAL_USER)
+            page.wait_for_timeout(500)
+            by_xpath(page, XPATHS["login_pass"]).fill(PORTAL_PASS)
+            page.wait_for_timeout(1_000)
+
+            print("Credenciais preenchidas. Clicando em Entrar...")
+            by_xpath(page, XPATHS["btn_login"]).click()
+            page.wait_for_timeout(5_000)
+        except Exception as e:
+            print(f"Tela de login nao encontrada ou ja logado. Prosseguindo... ({e})")
+
+        # Verificar resultado
+        try:
+            by_xpath(page, XPATHS["menu_financeiro"]).wait_for(state="visible", timeout=15_000)
+            print("Login realizado com sucesso!")
+            return
+        except Exception:
+            print(f"Menu financeiro nao apareceu na tentativa {tentativa}.")
+            if tentativa < max_tentativas:
+                print(f"Aguardando 5s antes de recarregar a pagina para nova tentativa...")
+                page.wait_for_timeout(5_000)
+            else:
+                # Ultima tentativa falhou — lanca erro
+                print("Todas as tentativas de login falharam.")
+                by_xpath(page, XPATHS["menu_financeiro"]).wait_for(state="visible", timeout=60_000)
 
 
 def navigate_to_export(page: Page) -> None:

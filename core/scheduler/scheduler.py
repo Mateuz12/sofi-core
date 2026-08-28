@@ -58,9 +58,10 @@ except ImportError:
 # Exit codes
 # ─────────────────────────────────────────────
 
-EXIT_OK        = 0
-EXIT_RETRYABLE = 1
-EXIT_PERMANENT = 2
+EXIT_OK              = 0
+EXIT_RETRYABLE       = 1
+EXIT_PERMANENT       = 2
+EXIT_SEM_FATURAMENTO = 3
 
 # ─────────────────────────────────────────────
 # Utilitários de log no sofi.db
@@ -107,10 +108,10 @@ def run_job(job_config: dict) -> dict:
     Returns:
         dict com chaves:
             - name          (str)  — nome do job
-            - status        (str)  — "SUCESSO" | "ERRO" | "FALHA PERMANENTE"
+            - status        (str)  — "SUCESSO" | "SEM FATURAMENTO" | "ERRO" | "FALHA PERMANENTE"
             - tentativas    (int)  — tentativas realizadas
             - duracao       (str)  — duração formatada "Xm Ys"
-            - mensagem_erro (str)  — descrição do erro (vazio se SUCESSO)
+            - mensagem_erro (str)  — descrição do erro (vazio se SUCESSO/SEM FATURAMENTO)
     """
     name         = job_config["name"]
     script       = _ROOT / job_config["script"]
@@ -144,11 +145,24 @@ def run_job(job_config: dict) -> dict:
 
         if rc == EXIT_OK:
             duracao = _formatar_duracao(inicio)
-            _log("SUCESSO", f"Job '{name}' concluído com sucesso (tentativa {tentativa}).", modulo="Scheduler")
-            print(f"[Scheduler] '{name}' SUCESSO na tentativa {tentativa}.")
+            status_txt = "COM FATURAMENTO" if "xml" in name.lower() else "SUCESSO"
+            _log("SUCESSO", f"Job '{name}' concluído com sucesso ({status_txt}) (tentativa {tentativa}).", modulo="Scheduler")
+            print(f"[Scheduler] '{name}' {status_txt} na tentativa {tentativa}.")
             return {
                 "name": name,
-                "status": "SUCESSO",
+                "status": status_txt,
+                "tentativas": tentativa,
+                "duracao": duracao,
+                "mensagem_erro": "",
+            }
+
+        if rc == EXIT_SEM_FATURAMENTO:
+            duracao = _formatar_duracao(inicio)
+            _log("INFO", f"Job '{name}' concluído sem novas notas faturadas (SEM FATURAMENTO).", modulo="Scheduler")
+            print(f"[Scheduler] '{name}' concluído (SEM FATURAMENTO).")
+            return {
+                "name": name,
+                "status": "SEM FATURAMENTO",
                 "tentativas": tentativa,
                 "duracao": duracao,
                 "mensagem_erro": "",
@@ -205,15 +219,32 @@ def _formatar_duracao(inicio: datetime) -> str:
 import threading
 
 _group_lock = threading.Lock()
-# { "Relatorios": { "pending": {"DFC UDI", "DFC BH", ...}, "results": [...] }, ... }
+# { "Retaguarda": { "pending": {"Fluxo Analítico DFC UDI", ...}, "results": [...] }, ... }
 _group_buffers: dict[str, dict] = {}
+
+
+def _get_group_jobs_list(group_data: list | dict) -> list[str]:
+    """Retorna a lista de nomes de jobs contidos na definição do grupo."""
+    if isinstance(group_data, list):
+        return group_data
+    if isinstance(group_data, dict):
+        return group_data.get("jobs", [])
+    return []
+
+
+def _get_group_emails(group_data: list | dict) -> str | list[str] | None:
+    """Retorna os destinatários de e-mail configurados para o grupo, se houver."""
+    if isinstance(group_data, dict):
+        return group_data.get("emails")
+    return None
 
 
 def _find_group(job_name: str, config: dict) -> str | None:
     """Retorna o nome do grupo de notificação ao qual o job pertence, ou None."""
     groups = config.get("notification_groups", {})
-    for group_name, members in groups.items():
-        if job_name in members:
+    for group_name, group_data in groups.items():
+        jobs_list = _get_group_jobs_list(group_data)
+        if job_name in jobs_list:
             return group_name
     return None
 
@@ -227,14 +258,31 @@ def _init_group_buffers(config: dict) -> None:
 
     with _group_lock:
         _group_buffers = {}
-        for group_name, members in groups.items():
-            # Só incluir membros habilitados
+        for group_name, group_data in groups.items():
+            members = _get_group_jobs_list(group_data)
             active = {m for m in members if m in enabled_names}
             if active:
                 _group_buffers[group_name] = {
                     "pending": set(active),
                     "results": [],
                 }
+
+
+def _get_or_create_group_buffer(group_name: str, config: dict) -> dict:
+    """Garante a existência do buffer para um grupo, criando-o sob demanda se necessário."""
+    global _group_buffers
+    if group_name not in _group_buffers or not _group_buffers[group_name].get("pending"):
+        groups = config.get("notification_groups", {})
+        group_data = groups.get(group_name, {})
+        members = _get_group_jobs_list(group_data)
+        all_jobs = config.get("jobs", [])
+        enabled_names = {j["name"] for j in all_jobs if j.get("enabled", True)}
+        active = {m for m in members if m in enabled_names}
+        _group_buffers[group_name] = {
+            "pending": set(active),
+            "results": [],
+        }
+    return _group_buffers[group_name]
 
 
 def _record_and_maybe_notify(job_name: str, resultado: dict, config: dict) -> None:
@@ -244,52 +292,54 @@ def _record_and_maybe_notify(job_name: str, resultado: dict, config: dict) -> No
     """
     notif_cfg = config.get("notification", {})
     group_name = _find_group(job_name, config)
+    groups = config.get("notification_groups", {})
+    group_data = groups.get(group_name) if group_name else None
+    group_emails = _get_group_emails(group_data) if group_data else None
 
     if not group_name:
         # Job sem grupo: envia notificação individual (compatibilidade)
-        _send_notification_if_needed([resultado], notif_cfg)
+        _send_notification_if_needed([resultado], notif_cfg, group_name=job_name, group_emails=None)
         return
 
     should_notify = False
     group_results = []
 
     with _group_lock:
-        buf = _group_buffers.get(group_name)
-        if not buf:
-            # Grupo não inicializado (pode acontecer se config mudou)
-            _send_notification_if_needed([resultado], notif_cfg)
-            return
-
+        buf = _get_or_create_group_buffer(group_name, config)
         buf["results"].append(resultado)
         buf["pending"].discard(job_name)
 
         if not buf["pending"]:
             # Último job do grupo concluiu!
             should_notify = True
-            # Ordena na sequência original definida no config
-            members_order = config.get("notification_groups", {}).get(group_name, [])
+            members_order = _get_group_jobs_list(group_data)
             order_map = {name: i for i, name in enumerate(members_order)}
             group_results = sorted(
                 buf["results"],
                 key=lambda r: order_map.get(r["name"], 999)
             )
-            # Limpa o buffer para o próximo ciclo
-            buf["results"] = []
+            # Reseta o buffer para a próxima execução do grupo
+            _group_buffers.pop(group_name, None)
 
     if should_notify:
         resumo = ", ".join(f"{r['name']}={r['status']}" for r in group_results)
         _log("INFO", f"Grupo '{group_name}' completo. Resultados: {resumo}", modulo="Scheduler")
         print(f"[Scheduler] Grupo '{group_name}' completo. Enviando notificacao consolidada...")
-        _send_notification_if_needed(group_results, notif_cfg)
+        _send_notification_if_needed(group_results, notif_cfg, group_name=group_name, group_emails=group_emails)
 
 
-def _send_notification_if_needed(resultados: list[dict], notif_cfg: dict) -> None:
+def _send_notification_if_needed(
+    resultados: list[dict],
+    notif_cfg: dict,
+    group_name: str | None = None,
+    group_emails: str | list[str] | None = None
+) -> None:
     """Decide se envia e-mail e envia se necessário."""
     if not notif_cfg.get("enabled", True):
         print("[Scheduler] Notificacoes desabilitadas no config. E-mail nao enviado.")
         return
 
-    tem_erro = any(r["status"] not in ("SUCESSO", "DESABILITADO") for r in resultados)
+    tem_erro = any(r["status"] not in ("SUCESSO", "COM FATURAMENTO", "SEM FATURAMENTO", "DESABILITADO") for r in resultados)
 
     deve_enviar = (
         (tem_erro and notif_cfg.get("send_on_error", True)) or
@@ -302,10 +352,11 @@ def _send_notification_if_needed(resultados: list[dict], notif_cfg: dict) -> Non
 
     try:
         from core.notifier import send_scheduler_notification
-        send_scheduler_notification(resultados)
+        send_scheduler_notification(resultados, destinatarios=group_emails, grupo_nome=group_name)
     except Exception as exc:
         _log("ERRO", f"Erro inesperado ao enviar notificacao: {exc}", modulo="Scheduler")
         print(f"[Scheduler] Erro inesperado ao enviar notificacao: {exc}")
+
 
 
 # ─────────────────────────────────────────────

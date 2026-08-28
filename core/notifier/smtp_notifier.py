@@ -63,7 +63,7 @@ def _log_db(status: str, mensagem: str) -> None:
 # Template HTML do e-mail
 # ─────────────────────────────────────────────
 
-def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool) -> str:
+def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool, grupo_nome: str | None = None) -> str:
     """Monta o corpo HTML do e-mail consolidado."""
 
     # ── Linhas da tabela de resumo ──
@@ -75,11 +75,16 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool) -> s
         dur    = r.get("duracao", "—")
         erro   = r.get("mensagem_erro", "")
 
-        if status == "SUCESSO":
+        if status in ("SUCESSO", "COM FATURAMENTO"):
             icone      = "✅"
             badge_cor  = "#1a7a3f"
             badge_bg   = "#d4edda"
-            badge_txt  = "SUCESSO"
+            badge_txt  = "COM FATURAMENTO" if status == "COM FATURAMENTO" else "SUCESSO"
+        elif status == "SEM FATURAMENTO":
+            icone      = "ℹ️"
+            badge_cor  = "#0d47a1"
+            badge_bg   = "#e3f2fd"
+            badge_txt  = "SEM FATURAMENTO"
         elif status == "DESABILITADO":
             icone      = "⏸️"
             badge_cor  = "#666"
@@ -93,7 +98,7 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool) -> s
 
         # Célula extra com trecho do erro (se houver)
         detalhe_html = ""
-        if erro and status not in ("SUCESSO", "DESABILITADO"):
+        if erro and status not in ("SUCESSO", "COM FATURAMENTO", "SEM FATURAMENTO", "DESABILITADO"):
             # Últimas 5 linhas, tratadas como texto simples
             trecho = "\n".join(erro.strip().splitlines()[-5:])
             detalhe_html = f"""
@@ -118,12 +123,55 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool) -> s
         {detalhe_html}"""
 
     # ── Cabeçalho dinâmico ──
+    tem_sem_faturamento = any(r.get("status") == "SEM FATURAMENTO" for r in resultados)
+    tem_com_faturamento = any(r.get("status") == "COM FATURAMENTO" for r in resultados)
+    eh_grupo_xml = bool((grupo_nome and "xml" in grupo_nome.lower()) or any("xml" in r.get("name", "").lower() for r in resultados))
+
     if tem_erro:
         header_bg    = "linear-gradient(135deg, #c0392b 0%, #922b21 100%)"
         header_label = f"&#10060; &nbsp;Agendamentos dia {data_execucao.split()[0]} &mdash; Aten&ccedil;&atilde;o, h&aacute; erros!"
+    elif eh_grupo_xml and tem_sem_faturamento:
+        header_bg    = "linear-gradient(135deg, #1e88e5 0%, #1565c0 100%)"
+        header_label = f"&#8505; &nbsp;Agendamentos dia {data_execucao.split()[0]} &mdash; Sem Faturamento"
+    elif eh_grupo_xml and tem_com_faturamento:
+        header_bg    = "linear-gradient(135deg, #1a7a3f 0%, #145a30 100%)"
+        header_label = f"&#9989; &nbsp;Agendamentos dia {data_execucao.split()[0]} &mdash; Com Faturamento"
     else:
         header_bg    = "linear-gradient(135deg, #1a7a3f 0%, #145a30 100%)"
         header_label = f"&#9989; &nbsp;Agendamentos dia {data_execucao.split()[0]} &mdash; Tudo OK!"
+
+    # ── Mensagem contextual (exibida APENAS para grupos de XML) ──
+    mensagem_contexto = ""
+
+    if eh_grupo_xml:
+        if tem_sem_faturamento and not tem_erro:
+            mensagem_contexto = """
+        <tr>
+          <td style="padding:16px 32px 8px;">
+            <div style="background:#e3f2fd; border-left:4px solid #1e88e5; padding:14px 18px; border-radius:6px;">
+              <p style="margin:0; color:#0d47a1; font-size:14px; font-weight:600;">
+                &#8505; N&atilde;o houve faturamento neste per&iacute;odo
+              </p>
+              <p style="margin:6px 0 0; color:#1565c0; font-size:13px;">
+                A automa&ccedil;&atilde;o foi executada com sucesso, por&eacute;m n&atilde;o foram encontradas novas notas fiscais faturadas no per&iacute;odo verificado.
+              </p>
+            </div>
+          </td>
+        </tr>"""
+        elif not tem_erro:
+            mensagem_contexto = """
+        <tr>
+          <td style="padding:16px 32px 8px;">
+            <div style="background:#d4edda; border-left:4px solid #1a7a3f; padding:14px 18px; border-radius:6px;">
+              <p style="margin:0; color:#1a7a3f; font-size:14px; font-weight:600;">
+                &#9989; Houve faturamento no per&iacute;odo
+              </p>
+              <p style="margin:6px 0 0; color:#145a30; font-size:13px;">
+                Novas notas fiscais foram detectadas e processadas com sucesso. Os relat&oacute;rios finais foram gerados.
+              </p>
+            </div>
+          </td>
+        </tr>"""
 
     hostname = socket.gethostname()
     usuario  = getpass.getuser()
@@ -147,6 +195,9 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool) -> s
             </p>
           </td>
         </tr>
+
+        <!-- MENSAGEM CONTEXTUAL -->
+        {mensagem_contexto}
 
         <!-- TABELA DE JOBS -->
         <tr>
@@ -194,17 +245,60 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool) -> s
 # Função pública principal
 # ─────────────────────────────────────────────
 
-def send_scheduler_notification(resultados: list[dict]) -> bool:
+def _resolver_destinatarios(destinatarios_input: list[str] | str | None, grupo_nome: str | None = None) -> list[str]:
+    """Resolve lista de e-mails tratando nomes de variáveis de ambiente e separadores ; e ,"""
+    if not destinatarios_input:
+        if grupo_nome and "xml" in grupo_nome.lower():
+            destinatarios_input = "SCHEDULER_NOTIFY_EMAILS_XML"
+        elif grupo_nome and ("retaguarda" in grupo_nome.lower() or "dfc" in grupo_nome.lower()):
+            destinatarios_input = "SCHEDULER_NOTIFY_EMAILS_RETAGUARDA"
+        elif grupo_nome and "extranet" in grupo_nome.lower():
+            destinatarios_input = "SCHEDULER_NOTIFY_EMAILS_EXTRANET"
+        else:
+            destinatarios_input = os.getenv("SCHEDULER_NOTIFY_EMAILS", "")
+
+    entradas = []
+    if isinstance(destinatarios_input, str):
+        entradas = [destinatarios_input]
+    elif isinstance(destinatarios_input, list):
+        entradas = destinatarios_input
+
+    resultado = []
+    for item in entradas:
+        if not item or not isinstance(item, str):
+            continue
+        item_str = item.strip()
+        # Se for nome de variável de ambiente cadastrada no .env
+        val_env = os.getenv(item_str)
+        if val_env:
+            item_str = val_env
+
+        # Quebra por ';' ou ','
+        partes = [p.strip() for p in item_str.replace(",", ";").split(";") if p.strip()]
+        for p in partes:
+            if "@" in p and p not in resultado:
+                resultado.append(p)
+
+    return resultado
+
+
+def send_scheduler_notification(
+    resultados: list[dict],
+    destinatarios: list[str] | str | None = None,
+    grupo_nome: str | None = None
+) -> bool:
     """
     Envia um e-mail HTML consolidado com o resumo de todos os jobs.
 
     Args:
         resultados: lista de dicts com chaves:
             - name          (str)   — nome do job
-            - status        (str)   — "SUCESSO" | "ERRO" | "FALHA PERMANENTE" | "DESABILITADO"
+            - status        (str)   — "SUCESSO" | "COM FATURAMENTO" | "SEM FATURAMENTO" | "ERRO" | "FALHA PERMANENTE" | "DESABILITADO"
             - tentativas    (int)   — número de tentativas realizadas
             - duracao       (str)   — duração formatada, ex: "2m 14s"
-            - mensagem_erro (str)   — trecho do erro (vazio se SUCESSO/DESABILITADO)
+            - mensagem_erro (str)   — trecho do erro (vazio se SUCESSO/COM FATURAMENTO/SEM FATURAMENTO/DESABILITADO)
+        destinatarios: lista ou string com e-mails ou nome de variável de ambiente (ex: "SCHEDULER_NOTIFY_EMAILS_XML")
+        grupo_nome: (opcional) nome do grupo de notificação
 
     Returns:
         True se o e-mail foi enviado com sucesso, False caso contrário.
@@ -214,41 +308,46 @@ def send_scheduler_notification(resultados: list[dict]) -> bool:
     smtp_port   = int(os.getenv("SMTP_PORT", "587"))
     smtp_user   = os.getenv("SMTP_USER", "")
     smtp_pass   = os.getenv("SMTP_PASSWORD", "")
-    destinatarios_raw = os.getenv("SCHEDULER_NOTIFY_EMAILS", "")
 
     if not smtp_user or not smtp_pass:
         _log_db("AVISO", "send_scheduler_notification: SMTP_USER ou SMTP_PASSWORD nao configurados no .env. E-mail nao enviado.")
         print("[Notifier] AVISO: SMTP_USER ou SMTP_PASSWORD nao configurados. Notificacao pulada.")
         return False
 
-    destinatarios = [e.strip() for e in destinatarios_raw.split(";") if e.strip()]
-    if not destinatarios:
-        _log_db("AVISO", "send_scheduler_notification: SCHEDULER_NOTIFY_EMAILS nao configurado. E-mail nao enviado.")
-        print("[Notifier] AVISO: Nenhum destinatario configurado em SCHEDULER_NOTIFY_EMAILS.")
+    destinatarios_limpos = _resolver_destinatarios(destinatarios, grupo_nome=grupo_nome)
+    if not destinatarios_limpos:
+        _log_db("AVISO", f"send_scheduler_notification: Nenhum destinatario configurado para grupo '{grupo_nome or 'Geral'}'. E-mail nao enviado.")
+        print(f"[Notifier] AVISO: Nenhum destinatario valido encontrado para o grupo '{grupo_nome or 'Geral'}'.")
         return False
 
     # ── Metadados ──
     data_execucao = datetime.now().strftime("%d/%m/%Y %H:%M")
     tem_erro = any(
-        r.get("status") not in ("SUCESSO", "DESABILITADO")
+        r.get("status") not in ("SUCESSO", "COM FATURAMENTO", "SEM FATURAMENTO", "DESABILITADO")
         for r in resultados
     )
 
     # ── Assunto — resume os jobs do grupo ──
     data_hoje = datetime.now().strftime("%d/%m/%Y")
     nomes_jobs = ", ".join(r.get("name", "Job") for r in resultados)
+    prefixo_grupo = f"[{grupo_nome}] " if grupo_nome else "[SOFI] "
+
     if tem_erro:
-        assunto = f"[SOFI] {data_hoje} - com ERROS | {nomes_jobs}"
+        assunto = f"{prefixo_grupo}{data_hoje} - com ERROS | {nomes_jobs}"
+    elif any(r.get("status") == "SEM FATURAMENTO" for r in resultados):
+        assunto = f"{prefixo_grupo}{data_hoje} - SEM FATURAMENTO | {nomes_jobs}"
+    elif any(r.get("status") == "COM FATURAMENTO" for r in resultados):
+        assunto = f"{prefixo_grupo}{data_hoje} - COM FATURAMENTO | {nomes_jobs}"
     else:
-        assunto = f"[SOFI] {data_hoje} - OK | {nomes_jobs}"
+        assunto = f"{prefixo_grupo}{data_hoje} - OK | {nomes_jobs}"
 
     # ── Monta e-mail ──
     msg = MIMEMultipart("alternative")
     msg["Subject"] = assunto
     msg["From"]    = f"SOFI Notifier <{smtp_user}>"
-    msg["To"]      = ", ".join(destinatarios)
+    msg["To"]      = ", ".join(destinatarios_limpos)
 
-    html_body = _build_html(resultados, data_execucao, tem_erro)
+    html_body = _build_html(resultados, data_execucao, tem_erro, grupo_nome=grupo_nome)
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     # ── Envia via SMTP ──
@@ -258,14 +357,15 @@ def send_scheduler_notification(resultados: list[dict]) -> bool:
             server.starttls()
             server.ehlo()
             server.login(smtp_user, smtp_pass)
-            server.sendmail(smtp_user, destinatarios, msg.as_string())
+            server.sendmail(smtp_user, destinatarios_limpos, msg.as_string())
 
         jobs_resumo = ", ".join(f"{r['name']}={r['status']}" for r in resultados)
-        _log_db("SUCESSO", f"E-mail de notificacao enviado para {destinatarios}. Jobs: {jobs_resumo}")
-        print(f"[Notifier] E-mail enviado com SUCESSO para: {', '.join(destinatarios)}")
+        _log_db("SUCESSO", f"E-mail de notificacao do grupo '{grupo_nome or 'Geral'}' enviado para {destinatarios_limpos}. Jobs: {jobs_resumo}")
+        print(f"[Notifier] E-mail do grupo '{grupo_nome or 'Geral'}' enviado com SUCESSO para: {', '.join(destinatarios_limpos)}")
         return True
 
     except Exception as exc:
-        _log_db("ERRO", f"Falha ao enviar e-mail de notificacao: {exc}")
+        _log_db("ERRO", f"Falha ao enviar e-mail de notificacao para grupo '{grupo_nome or 'Geral'}': {exc}")
         print(f"[Notifier] FALHA ao enviar e-mail: {exc}")
         return False
+
