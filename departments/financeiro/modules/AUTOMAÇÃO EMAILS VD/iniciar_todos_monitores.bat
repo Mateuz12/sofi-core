@@ -9,6 +9,8 @@ taskkill /f /im pythonw.exe >nul 2>&1
 echo [1/2] Iniciando Monitor VD UDI...
 start "" %PY_CMD% "%SCRIPT_DIR%monitor_emails_vd.py"
 
+ping 127.0.0.1 -n 4 >nul
+
 echo [2/2] Iniciando Monitor VD BH...
 start "" %PY_CMD% "%SCRIPT_DIR%BH\monitor_emails_vd_BH.py"
 
@@ -18,4 +20,4 @@ echo Logs:
 echo   - UDI: %SCRIPT_DIR%monitor_vd.log
 echo   - BH:  %SCRIPT_DIR%BH\monitor_vd.log
 echo.
-timeout /t 5 >nul
+ping 127.0.0.1 -n 6 >nul

@@ -47,8 +47,14 @@ def get_outlook_folder(namespace, folder_name):
 def convert_to_xls(temp_path, final_path):
     """Converte um arquivo Excel para o formato 97-2003 (.xls) via COM."""
     excel = win32com.client.gencache.EnsureDispatch("Excel.Application")
-    excel.Visible = False
-    excel.DisplayAlerts = False
+    try:
+        excel.Visible = False
+    except Exception:
+        pass
+    try:
+        excel.DisplayAlerts = False
+    except Exception:
+        pass
     
     try:
         wb = excel.Workbooks.Open(temp_path)

@@ -39,6 +39,7 @@ def start_bh():
 def main():
     print("[Monitores VD] Iniciando Supervisor de Monitores...")
     proc_udi = start_udi()
+    time.sleep(3)
     proc_bh = start_bh()
     print(f"[Monitores VD] UDI PID: {proc_udi.pid} | BH PID: {proc_bh.pid}")
     print("[Monitores VD] Ambos os monitores foram iniciados e estão sendo supervisionados!")

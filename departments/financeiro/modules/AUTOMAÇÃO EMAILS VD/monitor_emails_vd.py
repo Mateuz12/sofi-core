@@ -19,6 +19,7 @@ import logging
 import threading
 import time
 import socket
+import shutil
 from datetime import datetime, date
 from pathlib import Path
 
@@ -256,30 +257,55 @@ def process_message(message, namespace):
         final_filename = f"{matched_unidade['final_name_prefix']}.{extracted_date_full}.xls"
         final_path = os.path.join(final_dir, final_filename)
 
-        # PASSO 2: Mover email ANTES de salvar o anexo
-        # (Evita erro do Outlook "The operation cannot be performed because the message has been changed")
+        attachment_processed = False
+
+        if os.path.exists(final_path):
+            log(f"  ℹ️ Arquivo já existe em disco: {final_path}")
+            attachment_processed = True
+        else:
+            original_ext = os.path.splitext(target_nome)[1]
+            with tempfile.NamedTemporaryFile(delete=False, suffix=original_ext) as tmp:
+                temp_save_path = tmp.name
+
+            target_attachment.SaveAsFile(temp_save_path)
+
+            if original_ext.lower() == ".xls":
+                shutil.copy2(temp_save_path, final_path)
+                log(f"  💾 Arquivo salvo (sem conversão): {final_path}")
+                attachment_processed = True
+            elif convert_to_xls(temp_save_path, final_path):
+                log(f"  💾 Arquivo salvo: {final_path}")
+                attachment_processed = True
+
+            if os.path.exists(temp_save_path):
+                os.remove(temp_save_path)
+
+        # PASSO 2: Mover email (com Save para evitar erro de item modificado no Outlook)
         try:
             archive_folder = get_archive_folder(namespace)
+            try:
+                message.Save()
+            except Exception:
+                pass
             message.Move(archive_folder)
-            log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}' antes de processar.")
+            log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}'.")
         except Exception as move_err:
-            log(f"  ⚠️ Não foi possível mover o email: {move_err}. Continuando processamento...", "warning")
+            try:
+                entry_id = getattr(message, "EntryID", None)
+                if entry_id:
+                    fresh_msg = namespace.GetItemFromID(entry_id)
+                    try:
+                        fresh_msg.Save()
+                    except Exception:
+                        pass
+                    fresh_msg.Move(archive_folder)
+                    log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}' (via GetItemFromID).")
+                else:
+                    log(f"  ⚠️ Não foi possível mover o email: {move_err}", "warning")
+            except Exception as e2:
+                log(f"  ⚠️ Não foi possível mover o email (fallback falhou): {e2}", "warning")
 
-        # PASSO 3: Salvar o anexo
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-            temp_save_path = tmp.name
-
-        target_attachment.SaveAsFile(temp_save_path)
-
-        attachment_processed = False
-        if convert_to_xls(temp_save_path, final_path):
-            log(f"  💾 Arquivo salvo: {final_path}")
-            attachment_processed = True
-
-        if os.path.exists(temp_save_path):
-            os.remove(temp_save_path)
-
-        # PASSO 4: Verificar e disparar upload automático
+        # PASSO 3: Verificar e disparar upload automático
         if attachment_processed:
             check_and_upload(final_dir, extracted_date_full)
         else:

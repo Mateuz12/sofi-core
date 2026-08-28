@@ -7,17 +7,28 @@
     "send_on_error": true
   },
   "notification_groups": {
-    "Relatorios": [
-      "Fluxo Analítico DFC UDI",
-      "Fluxo Analítico DFC BH",
-      "Retaguarda UDI",
-      "Retaguarda BH",
-      "XML Retaguarda Entrada"
-    ],
-    "Extranet": [
-      "Extranet BH",
-      "Extranet UDI"
-    ]
+    "Retaguarda": {
+      "emails": "SCHEDULER_NOTIFY_EMAILS_RETAGUARDA",
+      "jobs": [
+        "Fluxo Analítico DFC UDI",
+        "Fluxo Analítico DFC BH",
+        "Retaguarda UDI",
+        "Retaguarda BH"
+      ]
+    },
+    "XML Retaguarda": {
+      "emails": "SCHEDULER_NOTIFY_EMAILS_XML",
+      "jobs": [
+        "XML Retaguarda Entrada"
+      ]
+    },
+    "Extranet": {
+      "emails": "SCHEDULER_NOTIFY_EMAILS_EXTRANET",
+      "jobs": [
+        "Extranet BH",
+        "Extranet UDI"
+      ]
+    }
   },
   "jobs": [
     {
@@ -27,8 +38,8 @@
       "unidade": "UDI",
       "schedule": {
         "type": "cron",
-        "hour": 6,
-        "minute": 45
+        "hour": 7,
+        "minute": 0
       },
       "dias": 0,
       "retry": {
@@ -60,7 +71,7 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 15
+        "minute": 0
       },
       "dias": 1,
       "retry": {
@@ -76,7 +87,7 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 30
+        "minute": 0
       },
       "dias": 1,
       "retry": {
@@ -106,7 +117,7 @@
       "schedule": {
         "type": "cron",
         "hour": 9,
-        "minute": 15
+        "minute": 0
       },
       "dias": 5,
       "retry": {
