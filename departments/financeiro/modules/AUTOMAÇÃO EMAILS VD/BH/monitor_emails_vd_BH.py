@@ -21,7 +21,7 @@ import unicodedata
 import threading
 import time
 import socket
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 
 # ─────────────────────────────────────────────
@@ -55,6 +55,8 @@ SENDER_EMAILS = [
 ]
 ARCHIVE_FOLDER_NAME = "Arquivados BH"
 START_DATE_SCAN = "21/07/2026" # Somente processa emails recebidos a partir desta data
+WATCHER_START_DATE = "21/07/2026"
+WATCHER_INTERVAL = 300
 
 MESES_PT = {
     1: "01 JANEIRO", 2: "02 FEVEREIRO", 3: "03 MARÇO", 4: "04 ABRIL",
@@ -112,11 +114,15 @@ UNIDADES = {
             "Controle de Titulo",
             "Controle de Titulos",
             "Controle de Títulos",
+            "ControleTitulos",
+            "ControleTitulo",
+            "ControleTitulos_ER NEVES",
+            "ControleTitulos ER NEVES",
             "Controle de titulos ER Neves 21433",
             "Controle de títulos ER Neves 21433",
             "Controle de titulo ER Neves",
             "Controle de título ER Neves",
-            "ConsultaTitulo ER NEVES",  # Novo padrão de nome detectado em 14/08/2026
+            "ConsultaTitulo ER NEVES",
             "ConsultaTitulo"
         ],
         "unit_id": "ER NEVES",
@@ -303,8 +309,14 @@ def process_message(message, namespace):
             if isinstance(prefixos_config, str):
                 prefixos_config = [prefixos_config]
 
-            # Verifica se algum prefixo configurado bate com o nome do anexo
-            prefixo_ok = any(normalizar_texto(p) in nome_clean for p in prefixos_config)
+            nome_no_space = nome_clean.replace(" ", "").replace("_", "").replace("-", "")
+            prefixo_ok = False
+            for p in prefixos_config:
+                p_norm = normalizar_texto(p)
+                p_no_space = p_norm.replace(" ", "").replace("_", "").replace("-", "")
+                if p_norm in nome_clean or p_no_space in nome_no_space:
+                    prefixo_ok = True
+                    break
 
             if not prefixo_ok:
                 continue
@@ -371,26 +383,30 @@ def process_message(message, namespace):
             if os.path.exists(temp_save_path):
                 os.remove(temp_save_path)
 
-        # PASSO 2: Mover email (com Save para evitar erro de item modificado no Outlook)
+        # PASSO 2: Mover email (apenas se já não estiver arquivado)
         try:
             archive_folder = get_archive_folder(namespace)
-            try:
-                message.Save()
-            except Exception:
-                pass
-            message.Move(archive_folder)
-            log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}'.")
+            parent_name = getattr(getattr(message, "Parent", None), "Name", "")
+            if parent_name != ARCHIVE_FOLDER_NAME:
+                try:
+                    message.Save()
+                except Exception:
+                    pass
+                message.Move(archive_folder)
+                log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}'.")
         except Exception as move_err:
             try:
                 entry_id = getattr(message, "EntryID", None)
                 if entry_id:
                     fresh_msg = namespace.GetItemFromID(entry_id)
-                    try:
-                        fresh_msg.Save()
-                    except Exception:
-                        pass
-                    fresh_msg.Move(archive_folder)
-                    log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}' (via GetItemFromID).")
+                    fresh_parent = getattr(getattr(fresh_msg, "Parent", None), "Name", "")
+                    if fresh_parent != ARCHIVE_FOLDER_NAME:
+                        try:
+                            fresh_msg.Save()
+                        except Exception:
+                            pass
+                        fresh_msg.Move(archive_folder)
+                        log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}' (via GetItemFromID).")
                 else:
                     log(f"  ⚠️ Não foi possível mover o email: {move_err}", "warning")
             except Exception as e2:
@@ -432,6 +448,54 @@ def upload_individual(file_path, date_str, uni_name):
 
     except Exception as e:
         log(f"  ❌ [PORTAL] Falha no upload individual de {uni_name} ({date_str}): {e}", "error")
+
+def folder_watcher_loop():
+    """Monitora a pasta do servidor em busca de relatórios do BH sem upload feito."""
+    watcher_start = datetime.strptime(WATCHER_START_DATE, "%d/%m/%Y").date()
+    log(f"👁️  [WATCHER BH] Iniciado. Monitorando pasta a cada {WATCHER_INTERVAL // 60} minutos (dias >= {WATCHER_START_DATE}).")
+    
+    while True:
+        try:
+            hoje = date.today()
+            mes_folder = MESES_PT.get(hoje.month)
+            if not mes_folder:
+                time.sleep(WATCHER_INTERVAL)
+                continue
+            
+            pasta_mes = os.path.join(BASE_PATH, mes_folder)
+            if not os.path.exists(pasta_mes):
+                time.sleep(WATCHER_INTERVAL)
+                continue
+            
+            for dia_nome in os.listdir(pasta_mes):
+                dia_path = os.path.join(pasta_mes, dia_nome)
+                if not os.path.isdir(dia_path):
+                    continue
+                try:
+                    dia_num = int(dia_nome)
+                    data_dia = date(hoje.year, hoje.month, dia_num)
+                except ValueError:
+                    continue
+                
+                if data_dia < watcher_start:
+                    continue
+                
+                date_str = data_dia.strftime("%d-%m-%Y")
+                
+                for uni_name, data in UNIDADES.items():
+                    filename = f"{data['final_name_prefix']}.{date_str}.xls"
+                    path = os.path.join(dia_path, filename)
+                    if os.path.exists(path):
+                        uni_safe = data["unit_id"].replace(" ", "_").upper()
+                        upload_done_marker = os.path.join(dia_path, f".upload_done_{uni_safe}_{date_str}")
+                        if not os.path.exists(upload_done_marker):
+                            log(f"  👁️  [WATCHER BH] Relatório de {uni_name} ({date_str}) encontrado pendente de upload. Disparando upload...")
+                            upload_individual(path, date_str, data["unit_id"])
+                            
+        except Exception as e:
+            log(f"Erro no watcher de pasta BH: {e}", "error")
+        
+        time.sleep(WATCHER_INTERVAL)
 
 def inbox_poller_loop():
     """Varre a caixa de entrada periodicamente a cada 3 minutos como segurança caso eventos COM falhem."""
@@ -482,38 +546,42 @@ class OutlookEventHandler:
 # VARREDURA E PONTO DE ENTRADA
 # ─────────────────────────────────────────────
 def scan_inbox(namespace):
-    """Verifica emails existentes na Caixa de Entrada a partir da data configurada."""
-    log(f"🔍 Iniciando varredura de emails existentes (a partir de {START_DATE_SCAN})...")
+    """Verifica emails existentes na Caixa de Entrada e na pasta Arquivados BH."""
+    log(f"🔍 Iniciando varredura de emails (Inbox e Arquivados BH a partir de {START_DATE_SCAN})...")
     try:
         inbox = namespace.GetDefaultFolder(6)
+        archive_folder = get_archive_folder(namespace)
+        folders = [("Caixa de Entrada", inbox), (ARCHIVE_FOLDER_NAME, archive_folder)]
+        
         start_dt = datetime.strptime(START_DATE_SCAN, "%d/%m/%Y").date()
+        total_count = 0
         
-        messages = inbox.Items
-        messages.Sort("[ReceivedTime]", True)
-        
-        count = 0
-        analisados = 0
-        # Percorremos os emails enquanto forem recentes
-        for i in range(1, len(messages) + 1):
-            if analisados >= 1000: # Limite de segurança para não varrer o histórico infinito
-                break
-                
-            try:
-                msg = messages.Item(i)
-                if msg.Class == 43:
-                    analisados += 1
-                    # Compara a data de recebimento (timezone aware) com a data inicial
-                    received_date = msg.ReceivedTime.date()
-                    
-                    if received_date >= start_dt:
-                        process_message(msg, namespace)
-                        count += 1
-                    else:
-                        # Como está ordenado por data descendente, se chegamos em um mais antigo, podemos parar
-                        break
-            except Exception as e:
+        for folder_name, folder_obj in folders:
+            if not folder_obj:
                 continue
-        log(f"✨ Varredura inicial concluída. {count} e-mails processados.")
+            messages = folder_obj.Items
+            messages.Sort("[ReceivedTime]", True)
+            
+            count = 0
+            analisados = 0
+            for i in range(1, len(messages) + 1):
+                if analisados >= 500:
+                    break
+                try:
+                    msg = messages.Item(i)
+                    if msg.Class == 43:
+                        analisados += 1
+                        received_date = msg.ReceivedTime.date()
+                        if received_date >= start_dt:
+                            process_message(msg, namespace)
+                            count += 1
+                        else:
+                            break
+                except Exception:
+                    continue
+            log(f"   ✨ Pasta '{folder_name}' varrida: {count} e-mails verificados.")
+            total_count += count
+        log(f"✨ Varredura inicial concluída. Total de {total_count} e-mails processados.")
     except Exception as e:
         log(f"Erro na varredura inicial: {e}", "error")
 
@@ -553,12 +621,15 @@ def main():
         # 3. Varredura Inicial (Emails que já estão lá)
         scan_inbox(namespace)
 
-        # 4. Iniciar Poller de Inbox em thread separada
+        # 4. Iniciar Watcher de Pasta e Poller de Inbox em threads separadas
+        watcher_thread = threading.Thread(target=folder_watcher_loop, daemon=True)
+        watcher_thread.start()
+
         poller_thread = threading.Thread(target=inbox_poller_loop, daemon=True)
         poller_thread.start()
 
-        log("🎧 Aguardando novos emails em tempo real + poller (3min)...")
-        # 4. Loop de eventos do Windows
+        log("🎧 Aguardando novos emails em tempo real + poller (3min) + monitoramento de pasta...")
+        # 5. Loop de eventos do Windows
         pythoncom.PumpMessages()
 
     except KeyboardInterrupt:
