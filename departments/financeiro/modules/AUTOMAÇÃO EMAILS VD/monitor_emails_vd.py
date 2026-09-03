@@ -58,19 +58,19 @@ MESES_PT = {
 UNIDADES = {
     "UDI": {
         "subject_keyword": "UDI",
-        "attachment_prefix": "Controle de Titulo", # Puxa tanto Titulo quanto Titulos
+        "attachment_prefix": ["Controle de Titulo", "Controle de Título", "Controle de Titulos", "Controle de Títulos", "ControleTitulos", "ControleTítulo", "ControleTitulo", "ControleTítulos"],
         "unit_id": "UDI",
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 20844"
     },
     "ARI": {
         "subject_keyword": "ARI",
-        "attachment_prefix": "Controle de Titulo",
+        "attachment_prefix": ["Controle de Titulo", "Controle de Título", "Controle de Titulos", "Controle de Títulos", "ControleTitulos", "ControleTítulo", "ControleTitulo", "ControleTítulos"],
         "unit_id": "ARI",
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 23275"
     },
     "Jardim Patrícia": {
-        "subject_keyword": "JP",           # Email chega com "JP" no assunto (ex: "Fechamento de Caixa JP - 17-07-2026")
-        "attachment_prefix": "Controle de Titulo",  # Cobre "Controle de Titulo", "Controle de Títulos", "Controle de Titulos"
+        "subject_keyword": "JP",
+        "attachment_prefix": ["Controle de Titulo", "Controle de Título", "Controle de Titulos", "Controle de Títulos", "ControleTitulos", "ControleTítulo", "ControleTitulo", "ControleTítulos"],
         "unit_id": "JP",
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.UDI.2.1 FECHAMENTO DE CAIXA VD 24417"
     }
@@ -221,20 +221,30 @@ def process_message(message, namespace):
             nome = attachment.FileName
             log(f"  Verificando anexo: {nome}")
 
-            # Normalizar para comparação sem acentos (básico) e minúsculas
-            nome_clean = nome.lower().replace("í", "i").replace("á", "a")
-            prefixo_ref = matched_unidade["attachment_prefix"].lower()
+            nome_clean = nome.lower().replace("í", "i").replace("á", "a").replace("ã", "a").replace("õ", "o")
+            nome_no_space = nome_clean.replace(" ", "").replace("_", "").replace("-", "")
+
+            prefixos = matched_unidade["attachment_prefix"]
+            if isinstance(prefixos, str):
+                prefixos = [prefixos]
+
+            prefixo_ok = False
+            for p in prefixos:
+                p_clean = p.lower().replace("í", "i").replace("á", "a").replace("ã", "a").replace("õ", "o")
+                p_no_space = p_clean.replace(" ", "").replace("_", "").replace("-", "")
+                if p_clean in nome_clean or p_no_space in nome_no_space:
+                    prefixo_ok = True
+                    break
+
             unidade_ref = matched_unidade["unit_id"].lower()
+            unidade_ok = unidade_ref in nome_clean or unidade_ref.replace(" ", "") in nome_no_space
 
-            prefixo_ok = prefixo_ref in nome_clean and unidade_ref in nome_clean
-
-            # Normalizar data — testa tanto com "-" quanto com "/"
             date_2dig_slash = date_2dig.replace("-", "/")
             date_4dig_slash = date_4dig.replace("-", "/")
             data_ok = (date_2dig in nome or date_4dig in nome or
                        date_2dig_slash in nome or date_4dig_slash in nome)
 
-            if prefixo_ok and data_ok:
+            if prefixo_ok and unidade_ok and data_ok:
                 log(f"  ✅ Anexo correspondente encontrado!")
                 target_attachment = attachment
                 target_nome = nome
@@ -280,26 +290,30 @@ def process_message(message, namespace):
             if os.path.exists(temp_save_path):
                 os.remove(temp_save_path)
 
-        # PASSO 2: Mover email (com Save para evitar erro de item modificado no Outlook)
+        # PASSO 2: Mover email (apenas se já não estiver arquivado)
         try:
             archive_folder = get_archive_folder(namespace)
-            try:
-                message.Save()
-            except Exception:
-                pass
-            message.Move(archive_folder)
-            log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}'.")
+            parent_name = getattr(getattr(message, "Parent", None), "Name", "")
+            if parent_name != ARCHIVE_FOLDER_NAME:
+                try:
+                    message.Save()
+                except Exception:
+                    pass
+                message.Move(archive_folder)
+                log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}'.")
         except Exception as move_err:
             try:
                 entry_id = getattr(message, "EntryID", None)
                 if entry_id:
                     fresh_msg = namespace.GetItemFromID(entry_id)
-                    try:
-                        fresh_msg.Save()
-                    except Exception:
-                        pass
-                    fresh_msg.Move(archive_folder)
-                    log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}' (via GetItemFromID).")
+                    fresh_parent = getattr(getattr(fresh_msg, "Parent", None), "Name", "")
+                    if fresh_parent != ARCHIVE_FOLDER_NAME:
+                        try:
+                            fresh_msg.Save()
+                        except Exception:
+                            pass
+                        fresh_msg.Move(archive_folder)
+                        log(f"  📂 Email movido para '{ARCHIVE_FOLDER_NAME}' (via GetItemFromID).")
                 else:
                     log(f"  ⚠️ Não foi possível mover o email: {move_err}", "warning")
             except Exception as e2:
@@ -478,38 +492,42 @@ class OutlookEventHandler:
 # VARREDURA E PONTO DE ENTRADA
 # ─────────────────────────────────────────────
 def scan_inbox(namespace):
-    """Verifica emails existentes na Caixa de Entrada a partir da data configurada."""
-    log(f"🔍 Iniciando varredura de emails existentes (a partir de {START_DATE_SCAN})...")
+    """Verifica emails existentes na Caixa de Entrada e na pasta Arquivados."""
+    log(f"🔍 Iniciando varredura de emails (Inbox e Arquivados a partir de {START_DATE_SCAN})...")
     try:
         inbox = namespace.GetDefaultFolder(6)
+        archive_folder = get_archive_folder(namespace)
+        folders = [("Caixa de Entrada", inbox), (ARCHIVE_FOLDER_NAME, archive_folder)]
+        
         start_dt = datetime.strptime(START_DATE_SCAN, "%d/%m/%Y").date()
+        total_count = 0
         
-        messages = inbox.Items
-        messages.Sort("[ReceivedTime]", True)
-        
-        count = 0
-        analisados = 0
-        # Percorremos os emails enquanto forem recentes
-        for i in range(1, len(messages) + 1):
-            if analisados >= 1000: # Limite de segurança para não varrer o histórico infinito
-                break
-                
-            try:
-                msg = messages.Item(i)
-                if msg.Class == 43:
-                    analisados += 1
-                    # Compara a data de recebimento (timezone aware) com a data inicial
-                    received_date = msg.ReceivedTime.date()
-                    
-                    if received_date >= start_dt:
-                        process_message(msg, namespace)
-                        count += 1
-                    else:
-                        # Como está ordenado por data descendente, se chegamos em um mais antigo, podemos parar
-                        break
-            except Exception as e:
+        for folder_name, folder_obj in folders:
+            if not folder_obj:
                 continue
-        log(f"✨ Varredura inicial concluída. {count} e-mails processados.")
+            messages = folder_obj.Items
+            messages.Sort("[ReceivedTime]", True)
+            
+            count = 0
+            analisados = 0
+            for i in range(1, len(messages) + 1):
+                if analisados >= 500:
+                    break
+                try:
+                    msg = messages.Item(i)
+                    if msg.Class == 43:
+                        analisados += 1
+                        received_date = msg.ReceivedTime.date()
+                        if received_date >= start_dt:
+                            process_message(msg, namespace)
+                            count += 1
+                        else:
+                            break
+                except Exception:
+                    continue
+            log(f"   ✨ Pasta '{folder_name}' varrida: {count} e-mails verificados.")
+            total_count += count
+        log(f"✨ Varredura inicial concluída. Total de {total_count} e-mails processados.")
     except Exception as e:
         log(f"Erro na varredura inicial: {e}", "error")
 
