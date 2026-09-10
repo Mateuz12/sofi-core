@@ -58,7 +58,7 @@ graph TD
 
 O ecossistema divide-se conceitualmente nos seguintes domínios:
 
-1. **[[dominio_financeiro]]** *(Fato — Em Produção)*: Centraliza todas as rotinas de extração de relatórios, processamento fiscal de fornecedores, monitoramento de e-mails de vendas diretas, conciliação de recebíveis e automação de depósitos.
+1. **[[dominio_financeiro]]** *(Fato — Mapeado / Em Produção)*: Centraliza 12 módulos de extração de faturamento, conciliação de cartões/omnichannel, monitoramento contínuo de caixas postais de Venda Direta (VD), auditoria e conferência de notas fiscais da fornecedora Cálamo e lançamentos de depósitos bancários para 43 lojas (UDI e BH). Documento completo em `[[dominio_financeiro]]`.
 2. **[[dominio_compras]]** *(Fato — Ativo)*: Engloba rotinas de extração e tratamento do Relatório MAR (compras de insumos e produtos), migrado para a estrutura do SOFI com interface gráfica dedicada.
 3. **[[dominio_rh]]** *(Fato — Planejado / Placeholder)*: Estrutura reservada para triagem automatizada de candidatos e currículos via Inteligência Artificial.
 4. **[[core_infraestrutura]]** *(Fato — Em Produção)*: Serviços transversais compartilhados que sustentam a governança, orquestração, logging, notificação e configuração do ecossistema.
@@ -89,30 +89,18 @@ O ecossistema divide-se conceitualmente nos seguintes domínios:
   - **Responsabilidade:** Conecta-se via Outlook Desktop (COM/pywin32) a 6 caixas de e-mail (3 UDI + 3 BH), detecta novos e-mails, extrai anexos XLSX, converte para XLS e salva na rede `Z:\`.
   - **Regras críticas:** Não exclui e-mails; converte o arquivo para formato binário XLS compatível com importação pelo Oracle; logs segregados por regional.
 
-- [[modulo_xml_meudanfe]]
-  - **Objetivo:** Download automatizado de arquivos XML de NF-e a partir de chaves de acesso.
-  - **Responsabilidade:** Lê planilhas com chaves de NF-e e realiza consultas à API MeuDanfe v2, salvando os XMLs autorizados para auditoria.
-  - **Regras críticas:** Utilização obrigatória de API Key autorizada; gestão de quotas e retries em chamadas REST.
-
-- [[modulo_conversor_xml_sefaz]]
-  - **Objetivo:** Conversão de XMLs de padrão proprietário MeuDanfe para o padrão oficial SEFAZ.
-  - **Responsabilidade:** Reestrutura recursivamente tags XML, reordenando blocos (`NFe` antes de `protNFe`), convertendo atributos em subelementos e injetando namespaces oficiais (schema `nfeProc v4.00`).
-  - **Regras críticas:** O XML gerado deve passar rigorosamente na validação estrutural do Manual de Integração da NF-e sem falhas de schema.
-
-- [[modulo_gerador_relatorio_calamo]]
-  - **Objetivo:** Geração de relatórios analíticos formatados de notas fiscais da Cálamo Distribuidora.
-  - **Responsabilidade:** Processa os XMLs convertidos e gera 4 planilhas Excel formatadas (Geral e Matheus, para BH e UDI) utilizando Microsoft Excel COM (`win32com.client.DispatchEx`).
-  - **Regras críticas:** Aplicação de fórmulas Excel nativas (`VLOOKUP`, `SUMIFS`), cálculo de ICMS ST, regras de prazo por PDV (`regras_prazo.txt`) e estilo visual com linhas zebradas.
-
-- [[modulo_extrator_retaguarda_xml]]
-  - **Objetivo:** Extração do relatório base de notas fiscais de entrada da Cálamo no Portal Retaguarda.
-  - **Responsabilidade:** Acessa o menu 'Compra -> Nota fiscal entrada' via Playwright, seleciona holdings e fornecedor Cálamo, filtra o intervalo semanal e baixa o XLS base.
-  - **Regras críticas:** Manipulação de iframes legados (`legadoFrame`); agendamento de segunda a sexta às 07:00.
-
-- [[modulo_extrator_picking]]
-  - **Objetivo:** Extração e conciliação semanal de ordens de separação (OP Picking) por loja.
-  - **Responsabilidade:** Lê os relatórios finais do Matheus, captura token Bearer na Extranet via Playwright, consulta a API de picking com rate-limit e gera planilhas individuais por PDV/nota.
-  - **Regras críticas:** Rate-limit obrigatório com delay mínimo de 5s e jitter aleatório para evitar bloqueios de API.
+- [[modulo_xml]] *(Dissecação Completa Disponível)*
+  - **Objetivo:** Centralizar, baixar, normalizar e auditar semanalmente as Notas Fiscais Eletrônicas (NF-e) de compra emitidas pela Cálamo Distribuidora para as 43 lojas, confrontando faturamento, ICMS ST, prazos de pagamento e ordens de separação (OP Picking).
+  - **Responsabilidade:** Executar o pipeline fiscal em 5 etapas: extração sintética no Retaguarda (`extrator_retaguarda_xml.py`), download via API MeuDanfe v2 (`debug_meudanfe.py`), conversão para schema SEFAZ `nfeProc v4.00` (`conversor_xml_sefaz.py`), extração de dados fiscais (`leitor_xml.py`), geração de 4 relatórios formatados em Excel COM (`gerador_relatorio.py`) e extração de ordens de picking na Extranet (`extrator_picking.py`). Documento completo em `[[modulo_xml]]`.
+  - **Regras críticas:**
+    - Filtro obrigatório de raiz do CNPJ Cálamo (`06147451`).
+    - Prazos de pagamento customizados por PDV (`regras_prazo.txt`): Morumbi (0 dias), BH (60 dias), UDI VD (45 dias), Geral (30/45 dias).
+    - Normalização canônica estrutural para padrão SEFAZ (`NFe` antes de `protNFe`).
+    - Instanciação isolada de Excel COM (`DispatchEx`) com encerramento garantido em bloco `finally`.
+    - Rate-limit com jitter (>= 5s) na API de picking da Extranet.
+    - Acúmulo incremental semanal de faturamentos sem sobrescrever notas anteriores.
+  - **Depende de:** `[[core_sofi_env]]`, `[[core_logger_database]]`, `[[core_scheduler]]`, `[[integracao_retaguarda]]`, `[[integracao_meudanfe]]`, `[[integracao_excel_desktop]]`, `[[integracao_extranet]]`, `[[integracao_rede_local]]`.
+  - **Impacta:** `[[modulo_dashboard_hub]]`, auditoria de contas a pagar e liquidação financeira de fornecedores da franqueada.
 
 - [[modulo_importar_financas]]
   - **Objetivo:** Serviço central de upload automatizado de arquivos no portal FinançasGB.
