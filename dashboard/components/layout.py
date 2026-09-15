@@ -5,7 +5,7 @@ from pathlib import Path
 def render_scheduler_status():
     """Renderiza o painel de status do scheduler. Pode ser chamado em qualquer página."""
     try:
-        from core.scheduler import get_scheduler_status
+        from core.scheduler.scheduler import get_scheduler_status
         status = get_scheduler_status()
         if status["running"]:
             html = (
@@ -77,6 +77,16 @@ def render_footer():
     st.markdown(html, unsafe_allow_html=True)
 
 
+@st.cache_resource
+def ensure_scheduler_started():
+    try:
+        from core.scheduler.scheduler import start_scheduler
+        return start_scheduler()
+    except Exception as e:
+        print(f"[Scheduler] Erro ao iniciar singleton: {e}")
+        return None
+
+
 def render_layout(nav_links: list[tuple[str, str]] | None = None):
     """Aplica o design base Sage à página atual.
 
@@ -90,5 +100,7 @@ def render_layout(nav_links: list[tuple[str, str]] | None = None):
         initial_sidebar_state="collapsed",
     )
     load_css()
+    ensure_scheduler_started()
     render_topbar(nav_links=nav_links)
     render_footer()
+

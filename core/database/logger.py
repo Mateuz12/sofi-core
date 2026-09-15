@@ -34,6 +34,17 @@ def init_db():
                 usuario TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS configuration_audit_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                usuario TEXT NOT NULL,
+                dominio TEXT NOT NULL,
+                chave TEXT NOT NULL,
+                valor_anterior TEXT,
+                valor_novo TEXT
+            )
+        """)
 
 init_db()
 

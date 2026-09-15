@@ -246,7 +246,16 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool, grup
 # ─────────────────────────────────────────────
 
 def _resolver_destinatarios(destinatarios_input: list[str] | str | None, grupo_nome: str | None = None) -> list[str]:
-    """Resolve lista de e-mails tratando nomes de variáveis de ambiente e separadores ; e ,"""
+    """Resolve lista de e-mails tratando ConfigManager, variáveis de ambiente e separadores ; e ,"""
+    if not destinatarios_input and grupo_nome:
+        try:
+            from core.config.config_manager import ConfigManager
+            recipients = ConfigManager().get_notification_recipients(grupo_nome)
+            if recipients:
+                return recipients
+        except Exception:
+            pass
+
     if not destinatarios_input:
         if grupo_nome and "xml" in grupo_nome.lower():
             destinatarios_input = "SCHEDULER_NOTIFY_EMAILS_XML"
