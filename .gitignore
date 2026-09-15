@@ -10,3 +10,7 @@ dist/
 .venv/
 database/sofi.db
 *.log
+*.lock
+config/*.tmp
+config/backups/*
+!config/backups/.gitkeep

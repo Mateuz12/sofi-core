@@ -89,9 +89,31 @@ _CONFIG_PATH = Path(__file__).resolve().parent / "scheduler_config.json"
 
 
 def load_config(path: Path = _CONFIG_PATH) -> dict:
-    """Lê e retorna o conteúdo de scheduler_config.json."""
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+    """Lê e retorna a configuração do scheduler, priorizando ConfigManager (YAML)."""
+    try:
+        from core.config.config_manager import ConfigManager
+        cfg = ConfigManager().get_scheduler_config()
+        # Converte para dict compatível com a estrutura esperada
+        notif_cfg = ConfigManager().get_notificacoes_config()
+        groups = {}
+        for gname, ginfo in notif_cfg.grupos.items():
+            groups[gname] = {
+                "emails": ginfo.emails,
+                "jobs": ginfo.jobs_vinculados
+            }
+        data = cfg.model_dump()
+        data["notification_groups"] = groups
+        data["notification"] = {
+            "send_on_success": notif_cfg.enviar_em_sucesso,
+            "send_on_error": notif_cfg.enviar_em_erro
+        }
+        return data
+    except Exception as e:
+        # Fallback legado para scheduler_config.json
+        if path.exists():
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+        raise e
 
 
 # ─────────────────────────────────────────────
@@ -271,24 +293,33 @@ def _init_group_buffers(config: dict) -> None:
 def _get_or_create_group_buffer(group_name: str, config: dict) -> dict:
     """Garante a existência do buffer para um grupo, criando-o sob demanda se necessário."""
     global _group_buffers
+    all_jobs = config.get("jobs", [])
+    enabled_names = {j["name"] for j in all_jobs if j.get("enabled", True)}
+
     if group_name not in _group_buffers or not _group_buffers[group_name].get("pending"):
         groups = config.get("notification_groups", {})
         group_data = groups.get(group_name, {})
         members = _get_group_jobs_list(group_data)
-        all_jobs = config.get("jobs", [])
-        enabled_names = {j["name"] for j in all_jobs if j.get("enabled", True)}
         active = {m for m in members if m in enabled_names}
         _group_buffers[group_name] = {
             "pending": set(active),
             "results": [],
         }
+    else:
+        # Mantém apenas os jobs que continuam habilitados no config atual
+        _group_buffers[group_name]["pending"] = {
+            m for m in _group_buffers[group_name]["pending"] if m in enabled_names
+        }
+
     return _group_buffers[group_name]
 
 
 def _record_and_maybe_notify(job_name: str, resultado: dict, config: dict) -> None:
     """
-    Registra o resultado de um job no buffer do grupo.
-    Se era o último pendente, envia a notificação consolidada.
+    Registra o resultado de um job.
+    - Se o job roda em horário isolado em relação aos outros jobs ativos do grupo,
+      envia a notificação daquele job imediatamente.
+    - Se compartilha horário com outros jobs do grupo, acumula e envia quando o grupo concluir.
     """
     notif_cfg = config.get("notification", {})
     group_name = _find_group(job_name, config)
@@ -297,9 +328,27 @@ def _record_and_maybe_notify(job_name: str, resultado: dict, config: dict) -> No
     group_emails = _get_group_emails(group_data) if group_data else None
 
     if not group_name:
-        # Job sem grupo: envia notificação individual (compatibilidade)
+        # Job sem grupo: envia notificação individual
         _send_notification_if_needed([resultado], notif_cfg, group_name=job_name, group_emails=None)
         return
+
+    # Mapeia os horários dos jobs ativos do grupo
+    all_jobs = config.get("jobs", [])
+    job_schedule_map = {}
+    enabled_jobs = {}
+    for j in all_jobs:
+        if j.get("enabled", True):
+            enabled_jobs[j["name"]] = j
+            s = j.get("schedule", {})
+            job_schedule_map[j["name"]] = (s.get("hour"), s.get("minute"))
+
+    group_members = [m for m in _get_group_jobs_list(group_data) if m in enabled_jobs]
+    current_job_sched = job_schedule_map.get(job_name)
+
+    # Verifica se outros jobs ativos do grupo compartilham este mesmo horário
+    same_time_members = {
+        m for m in group_members if job_schedule_map.get(m) == current_job_sched
+    }
 
     should_notify = False
     group_results = []
@@ -309,8 +358,14 @@ def _record_and_maybe_notify(job_name: str, resultado: dict, config: dict) -> No
         buf["results"].append(resultado)
         buf["pending"].discard(job_name)
 
-        if not buf["pending"]:
-            # Último job do grupo concluiu!
+        # Se o job é isolado no seu horário (nenhum outro job ativo do grupo roda neste horário)
+        if len(same_time_members) <= 1:
+            should_notify = True
+            group_results = [resultado]
+            # Remove o resultado do buffer global para não duplicar no consolidado de outros horários
+            buf["results"] = [r for r in buf["results"] if r.get("name") != job_name]
+        elif not buf["pending"]:
+            # Todos os jobs do grupo terminaram
             should_notify = True
             members_order = _get_group_jobs_list(group_data)
             order_map = {name: i for i, name in enumerate(members_order)}
@@ -318,13 +373,12 @@ def _record_and_maybe_notify(job_name: str, resultado: dict, config: dict) -> No
                 buf["results"],
                 key=lambda r: order_map.get(r["name"], 999)
             )
-            # Reseta o buffer para a próxima execução do grupo
             _group_buffers.pop(group_name, None)
 
     if should_notify:
         resumo = ", ".join(f"{r['name']}={r['status']}" for r in group_results)
-        _log("INFO", f"Grupo '{group_name}' completo. Resultados: {resumo}", modulo="Scheduler")
-        print(f"[Scheduler] Grupo '{group_name}' completo. Enviando notificacao consolidada...")
+        _log("INFO", f"Notificação disparada para grupo '{group_name}'. Resultados: {resumo}", modulo="Scheduler")
+        print(f"[Scheduler] Notificação disparada para grupo '{group_name}': {resumo}")
         _send_notification_if_needed(group_results, notif_cfg, group_name=group_name, group_emails=group_emails)
 
 
@@ -465,6 +519,15 @@ def start_scheduler() -> "BackgroundScheduler | None":
     """
     global _scheduler_instance, _jobs_meta
 
+    if _scheduler_instance is not None and getattr(_scheduler_instance, "running", False):
+        try:
+            from apscheduler.schedulers.base import STATE_PAUSED
+            if getattr(_scheduler_instance, "state", None) == STATE_PAUSED:
+                _scheduler_instance.resume()
+        except Exception:
+            pass
+        return _scheduler_instance
+
     if not _APSCHEDULER_OK:
         print("[Scheduler] APScheduler nao instalado. Instale com: pip install apscheduler")
         return None
@@ -509,12 +572,15 @@ def start_scheduler() -> "BackgroundScheduler | None":
         j_sched = job_cfg.get("schedule", {})
         h = j_sched.get("hour", 8)
         m = j_sched.get("minute", 0)
-        dow = str(j_sched.get("day_of_week", "mon-fri")).lower().strip()
-        # Normalização de termos em português para padrão APScheduler
-        if dow in ("seg-sex", "segunda-sexta", "segunda_a_sexta", "dias_uteis"):
+        raw_dow = j_sched.get("day_of_week")
+        if not raw_dow or str(raw_dow).lower().strip() in ("none", "null", ""):
             dow = "mon-fri"
-        elif dow in ("todos", "diario", "diário"):
-            dow = "*"
+        else:
+            dow = str(raw_dow).lower().strip()
+            if dow in ("seg-sex", "segunda-sexta", "segunda_a_sexta", "dias_uteis"):
+                dow = "mon-fri"
+            elif dow in ("todos", "diario", "diário"):
+                dow = "*"
         schedule_groups.setdefault((h, m, dow), []).append(job_cfg)
 
     if not schedule_groups:
@@ -611,6 +677,36 @@ def stop_scheduler() -> None:
     _scheduler_instance = None
 
 
+def pause_scheduler() -> bool:
+    """Pausa a execução de jobs pelo scheduler em memória."""
+    global _scheduler_instance
+    if _scheduler_instance and _scheduler_instance.running:
+        try:
+            _scheduler_instance.pause()
+            _log("INFO", "Scheduler pausado manualmente.", modulo="Scheduler")
+            return True
+        except Exception as e:
+            print(f"[Scheduler] Erro ao pausar: {e}")
+    return False
+
+
+def resume_scheduler() -> bool:
+    """Retoma ou inicia a execução de jobs pelo scheduler em memória."""
+    global _scheduler_instance
+    if _scheduler_instance and _scheduler_instance.running:
+        try:
+            from apscheduler.schedulers.base import STATE_PAUSED
+            if getattr(_scheduler_instance, "state", None) == STATE_PAUSED:
+                _scheduler_instance.resume()
+                _log("INFO", "Scheduler despausado/retomado.", modulo="Scheduler")
+            return True
+        except Exception as e:
+            print(f"[Scheduler] Erro ao despausar: {e}")
+    # Se não estava ativo ou era None, inicia
+    res = start_scheduler()
+    return bool(res and res.running)
+
+
 def get_scheduler_status() -> dict:
     """
     Retorna um dict com o status atual do scheduler para exibição no badge do topbar.
@@ -618,14 +714,24 @@ def get_scheduler_status() -> dict:
     Retorno:
         {
             "running": bool,
+            "is_paused": bool,
             "next_job": str,   # ex: "SOFI Daily Jobs 09:00" ou "--"
             "jobs": [{"name": str, "hour": int, "minute": int}, ...]
         }
     """
-    running = bool(_scheduler_instance and _scheduler_instance.running)
+    is_running = bool(_scheduler_instance and _scheduler_instance.running)
+    is_paused = False
+    if is_running and hasattr(_scheduler_instance, "state"):
+        try:
+            from apscheduler.schedulers.base import STATE_PAUSED
+            is_paused = (_scheduler_instance.state == STATE_PAUSED)
+        except Exception:
+            pass
+
+    effective_running = is_running and not is_paused
 
     next_job = "--"
-    if running and _jobs_meta:
+    if effective_running and _jobs_meta:
         now = datetime.now()
         candidates = []
         for j in _jobs_meta:
@@ -638,8 +744,93 @@ def get_scheduler_status() -> dict:
         next_job = f"{nxt['name']} {nxt['hour']:02d}:{nxt['minute']:02d}"
 
     return {
-        "running": running,
+        "running": effective_running,
+        "is_paused": is_paused,
         "next_job": next_job,
         "jobs": list(_jobs_meta),
     }
+
+
+def reload_scheduler_jobs(scheduler_instance=None, new_config: dict = None) -> None:
+    """
+    Recarrega e reagenda dinamicamente todos os jobs em memória sem reiniciar o processo.
+    Se o reagendamento falhar, propaga exceção para permitir rollback no ConfigManager.
+    """
+    global _scheduler_instance, _jobs_meta
+
+    target_scheduler = scheduler_instance or _scheduler_instance
+    if target_scheduler is None or not getattr(target_scheduler, "running", False):
+        return
+
+    if new_config is None:
+        new_config = load_config()
+
+    all_jobs = new_config.get("jobs", [])
+    new_jobs_meta = []
+
+    # 1. Remover jobs cron atuais (exceto jobs internos como reset de buffers)
+    for job in list(target_scheduler.get_jobs()):
+        if job.id != "sofi_reset_buffers":
+            try:
+                target_scheduler.remove_job(job.id)
+            except Exception:
+                pass
+
+    # 2. Agrupar novos jobs por horário
+    schedule_groups: dict[tuple[int, int, str], list[dict]] = {}
+    for job_cfg in all_jobs:
+        if not job_cfg.get("enabled", True):
+            continue
+        j_sched = job_cfg.get("schedule", {})
+        h = j_sched.get("hour", 8)
+        m = j_sched.get("minute", 0)
+        raw_dow = j_sched.get("day_of_week")
+        if not raw_dow or str(raw_dow).lower().strip() in ("none", "null", ""):
+            dow = "mon-fri"
+        else:
+            dow = str(raw_dow).lower().strip()
+            if dow in ("seg-sex", "segunda-sexta", "segunda_a_sexta", "dias_uteis"):
+                dow = "mon-fri"
+            elif dow in ("todos", "diario", "diário"):
+                dow = "*"
+        schedule_groups.setdefault((h, m, dow), []).append(job_cfg)
+
+    # 3. Recadastrar jobs
+    for (h, m, dow), group_jobs in schedule_groups.items():
+        trigger_kwargs = {"hour": h, "minute": m}
+        if dow and dow != "*":
+            trigger_kwargs["day_of_week"] = dow
+
+        if len(group_jobs) == 1:
+            job_cfg = group_jobs[0]
+            job_id = f"sofi_{job_cfg['name'].replace(' ', '_').lower()}"
+            target_scheduler.add_job(
+                func=run_single_job,
+                trigger="cron",
+                args=[job_cfg],
+                id=job_id,
+                name=job_cfg["name"],
+                max_instances=1,
+                replace_existing=True,
+                **trigger_kwargs,
+            )
+            new_jobs_meta.append({"name": job_cfg["name"], "hour": h, "minute": m})
+        else:
+            group_name = f"SOFI Grupo {h:02d}:{m:02d}"
+            job_id = f"sofi_group_{h:02d}_{m:02d}"
+            target_scheduler.add_job(
+                func=run_all_jobs,
+                trigger="cron",
+                args=[group_jobs],
+                id=job_id,
+                name=group_name,
+                max_instances=1,
+                replace_existing=True,
+                **trigger_kwargs,
+            )
+            new_jobs_meta.append({"name": group_name, "hour": h, "minute": m})
+
+    _jobs_meta = new_jobs_meta
+    _log("INFO", f"Scheduler recarregado com sucesso ({len(new_jobs_meta)} gatilho(s) ativo(s)).", modulo="Scheduler")
+    print(f"[Scheduler] Recarregado com sucesso com {len(new_jobs_meta)} gatilho(s).")
 
