@@ -2,7 +2,7 @@ enabled: true
 timezone: America/Sao_Paulo
 jobs:
 - name: Fluxo Analítico DFC UDI
-  enabled: false
+  enabled: true
   script: departments/financeiro/modules/fluxo_caixa/extrator_dfc.py
   unidade: UDI
   schedule:
@@ -15,7 +15,7 @@ jobs:
     max_attempts: 3
     delay_seconds: 120
 - name: Fluxo Analítico DFC BH
-  enabled: false
+  enabled: true
   script: departments/financeiro/modules/fluxo_caixa/extrator_dfc_bh.py
   unidade: BH
   schedule:
@@ -41,7 +41,7 @@ jobs:
     max_attempts: 3
     delay_seconds: 120
 - name: Retaguarda BH
-  enabled: false
+  enabled: true
   script: departments/financeiro/modules/retaguarda/extrator_retaguarda.py
   unidade: BH
   schedule:
@@ -54,7 +54,7 @@ jobs:
     max_attempts: 3
     delay_seconds: 120
 - name: Extranet BH
-  enabled: false
+  enabled: true
   script: departments/financeiro/modules/extranet/BH/extranet_reports_bh.py
   unidade: null
   schedule:
@@ -67,7 +67,7 @@ jobs:
     max_attempts: 3
     delay_seconds: 120
 - name: Extranet UDI
-  enabled: false
+  enabled: true
   script: departments/financeiro/modules/extranet/UDI/extranet_reports_udi.py
   unidade: null
   schedule:
@@ -80,13 +80,13 @@ jobs:
     max_attempts: 3
     delay_seconds: 120
 - name: XML Retaguarda Entrada
-  enabled: false
+  enabled: true
   script: departments/financeiro/modules/xml/extrator_retaguarda_xml.py
   unidade: null
   schedule:
     type: cron
-    hour: 15
-    minute: 7
+    hour: 6
+    minute: 0
     day_of_week: mon-fri
   dias: 0
   retry:
