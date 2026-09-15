@@ -1,0 +1,35 @@
+smtp:
+  server_env: SMTP_SERVER
+  port_env: SMTP_PORT
+  user_env: SMTP_USER
+  password_env: SMTP_PASSWORD
+grupos:
+  retaguarda:
+    jobs_vinculados:
+    - Fluxo Analítico DFC UDI
+    - Fluxo Analítico DFC BH
+    - Retaguarda UDI
+    - Retaguarda BH
+    emails:
+    - financeiro.auxiliar@udiboticario.com.br
+  xml_retaguarda:
+    jobs_vinculados:
+    - XML Retaguarda Entrada
+    emails:
+    - financeiro.auxiliar@udiboticario.com.br
+    - financeiro.coordenacao@udiboticario.com.br
+    - compras.coordenacao@udiboticario.com.br
+    - financeiro.analista@udiboticario.com.br
+    - gestor.compraseprocessos@grupoattboticario.com
+    - compras.assistente@udiboticario.com.br
+  extranet:
+    jobs_vinculados:
+    - Extranet BH
+    - Extranet UDI
+    emails:
+    - financeiro.auxiliar@udiboticario.com.br
+    - fechamentodecaixa@attboticario.com.br
+    - financeiro.coordenacao@udiboticaio.com.br
+    - financeiro.controladoria@udiboticario.com.br
+enviar_em_sucesso: true
+enviar_em_erro: true

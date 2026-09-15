@@ -23,8 +23,10 @@ def _get_scheduler():
 
 _get_scheduler()
 
-# Renderiza Topbar, Footer e injeta CSS global
-render_layout(nav_links=[("MÓDULOS", "/")])
+render_layout(nav_links=[
+    ("MÓDULOS", "/"),
+    ("TORRE DE CONTROLE", "/torre_controle"),
+])
 
 
 # ─────────────────────────────────────────────
@@ -35,8 +37,8 @@ st.markdown("""<div class="sofi-title-container">
 <p class="sofi-sub-title">Acesse rapidamente as áreas do sistema.</p>
 </div>""", unsafe_allow_html=True)
 
-# Grid de 2 cards de departamento - sem linhas em branco que quebram o parser
-st.markdown("""<div class="sofi-card-grid-2">
+# Grid de 3 cards de departamento/administração - sem linhas em branco que quebram o parser
+st.markdown("""<div class="sofi-card-grid-3">
 <a href="/financeiro" target="_self" class="sofi-card-link">
 <div class="sofi-card">
 <div class="sofi-card-icon-container">
@@ -54,6 +56,25 @@ st.markdown("""<div class="sofi-card-grid-2">
 </svg>
 </div>
 <h3 class="sofi-card-title">Financeiro</h3>
+</div>
+</a>
+<a href="/torre_controle" target="_self" class="sofi-card-link">
+<div class="sofi-card">
+<div class="sofi-card-icon-container">
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+<circle cx="32" cy="32" r="20" fill="#ddeeff" stroke="#5b8fc9" stroke-width="2"/>
+<circle cx="32" cy="32" r="8" fill="#ffffff" stroke="#337ab7" stroke-width="2"/>
+<line x1="32" y1="10" x2="32" y2="18" stroke="#337ab7" stroke-width="2.5"/>
+<line x1="32" y1="46" x2="32" y2="54" stroke="#337ab7" stroke-width="2.5"/>
+<line x1="10" y1="32" x2="18" y2="32" stroke="#337ab7" stroke-width="2.5"/>
+<line x1="46" y1="32" x2="54" y2="32" stroke="#337ab7" stroke-width="2.5"/>
+<line x1="16" y1="16" x2="22" y2="22" stroke="#5b8fc9" stroke-width="2"/>
+<line x1="42" y1="42" x2="48" y2="48" stroke="#5b8fc9" stroke-width="2"/>
+<line x1="48" y1="16" x2="42" y2="22" stroke="#5b8fc9" stroke-width="2"/>
+<line x1="22" y1="42" x2="16" y2="48" stroke="#5b8fc9" stroke-width="2"/>
+</svg>
+</div>
+<h3 class="sofi-card-title">Torre de Controle</h3>
 </div>
 </a>
 <div class="sofi-card disabled">
