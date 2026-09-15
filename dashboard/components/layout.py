@@ -94,7 +94,7 @@ def render_layout(nav_links: list[tuple[str, str]] | None = None):
         nav_links: Links de navegação para a topbar. Se None, sem links centrais.
     """
     st.set_page_config(
-        page_title="SOFI",
+        page_title="SOFI1.0",
         page_icon="💼",
         layout="wide",
         initial_sidebar_state="collapsed",
