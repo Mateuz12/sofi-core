@@ -24,6 +24,9 @@ from core.scheduler.scheduler import (
     run_single_job,
     run_all_jobs,
     send_alert,
+    reload_scheduler_jobs,
+    pause_scheduler,
+    resume_scheduler,
 )
 
 __all__ = [
@@ -35,4 +38,7 @@ __all__ = [
     "run_single_job",
     "run_all_jobs",
     "send_alert",
+    "reload_scheduler_jobs",
+    "pause_scheduler",
+    "resume_scheduler",
 ]

@@ -55,7 +55,23 @@ MESES_MAP = {
 }
 
 def carregar_regras_prazo():
-    """Carrega as regras de prazo de pagamento a partir do arquivo regras_prazo.txt."""
+    """Carrega as regras de prazo de pagamento via ConfigManager (YAML), com fallback para regras_prazo.txt."""
+    try:
+        from core.config.config_manager import ConfigManager
+        prazos_dict = ConfigManager().get_pdv_prazos()
+        if prazos_dict:
+            regras = {}
+            for k, v in prazos_dict.items():
+                if k.lower() == "default":
+                    regras["DEFAULT"] = int(v)
+                else:
+                    regras[str(k)] = int(v)
+            if "DEFAULT" not in regras:
+                regras["DEFAULT"] = 45
+            return regras
+    except Exception as e:
+        print(f"[Aviso] ConfigManager indisponivel em carregar_regras_prazo: {e}")
+
     caminho = os.path.join(DIRETORIO_ATUAL, 'regras_prazo.txt')
     regras = {'DEFAULT': 45}
     if os.path.exists(caminho):
@@ -75,22 +91,6 @@ def carregar_regras_prazo():
                             pass
         except Exception as e:
             print(f"Erro ao carregar regras de prazo: {e}")
-    else:
-        # Cria o arquivo com os valores padrão para facilitar futura edição
-        try:
-            with open(caminho, 'w', encoding='utf-8') as f:
-                f.write("# Configuração de Prazos de Pagamento (dias base)\n")
-                f.write("# Formato: PDV=DiasBase\n")
-                f.write("# Use DEFAULT para definir o prazo geral (caso o PDV não possua regra específica).\n\n")
-                f.write("DEFAULT=45\n\n")
-                f.write("# Lojas Morumbi (exemplo: 0+5+x)\n")
-                f.write("21274=0\n\n")
-                f.write("# Lojas BH (exemplo: 60+5+x)\n")
-                f.write("13793=60\n")
-                f.write("22372=60\n")
-                f.write("21433=60\n")
-        except Exception as e:
-            print(f"Erro ao criar arquivo de regras padrão: {e}")
     return regras
 
 def obter_ordem_lojas(caminho_modelo, aba_nomenclatura):

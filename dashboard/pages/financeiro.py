@@ -5,7 +5,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from components.layout import render_layout, render_scheduler_status
 
-render_layout(nav_links=[("MÓDULOS", "/")])
+render_layout(nav_links=[
+    ("MÓDULOS", "/"),
+    ("TORRE DE CONTROLE", "/torre_controle"),
+])
 
 st.markdown("""<div class="sofi-title-container">
 <h1 class="sofi-main-title">Módulos Financeiros</h1>
