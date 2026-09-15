@@ -1,0 +1,55 @@
+name: Deploy Produção
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: self-hosted   # roda no runner instalado dentro do Windows Server
+    defaults:
+      run:
+        working-directory: C:\Users\Administrator\Documents\GitHub\sofi-core   # a pasta já é o clone git de produção
+
+    steps:
+      - name: Guardar hash do requirements.txt antes do pull
+        shell: powershell
+        run: |
+          $hashAntes = Get-FileHash "requirements.txt" -Algorithm SHA256
+          $hashAntes.Hash | Out-File -FilePath "$env:TEMP\req-hash-antes.txt"
+
+      - name: Atualizar código (git pull)
+        shell: powershell
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+          # Streamlit detecta a mudança nos .py sozinho na próxima vez que a
+          # página for aberta/atualizada — não precisa reiniciar nada aqui.
+
+      - name: Reinstalar dependências e reiniciar SOMENTE se requirements.txt mudou
+        shell: powershell
+        run: |
+          $hashDepois = (Get-FileHash "requirements.txt" -Algorithm SHA256).Hash
+          $hashAntes  = Get-Content "$env:TEMP\req-hash-antes.txt"
+
+          if ($hashDepois -ne $hashAntes) {
+            Write-Host "requirements.txt mudou, reinstalando dependências..."
+            & "C:\producao\meu-projeto\venv\Scripts\python.exe" -m pip install -r "requirements.txt" --quiet
+
+            Write-Host "Reiniciando Streamlit para carregar as novas dependências..."
+            Restart-Service Streamlit-App -Force
+            # ngrok não precisa reiniciar: ele só encaminha a porta, não roda o código.
+          } else {
+            Write-Host "requirements.txt não mudou, Streamlit vai atualizar sozinho no próximo refresh."
+          }
+
+      - name: Checagem de saúde
+        shell: powershell
+        run: |
+          Start-Sleep -Seconds 5
+          $status = (Get-Service Streamlit-App).Status
+          if ($status -ne "Running") {
+            Write-Error "Streamlit não está rodando! Status: $status"
+            exit 1
+          }
+          Write-Host "Deploy OK."
