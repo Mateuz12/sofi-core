@@ -8,9 +8,12 @@ import pandas as pd
 from pathlib import Path
 
 # Configuração do caminho
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+DASHBOARD_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = DASHBOARD_DIR.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
+if str(DASHBOARD_DIR) not in sys.path:
+    sys.path.insert(0, str(DASHBOARD_DIR))
 
 from core.sofi_env import load_sofi_env
 load_sofi_env()

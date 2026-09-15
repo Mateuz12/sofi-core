@@ -12,6 +12,9 @@ grupos:
     - Retaguarda BH
     emails:
     - financeiro.auxiliar@udiboticario.com.br
+    - fechamentodecaixa@attboticario.com.br
+    - financeiro.coordenacao@udiboticaio.com.br
+    - financeiro.controladoria@udiboticario.com.br
   xml_retaguarda:
     jobs_vinculados:
     - XML Retaguarda Entrada
@@ -30,6 +33,5 @@ grupos:
     - financeiro.auxiliar@udiboticario.com.br
     - fechamentodecaixa@attboticario.com.br
     - financeiro.coordenacao@udiboticaio.com.br
-    - financeiro.controladoria@udiboticario.com.br
 enviar_em_sucesso: true
 enviar_em_erro: true
