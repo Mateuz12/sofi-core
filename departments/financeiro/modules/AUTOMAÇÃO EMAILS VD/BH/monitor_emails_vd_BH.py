@@ -51,7 +51,8 @@ SENDER_EMAILS = [
     "fechamentodecaixa@attboticario.com.br",  # Genérico (qualquer unidade)
     "viviane.reis@attboticario.com.br",
     "lojavd1@attboticario.com.br",
-    "estoque.erneves@attboticario.com.br"       # Venda Nova
+    "estoque.erneves@attboticario.com.br"
+    "lojaerneves@attboticario.com.br"    # Venda Nova
 ]
 ARCHIVE_FOLDER_NAME = "Arquivados BH"
 START_DATE_SCAN = "21/07/2026" # Somente processa emails recebidos a partir desta data
