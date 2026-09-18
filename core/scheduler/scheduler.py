@@ -150,7 +150,7 @@ def run_job(job_config: dict) -> dict:
     print(f"[Scheduler] Iniciando '{name}' | Ref={date_str} | dias={dias}")
 
     cmd = [sys.executable, str(script), "--data", date_str, "--dias", str(dias)]
-    if "unidade" in job_config:
+    if job_config.get("unidade"):
         cmd.extend(["--unidade", str(job_config["unidade"])])
 
     inicio = datetime.now()
