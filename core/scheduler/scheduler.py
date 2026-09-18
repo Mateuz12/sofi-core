@@ -243,6 +243,39 @@ import threading
 _group_lock = threading.Lock()
 # { "Retaguarda": { "pending": {"Fluxo Analítico DFC UDI", ...}, "results": [...] }, ... }
 _group_buffers: dict[str, dict] = {}
+# Armazena o último resultado de cada job em memória: { "Nome do Job": { "status": "...", ... } }
+_last_job_results: dict[str, dict] = {}
+
+
+def _get_last_job_execution(job_name: str) -> dict | None:
+    """Busca o último resultado de execução do job (em memória com fallback para SQLite)."""
+    with _group_lock:
+        if job_name in _last_job_results:
+            return _last_job_results[job_name]
+
+    try:
+        with sqlite3.connect(str(_DB_PATH), timeout=5.0) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT status, mensagem FROM execution_logs WHERE modulo = 'Scheduler' AND mensagem LIKE ? ORDER BY id DESC LIMIT 1",
+                (f"%'{job_name}'%",)
+            )
+            row = cursor.fetchone()
+            if row:
+                st, msg = row
+                if "COM FATURAMENTO" in msg:
+                    status = "COM FATURAMENTO"
+                elif "SEM FATURAMENTO" in msg:
+                    status = "SEM FATURAMENTO"
+                elif st in ("SUCESSO", "ERRO", "FALHA PERMANENTE"):
+                    status = st
+                else:
+                    status = st
+                return {"name": job_name, "status": status}
+    except Exception as exc:
+        print(f"[Scheduler] Erro ao buscar último resultado de '{job_name}': {exc}")
+
+    return None
 
 
 def _get_group_jobs_list(group_data: list | dict) -> list[str]:
@@ -393,7 +426,7 @@ def _send_notification_if_needed(
         print("[Scheduler] Notificacoes desabilitadas no config. E-mail nao enviado.")
         return
 
-    tem_erro = any(r["status"] not in ("SUCESSO", "COM FATURAMENTO", "SEM FATURAMENTO", "DESABILITADO") for r in resultados)
+    tem_erro = any(r["status"] not in ("SUCESSO", "COM FATURAMENTO", "SEM FATURAMENTO", "DESABILITADO", "IGNORADO") for r in resultados)
 
     deve_enviar = (
         (tem_erro and notif_cfg.get("send_on_error", True)) or
@@ -417,10 +450,11 @@ def _send_notification_if_needed(
 # Execução de um job individual (com notificação de grupo)
 # ─────────────────────────────────────────────
 
-def run_single_job(job_config: dict) -> None:
+def run_single_job(job_config: dict, previous_results: dict | None = None) -> dict:
     """
     Wrapper para o APScheduler: executa o job e registra o resultado
     no buffer do grupo de notificação correspondente.
+    Suporta dependência de jobs precedentes e condição 'ter_faturamento'.
     """
     import traceback
 
@@ -435,8 +469,45 @@ def run_single_job(job_config: dict) -> None:
             "duracao": "--",
             "mensagem_erro": "",
         }
+        with _group_lock:
+            _last_job_results[name] = resultado
         _record_and_maybe_notify(name, resultado, config)
-        return
+        return resultado
+
+    # Verificação de dependência e condição (ex: 'ter_faturamento')
+    dep_name = job_config.get("depends_on")
+    cond = str(job_config.get("condition") or "").lower().strip()
+
+    if dep_name:
+        dep_res = None
+        if previous_results and dep_name in previous_results:
+            dep_res = previous_results[dep_name]
+        else:
+            dep_res = _get_last_job_execution(dep_name)
+
+        dep_status = dep_res.get("status") if dep_res else None
+
+        if cond in ("ter_faturamento", "com_faturamento", "com_faturamento_positivo"):
+            if dep_status not in ("COM FATURAMENTO", "SUCESSO"):
+                status_desc = "SEM FATURAMENTO" if dep_status == "SEM FATURAMENTO" else "IGNORADO"
+                msg_motivo = (
+                    f"Job '{name}' não executado: sem faturamento no job precedente '{dep_name}'."
+                    if dep_status == "SEM FATURAMENTO"
+                    else f"Job '{name}' ignorado: job precedente '{dep_name}' encerrou com status '{dep_status}'."
+                )
+                _log("INFO" if dep_status == "SEM FATURAMENTO" else "AVISO", msg_motivo, modulo="Scheduler")
+                print(f"[Scheduler] {msg_motivo}")
+                resultado = {
+                    "name": name,
+                    "status": status_desc,
+                    "tentativas": 0,
+                    "duracao": "--",
+                    "mensagem_erro": msg_motivo if status_desc != "SEM FATURAMENTO" else "",
+                }
+                with _group_lock:
+                    _last_job_results[name] = resultado
+                _record_and_maybe_notify(name, resultado, config)
+                return resultado
 
     _log("INFO", f"run_single_job iniciado: {name}", modulo="Scheduler")
     print(f"[Scheduler] run_single_job iniciado: {name}")
@@ -456,8 +527,12 @@ def run_single_job(job_config: dict) -> None:
             "mensagem_erro": msg,
         }
 
+    with _group_lock:
+        _last_job_results[name] = resultado
+
     _log("INFO", f"run_single_job concluido: {name} = {resultado['status']}", modulo="Scheduler")
     _record_and_maybe_notify(name, resultado, config)
+    return resultado
 
 
 # ─────────────────────────────────────────────
@@ -467,11 +542,13 @@ def run_single_job(job_config: dict) -> None:
 def run_all_jobs(jobs_configs: list[dict]) -> None:
     """
     Executa todos os jobs sequencialmente e registra cada resultado
-    no buffer de grupo. Mantido para compatibilidade e para jobs
-    no mesmo horário.
+    no buffer de grupo. Propaga resultados do lote para jobs dependentes.
     """
+    batch_results: dict[str, dict] = {}
     for job_cfg in jobs_configs:
-        run_single_job(job_cfg)
+        res = run_single_job(job_cfg, previous_results=batch_results)
+        if res:
+            batch_results[job_cfg["name"]] = res
 
 
 # ─────────────────────────────────────────────
@@ -549,6 +626,9 @@ def start_scheduler() -> "BackgroundScheduler | None":
 
     # Agenda reinicialização diária dos buffers (meia-noite)
     def _reset_buffers_daily():
+        global _last_job_results
+        with _group_lock:
+            _last_job_results = {}
         _init_group_buffers(load_config())
         _log("INFO", "Buffers de grupo reinicializados para o novo dia.", modulo="Scheduler")
         print("[Scheduler] Buffers de grupo reinicializados para o novo dia.")

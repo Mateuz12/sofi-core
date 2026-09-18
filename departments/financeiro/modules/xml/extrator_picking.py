@@ -716,6 +716,10 @@ def parse_args():
     parser.add_argument("--nosso-pedido", type=str, default="", help="Nosso Pedido (usado em modo unitário de teste)")
     parser.add_argument("--delay", type=float, default=5.0, help="Intervalo mínimo em segundos entre chamadas (padrão: 5.0s)")
     parser.add_argument("--gerar-json", action="store_true", help="Opcional: também salvar o grande JSON consolidado em paralelo")
+    parser.add_argument("--data", type=str, default=None, help="Data de referência (DD/MM/YYYY) para compatibilidade com o Scheduler")
+    parser.add_argument("--dias", type=int, default=0, help="Dias retroativos para compatibilidade com o Scheduler")
+    parser.add_argument("--unidade", type=str, default=None, help="Unidade regional (BH ou UDI) para compatibilidade com o Scheduler")
+    parser.add_argument("--headless", action="store_true", help="Executar em modo headless / não-interativo")
     return parser.parse_args()
 
 
@@ -759,6 +763,9 @@ def main() -> None:
                 notas_para_processar.extend(extrair_notas_relatorio_matheus(r))
         else:
             print("\nNenhum relatório do Matheus encontrado automaticamente.")
+            if args.headless or not sys.stdin.isatty():
+                print("[AVISO] Ambiente não interativo / scheduler: nenhum relatório encontrado. Encerrando.")
+                sys.exit(0)
             rel_manual = input("Digite o caminho do relatório do Matheus: ").strip()
             if rel_manual:
                 p_man = Path(rel_manual)
@@ -766,7 +773,7 @@ def main() -> None:
                 pasta_semana_relatorios = p_man.parent
             else:
                 print("Operação cancelada.")
-                return
+                sys.exit(0)
 
     # Remove duplicidades preservando os dados completos
     notas_unicas: List[Dict[str, Any]] = []
@@ -779,7 +786,7 @@ def main() -> None:
 
     if not notas_unicas:
         print("Nenhuma nota fiscal para consultar. Finalizando.")
-        return
+        sys.exit(0)
 
     # 4. Localiza a pasta correspondente de XML BAIXADOS em T:\13-Publica (organizada por PDV)
     if args.pasta_xmls:
@@ -875,6 +882,7 @@ def main() -> None:
     print(f"Estrutura de salvamento: <pasta_semana>\\<PDV>\\<PDV>_<Nº_DOC>.xlsx")
     print(f"Pasta da semana: {pasta_xmls_semana}")
     print("==================================================================")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

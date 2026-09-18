@@ -47,6 +47,8 @@ class JobConfig(BaseModel):
     schedule: ScheduleConfig
     dias: int = 0
     retry: RetryConfig = RetryConfig()
+    depends_on: Optional[str] = None
+    condition: Optional[str] = None
 
     @field_validator('dias')
     @classmethod

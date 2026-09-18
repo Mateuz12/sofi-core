@@ -85,11 +85,11 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool, grup
             badge_cor  = "#0d47a1"
             badge_bg   = "#e3f2fd"
             badge_txt  = "SEM FATURAMENTO"
-        elif status == "DESABILITADO":
+        elif status in ("DESABILITADO", "IGNORADO"):
             icone      = "⏸️"
             badge_cor  = "#666"
             badge_bg   = "#e9ecef"
-            badge_txt  = "DESABILITADO"
+            badge_txt  = status
         else:
             icone      = "❌"
             badge_cor  = "#8b1a1a"
@@ -98,7 +98,7 @@ def _build_html(resultados: list[dict], data_execucao: str, tem_erro: bool, grup
 
         # Célula extra com trecho do erro (se houver)
         detalhe_html = ""
-        if erro and status not in ("SUCESSO", "COM FATURAMENTO", "SEM FATURAMENTO", "DESABILITADO"):
+        if erro and status not in ("SUCESSO", "COM FATURAMENTO", "SEM FATURAMENTO", "DESABILITADO", "IGNORADO"):
             # Últimas 5 linhas, tratadas como texto simples
             trecho = "\n".join(erro.strip().splitlines()[-5:])
             detalhe_html = f"""
