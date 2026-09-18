@@ -110,6 +110,12 @@ def log_execution(modulo="Geral"):
                 result = func(*args, **kwargs)
                 status_final = "SUCESSO"
                 return result
+            except SystemExit as e:
+                if e.code in (0, None):
+                    status_final = "SUCESSO"
+                else:
+                    status_final = "ERRO"
+                raise
             except Exception as e:
                 # Em caso de erro, printa o traceback (que será capturado pelo sys.stderr)
                 traceback.print_exc()

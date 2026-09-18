@@ -19,7 +19,8 @@
     "XML Retaguarda": {
       "emails": "SCHEDULER_NOTIFY_EMAILS_XML",
       "jobs": [
-        "XML Retaguarda Entrada"
+        "XML Retaguarda Entrada",
+        "Extrator Picking"
       ]
     },
     "Extranet": {
@@ -139,6 +140,23 @@
         "max_attempts": 3,
         "delay_seconds": 120
       }
+    },
+    {
+      "name": "Extrator Picking",
+      "enabled": true,
+      "script": "departments/financeiro/modules/xml/extrator_picking.py",
+      "schedule": {
+        "type": "cron",
+        "hour": 7,
+        "minute": 0,
+        "day_of_week": "mon-fri"
+      },
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 120
+      },
+      "depends_on": "XML Retaguarda Entrada",
+      "condition": "ter_faturamento"
     }
   ]
 }

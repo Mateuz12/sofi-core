@@ -18,6 +18,7 @@ grupos:
   xml_retaguarda:
     jobs_vinculados:
     - XML Retaguarda Entrada
+    - Extrator Picking
     emails:
     - financeiro.auxiliar@udiboticario.com.br
     - financeiro.coordenacao@udiboticario.com.br

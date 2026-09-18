@@ -92,3 +92,19 @@ jobs:
   retry:
     max_attempts: 3
     delay_seconds: 120
+- name: Extrator Picking
+  enabled: true
+  script: departments/financeiro/modules/xml/extrator_picking.py
+  unidade: null
+  schedule:
+    type: cron
+    hour: 6
+    minute: 0
+    day_of_week: mon-fri
+  dias: 0
+  retry:
+    max_attempts: 3
+    delay_seconds: 120
+  depends_on: XML Retaguarda Entrada
+  condition: ter_faturamento
+

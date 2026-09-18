@@ -155,6 +155,9 @@ with tab_sched:
                 j_name = j.get("name", "Job")
                 enabled = c_head2.checkbox("Ativo", value=j.get("enabled", True), key=f"job_en_{idx}")
                 c_head1.markdown(f"**{j_name}**")
+                if j.get("depends_on"):
+                    cond_label = f" ({j.get('condition')})" if j.get("condition") else ""
+                    c_head1.caption(f"🔗 Depende de: `{j['depends_on']}`{cond_label}")
                 
                 s_info = j.get("schedule", {})
                 curr_hour = int(s_info.get("hour", 7))
