@@ -61,6 +61,7 @@ graph TD
 
         subgraph Conciliacao_Depositos["Liquidação e Tesouraria"]
             M_Concilia["[[modulo_conciliacao_vendas]]"]
+            M_Omni["[[modulo_conciliacao_omni]]"]
             M_Depositos["[[modulo_depositos]]"]
         end
     end
@@ -204,6 +205,15 @@ graph TD
   - `departments/financeiro/modules/depositos/AUTOMACOES DE DEPOSITO/mvp_deposito_21061.py`
   - `departments/financeiro/modules/depositos/AUTOMACOES DE DEPOSITO/lojas.xlsx`
 - **Regras Críticas:** Endpoint `POST /FechamentoDeCaixaAPI/RealizarDeposito/`; validação prévia de saldo em espécie para evitar diferenças de caixa; captura dinâmica de sessão para contornar expiração de autenticação.
+
+### 13. [[modulo_conciliacao_omni]]
+- **Objetivo:** Motor moderno de conciliação financeira automatizada de vendas OMNI via API REST no FinançasGB.
+- **Responsabilidade:** Descoberta de pendências (`/List/`), coleta de vendas do mês (`/GetMovimentosDeVendas/`), segregação de regras (`OmniCardRule` vs `OmniPixRule`) e modo auditoria `REPORT_ONLY`.
+- **Entradas:** Endpoints REST corporativos de vendas e cartões.
+- **Saídas:** Tabelas SQLite dedicadas (`processing_days`, `omni_movements`, `sales`, etc.) e relatórios segregados.
+- **Código Relacionado:**
+  - `departments/financeiro/modules/conciliacao_omni/`
+- **Regras Críticas:** v1 focada exclusivamente em OMNI Cartão; OMNI PIX isolado em `REGRA_NAO_IMPLEMENTADA`; zero execução de `POST /Conciliar/` na fase 1 (estritamente `REPORT_ONLY`).
 
 ---
 
