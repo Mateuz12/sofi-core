@@ -887,7 +887,7 @@ def gerar_relatorio_calamo():
     
     if not notas_bh and not notas_udi:
         print("Nenhuma nota processada dos XMLs. Abortando geração.")
-        return
+        return 0
         
     # Carrega dinamicamente a ordem desejada das lojas baseada nas planilhas
     caminho_mod_bh = os.path.join(pasta_modelos, 'MODELO BH.xls')
@@ -1041,6 +1041,7 @@ def gerar_relatorio_calamo():
     print(f"\n=== PROCESSAMENTO CONCLUÍDO COM SUCESSO! ===")
     print(f"Os relatórios Excel foram salvos com sucesso em:")
     print(f" => {diretorio_saida}")
+    return len(notas_bh) + len(notas_udi)
 
 if __name__ == '__main__':
     gerar_relatorio_calamo()
