@@ -300,13 +300,13 @@ def localizar_ultimos_relatorios_matheus() -> Tuple[List[Path], Optional[Path]]:
         pastas_semana = [p for p in REDE_RELATORIOS_BASE.glob("*/*/*") if p.is_dir()]
         semanas_com_matheus = [
             p for p in pastas_semana
-            if any("matheus" in f.name.lower() for f in p.glob("*.xls*"))
+            if any(("matheus" in f.name.lower() or "nosso pedido" in f.name.lower()) for f in p.glob("*.xls*"))
         ]
         if semanas_com_matheus:
             pasta_semana_encontrada = max(semanas_com_matheus, key=lambda p: p.stat().st_mtime)
-            print(f"\n[OK] Última semana de relatórios do Matheus detectada em T:\\13-Publica: {pasta_semana_encontrada}")
+            print(f"\n[OK] Última semana de relatórios detectada em T:\\13-Publica: {pasta_semana_encontrada}")
             for f in pasta_semana_encontrada.glob("*.xls*"):
-                if not f.name.startswith("~$") and "matheus" in f.name.lower():
+                if not f.name.startswith("~$") and ("matheus" in f.name.lower() or "nosso pedido" in f.name.lower()):
                     relatorios.append(f)
 
     # 2. Se não encontrou em 13-Publica, tenta o fallback local
@@ -316,19 +316,19 @@ def localizar_ultimos_relatorios_matheus() -> Tuple[List[Path], Optional[Path]]:
             pastas_loc = [p for p in pasta_local_rel.glob("*/*/*") if p.is_dir()]
             semanas_loc_matheus = [
                 p for p in pastas_loc
-                if any("matheus" in f.name.lower() for f in p.glob("*.xls*"))
+                if any(("matheus" in f.name.lower() or "nosso pedido" in f.name.lower()) for f in p.glob("*.xls*"))
             ]
             if semanas_loc_matheus:
                 pasta_semana_encontrada = max(semanas_loc_matheus, key=lambda p: p.stat().st_mtime)
                 print(f"\n[OK] Última semana local detectada: {pasta_semana_encontrada}")
                 for f in pasta_semana_encontrada.glob("*.xls*"):
-                    if not f.name.startswith("~$") and "matheus" in f.name.lower():
+                    if not f.name.startswith("~$") and ("matheus" in f.name.lower() or "nosso pedido" in f.name.lower()):
                         relatorios.append(f)
 
     # 3. Fallback: arquivos soltos na pasta do módulo
     if not relatorios:
-        for f in DIRETORIO_ATUAL.glob("*Matheus*.xls*"):
-            if not f.name.startswith("~$") and "modelo" not in f.name.lower():
+        for f in DIRETORIO_ATUAL.glob("*.xls*"):
+            if not f.name.startswith("~$") and ("matheus" in f.name.lower() or "nosso pedido" in f.name.lower()) and "modelo" not in f.name.lower():
                 relatorios.append(f)
         pasta_semana_encontrada = DIRETORIO_ATUAL
 
