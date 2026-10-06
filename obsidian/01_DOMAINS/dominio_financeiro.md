@@ -142,10 +142,10 @@ graph TD
 - **Responsabilidade:** Analisa os XMLs convertidos, extrai bases de cálculo e alíquotas de ICMS ST, aplica regras de prazos por loja e instancia o Microsoft Excel via COM para preencher 4 planilhas formatadas com fórmulas nativas e totalizadores por canal.
 - **Entradas:** Arquivos XML SEFAZ, planilha de modelo base, configuração de prazos (`regras_prazo.txt`).
 - **Saídas:** 4 planilhas Excel `.xls`:
-  1. `Relatorio_Final_Geral_BH.xls`
-  2. `Relatorio_Final_Geral_UDI.xls`
-  3. `Relatorio_Final_Matheus_BH.xls`
-  4. `Relatorio_Final_Matheus_UDI.xls`
+  1. `13.PUB.NOTAS FISCAIS FATURADAS & CONTABILIZAÇÃO-<ANO>-<MÊS>-<SEMANA> BH.xls`
+  2. `13.PUB.NOTAS FISCAIS FATURADAS & CONTABILIZAÇÃO-<ANO>-<MÊS>-<SEMANA> UDI.xls`
+  3. `13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-<ANO>-<MÊS>-<SEMANA> BH.xls`
+  4. `13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-<ANO>-<MÊS>-<SEMANA> UDI.xls`
 - **Código Relacionado:**
   - `departments/financeiro/modules/xml/gerador_relatorio.py`
   - `departments/financeiro/modules/xml/leitor_xml.py`

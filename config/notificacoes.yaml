@@ -15,6 +15,7 @@ grupos:
     - fechamentodecaixa@attboticario.com.br
     - financeiro.coordenacao@udiboticaio.com.br
     - financeiro.controladoria@udiboticario.com.br
+    - ti.assistente@udiboticario.com.br
   xml_retaguarda:
     jobs_vinculados:
     - XML Retaguarda Entrada
@@ -26,6 +27,7 @@ grupos:
     - financeiro.analista@udiboticario.com.br
     - gestor.compraseprocessos@grupoattboticario.com
     - compras.assistente@udiboticario.com.br
+    - ti.assistente@udiboticario.com.br
   extranet:
     jobs_vinculados:
     - Extranet BH
@@ -34,5 +36,6 @@ grupos:
     - financeiro.auxiliar@udiboticario.com.br
     - fechamentodecaixa@attboticario.com.br
     - financeiro.coordenacao@udiboticaio.com.br
+    - ti.assistente@udiboticario.com.br
 enviar_em_sucesso: true
 enviar_em_erro: true

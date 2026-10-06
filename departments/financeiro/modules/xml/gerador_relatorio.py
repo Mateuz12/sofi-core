@@ -48,10 +48,15 @@ from core.database.logger import log_execution
 
 # Mapeamento do número do mês para o nome em português
 MESES_MAP = {
-    1: "05 - Maio" if 5 == 5 else "01 - Janeiro", # Garante mapeamento correto
     1: "01 - Janeiro", 2: "02 - Fevereiro", 3: "03 - Março", 4: "04 - Abril",
     5: "05 - Maio", 6: "06 - Junho", 7: "07 - Julho", 8: "08 - Agosto",
     9: "09 - Setembro", 10: "10 - Outubro", 11: "11 - Novembro", 12: "12 - Dezembro"
+}
+
+MESES_NOME_UPPER = {
+    1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL",
+    5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO",
+    9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"
 }
 
 def carregar_regras_prazo():
@@ -887,7 +892,7 @@ def gerar_relatorio_calamo():
     
     if not notas_bh and not notas_udi:
         print("Nenhuma nota processada dos XMLs. Abortando geração.")
-        return
+        return 0
         
     # Carrega dinamicamente a ordem desejada das lojas baseada nas planilhas
     caminho_mod_bh = os.path.join(pasta_modelos, 'MODELO BH.xls')
@@ -917,6 +922,7 @@ def gerar_relatorio_calamo():
         
         ano_pasta = str(segunda_pasta.year)
         mes_pasta = MESES_MAP.get(segunda_pasta.month, f"{segunda_pasta.month:02d} - Outros")
+        mes_upper = MESES_NOME_UPPER.get(segunda_pasta.month, "OUTROS")
         
         min_str = segunda_pasta.strftime('%d-%m')
         max_str = domingo_pasta.strftime('%d-%m')
@@ -925,6 +931,7 @@ def gerar_relatorio_calamo():
         # Fallback padrão
         ano_pasta = str(datetime.now().year)
         mes_pasta = MESES_MAP.get(datetime.now().month, f"{datetime.now().month:02d} - Outros")
+        mes_upper = MESES_NOME_UPPER.get(datetime.now().month, "OUTROS")
         semana_pasta = f"Semana {datetime.now().strftime('%d-%m')}"
         
     # Caminho final estruturado na rede T:
@@ -941,11 +948,11 @@ def gerar_relatorio_calamo():
     os.makedirs(diretorio_saida, exist_ok=True)
     print(f"Diretório de relatórios criado: {diretorio_saida}")
     
-    # Caminhos finais para salvar os 4 arquivos
-    saida_geral_bh = os.path.join(diretorio_saida, "Relatorio_Final_Calamo_BH.xls")
-    saida_geral_udi = os.path.join(diretorio_saida, "Relatorio_Final_Calamo_UDI.xls")
-    saida_matheus_bh = os.path.join(diretorio_saida, "Relatorio_Final_Matheus_BH.xls")
-    saida_matheus_udi = os.path.join(diretorio_saida, "Relatorio_Final_Matheus_UDI.xls")
+    # Caminhos finais para salvar os 4 arquivos (novo padrão de nomeação)
+    saida_geral_bh = os.path.join(diretorio_saida, f"13.PUB.NOTAS FISCAIS FATURADAS & CONTABILIZAÇÃO-{ano_pasta}-{mes_upper}-{semana_pasta} BH.xls")
+    saida_geral_udi = os.path.join(diretorio_saida, f"13.PUB.NOTAS FISCAIS FATURADAS & CONTABILIZAÇÃO-{ano_pasta}-{mes_upper}-{semana_pasta} UDI.xls")
+    saida_matheus_bh = os.path.join(diretorio_saida, f"13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-{ano_pasta}-{mes_upper}-{semana_pasta} BH.xls")
+    saida_matheus_udi = os.path.join(diretorio_saida, f"13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-{ano_pasta}-{mes_upper}-{semana_pasta} UDI.xls")
     
     # Modelos de entrada
     caminho_mod_matheus_bh = os.path.join(pasta_modelos, 'MODELO_MATHEUS_BH.xls')
@@ -1041,6 +1048,7 @@ def gerar_relatorio_calamo():
     print(f"\n=== PROCESSAMENTO CONCLUÍDO COM SUCESSO! ===")
     print(f"Os relatórios Excel foram salvos com sucesso em:")
     print(f" => {diretorio_saida}")
+    return len(notas_bh) + len(notas_udi)
 
 if __name__ == '__main__':
     gerar_relatorio_calamo()

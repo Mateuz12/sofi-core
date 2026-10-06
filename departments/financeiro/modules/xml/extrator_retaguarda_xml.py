@@ -594,7 +594,11 @@ def processar_pipeline_completo(caminho_planilha: Path) -> int:
     if xmls_baixados > 0:
         print(f"[XML Pipeline] {xmls_baixados} XML(s) baixado(s) com sucesso!")
         print("[XML Pipeline] Disparando geração dos relatórios finais da Cálamo e organização por PDV...")
-        gerar_relatorio_calamo()
+        total_validas = gerar_relatorio_calamo()
+        if total_validas == 0:
+            print("[XML Pipeline] Todos os XMLs baixados foram ignorados por não possuírem vencimento (ex: devoluções).")
+            print("[XML Pipeline] Retornando status SEM FATURAMENTO.")
+            return EXIT_SEM_FATURAMENTO
         print("[XML Pipeline] Pipeline completo concluído com SUCESSO!")
         return EXIT_OK
     else:

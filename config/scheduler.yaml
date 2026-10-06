@@ -9,11 +9,13 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
     delay_seconds: 120
+  depends_on: null
+  condition: null
 - name: Fluxo Analítico DFC BH
   enabled: true
   script: departments/financeiro/modules/fluxo_caixa/extrator_dfc_bh.py
@@ -22,11 +24,13 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
     delay_seconds: 120
+  depends_on: null
+  condition: null
 - name: Retaguarda UDI
   enabled: true
   script: departments/financeiro/modules/retaguarda/extrator_retaguarda.py
@@ -35,11 +39,13 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 1
   retry:
     max_attempts: 3
     delay_seconds: 120
+  depends_on: null
+  condition: null
 - name: Retaguarda BH
   enabled: true
   script: departments/financeiro/modules/retaguarda/extrator_retaguarda.py
@@ -48,11 +54,13 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 1
   retry:
     max_attempts: 3
     delay_seconds: 120
+  depends_on: null
+  condition: null
 - name: Extranet BH
   enabled: true
   script: departments/financeiro/modules/extranet/BH/extranet_reports_bh.py
@@ -61,11 +69,13 @@ jobs:
     type: cron
     hour: 9
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 5
   retry:
     max_attempts: 3
     delay_seconds: 120
+  depends_on: null
+  condition: null
 - name: Extranet UDI
   enabled: true
   script: departments/financeiro/modules/extranet/UDI/extranet_reports_udi.py
@@ -74,37 +84,40 @@ jobs:
     type: cron
     hour: 9
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 5
   retry:
     max_attempts: 3
     delay_seconds: 120
+  depends_on: null
+  condition: null
 - name: XML Retaguarda Entrada
   enabled: true
   script: departments/financeiro/modules/xml/extrator_retaguarda_xml.py
   unidade: null
   schedule:
     type: cron
-    hour: 6
-    minute: 0
-    day_of_week: mon-fri
+    hour: 7
+    minute: 50
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
     delay_seconds: 120
+  depends_on: null
+  condition: null
 - name: Extrator Picking
   enabled: true
   script: departments/financeiro/modules/xml/extrator_picking.py
   unidade: null
   schedule:
     type: cron
-    hour: 6
-    minute: 0
-    day_of_week: mon-fri
+    hour: 7
+    minute: 50
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
     delay_seconds: 120
   depends_on: XML Retaguarda Entrada
   condition: ter_faturamento
-

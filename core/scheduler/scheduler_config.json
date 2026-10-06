@@ -40,7 +40,8 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 0
+        "minute": 0,
+        "day_of_week": "*"
       },
       "dias": 0,
       "retry": {
@@ -56,7 +57,8 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 0
+        "minute": 0,
+        "day_of_week": "*"
       },
       "dias": 0,
       "retry": {
@@ -72,7 +74,8 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 0
+        "minute": 0,
+        "day_of_week": "*"
       },
       "dias": 1,
       "retry": {
@@ -88,7 +91,8 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 0
+        "minute": 0,
+        "day_of_week": "*"
       },
       "dias": 1,
       "retry": {
@@ -103,7 +107,8 @@
       "schedule": {
         "type": "cron",
         "hour": 9,
-        "minute": 0
+        "minute": 0,
+        "day_of_week": "*"
       },
       "dias": 5,
       "retry": {
@@ -118,7 +123,8 @@
       "schedule": {
         "type": "cron",
         "hour": 9,
-        "minute": 0
+        "minute": 0,
+        "day_of_week": "*"
       },
       "dias": 5,
       "retry": {
@@ -133,8 +139,8 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 0,
-        "day_of_week": "mon-fri"
+        "minute": 50,
+        "day_of_week": "*"
       },
       "retry": {
         "max_attempts": 3,
@@ -148,8 +154,8 @@
       "schedule": {
         "type": "cron",
         "hour": 7,
-        "minute": 0,
-        "day_of_week": "mon-fri"
+        "minute": 50,
+        "day_of_week": "*"
       },
       "retry": {
         "max_attempts": 3,
