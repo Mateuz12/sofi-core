@@ -9,7 +9,7 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
@@ -24,7 +24,7 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
@@ -39,7 +39,7 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 1
   retry:
     max_attempts: 3
@@ -54,7 +54,7 @@ jobs:
     type: cron
     hour: 7
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 1
   retry:
     max_attempts: 3
@@ -69,7 +69,7 @@ jobs:
     type: cron
     hour: 9
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 5
   retry:
     max_attempts: 3
@@ -84,7 +84,7 @@ jobs:
     type: cron
     hour: 9
     minute: 0
-    day_of_week: null
+    day_of_week: '*'
   dias: 5
   retry:
     max_attempts: 3
@@ -99,7 +99,7 @@ jobs:
     type: cron
     hour: 7
     minute: 50
-    day_of_week: mon-fri
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
@@ -114,7 +114,7 @@ jobs:
     type: cron
     hour: 7
     minute: 50
-    day_of_week: mon-fri
+    day_of_week: '*'
   dias: 0
   retry:
     max_attempts: 3
