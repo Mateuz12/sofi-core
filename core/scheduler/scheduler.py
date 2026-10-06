@@ -653,8 +653,8 @@ def start_scheduler() -> "BackgroundScheduler | None":
         h = j_sched.get("hour", 8)
         m = j_sched.get("minute", 0)
         raw_dow = j_sched.get("day_of_week")
-        if not raw_dow or str(raw_dow).lower().strip() in ("none", "null", ""):
-            dow = "mon-fri"
+        if not raw_dow or str(raw_dow).lower().strip() in ("none", "null", "", "*", "todos", "diario", "diário", "all", "mon-sun", "seg-dom", "todos_os_dias"):
+            dow = "*"
         else:
             dow = str(raw_dow).lower().strip()
             if dow in ("seg-sex", "segunda-sexta", "segunda_a_sexta", "dias_uteis"):
@@ -865,8 +865,8 @@ def reload_scheduler_jobs(scheduler_instance=None, new_config: dict = None) -> N
         h = j_sched.get("hour", 8)
         m = j_sched.get("minute", 0)
         raw_dow = j_sched.get("day_of_week")
-        if not raw_dow or str(raw_dow).lower().strip() in ("none", "null", ""):
-            dow = "mon-fri"
+        if not raw_dow or str(raw_dow).lower().strip() in ("none", "null", "", "*", "todos", "diario", "diário", "all", "mon-sun", "seg-dom", "todos_os_dias"):
+            dow = "*"
         else:
             dow = str(raw_dow).lower().strip()
             if dow in ("seg-sex", "segunda-sexta", "segunda_a_sexta", "dias_uteis"):
