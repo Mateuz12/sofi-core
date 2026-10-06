@@ -51,8 +51,8 @@ SENDER_EMAILS = [
     "fechamentodecaixa@attboticario.com.br",  # Genérico (qualquer unidade)
     "viviane.reis@attboticario.com.br",
     "lojavd1@attboticario.com.br",
-    "estoque.erneves@attboticario.com.br"
-    "lojaerneves@attboticario.com.br"    # Venda Nova
+    "estoque.erneves@attboticario.com.br",     # ER Neves
+    "lojaerneves@attboticario.com.br",        # ER Neves (Juliana Luiz)
 ]
 ARCHIVE_FOLDER_NAME = "Arquivados BH"
 START_DATE_SCAN = "21/07/2026" # Somente processa emails recebidos a partir desta data
@@ -68,6 +68,9 @@ MESES_PT = {
 UNIDADES = {
     "ITAPÕA": {
         "subject_keyword": ["ITAPÕA", "ITAPOÃ", "ITAPOÁ", "ITAPOA", "13793"],  # Variações de acentuação e código da loja
+        "sender_emails": [
+            "faturamento.vd@attboticario.com.br"
+        ],
         "attachment_prefix": [
             "Controle de titulos",
             "Controle de títulos",
@@ -92,7 +95,11 @@ UNIDADES = {
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 13793"
     },
     "VENDA NOVA":{
-        "subject_keyword": ["VENDA NOVA"],
+        "subject_keyword": ["VENDA NOVA", "22372"],
+        "sender_emails": [
+            "lojavd@attboticario.com.br",
+            "lojavd1@attboticario.com.br"
+        ],
         "attachment_prefix": [
             "Controle de titulos Venda Nova 22372",
             "Controle de títulos Venda Nova 22372",
@@ -109,7 +116,12 @@ UNIDADES = {
         "final_name_prefix": "05-FIN.FECHAMENTO DE CAIXA.IMPORTAÇÃO FINANÇAS GB.BH. 2.1 FECHAMENTO DE CAIXA VD 22372"
     },
     "ER NEVES": {
-        "subject_keyword": ["ER NEVES", "21433"],
+        "subject_keyword": ["ER NEVES", "21433", "LOJA ER NEVES", "LOJAERNEVES", "NEVES", "JULIANA LUIZ"],
+        "sender_emails": [
+            "caixaerneves@attboticario.com.br",
+            "estoque.erneves@attboticario.com.br",
+            "lojaerneves@attboticario.com.br"
+        ],
         "attachment_prefix": [
             "Contole de Titulo",
             "Controle de Titulo",
@@ -288,8 +300,18 @@ def process_message(message, namespace):
             if matched_unidade:
                 break
 
+        # Fallback: se o assunto não especificar a unidade, identifica pelo e-mail do remetente
         if not matched_unidade:
-            log(f"  ⚠️  Unidade não identificada no assunto. Palavras-chave esperadas: {list(UNIDADES.keys())}")
+            sender_clean = sender.lower().strip()
+            for key, data in UNIDADES.items():
+                unit_senders = [s.lower().strip() for s in data.get("sender_emails", [])]
+                if sender_clean in unit_senders:
+                    matched_unidade = data
+                    log(f"  ℹ️  Unidade '{key}' identificada via e-mail do remetente ({sender_clean}).")
+                    break
+
+        if not matched_unidade:
+            log(f"  ⚠️  Unidade não identificada no assunto nem pelo remetente ({sender}). Palavras-chave esperadas: {list(UNIDADES.keys())}")
             return
 
         # Procurar o anexo correto (sem salvar ainda)

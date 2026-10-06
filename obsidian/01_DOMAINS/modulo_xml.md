@@ -226,11 +226,12 @@ flowchart TD
 - **Planilhas Base Retaguarda:** Salvas em `T:\13-Publica\XMLS CÁLAMO\PLANILHAS_RETAGUARDA\`.
 - **XMLs Oficiais SEFAZ:** Arquivos `<PDV>_<Nº_DOC>.xml` organizados em `T:\13-Publica\XMLS CÁLAMO\XML BAIXADOS\<ANO>\<MÊS>\<SEMANA>\<PDV>\`.
 - **4 Relatórios Executivos Semanais (.xls):**
-  1. `Relatorio_Final_Geral_BH.xls`
-  2. `Relatorio_Final_Geral_UDI.xls`
-  3. `Relatorio_Final_Matheus_BH.xls`
-  4. `Relatorio_Final_Matheus_UDI.xls`
+  1. `13.PUB.NOTAS FISCAIS FATURADAS & CONTABILIZAÇÃO-<ANO>-<MÊS>-<SEMANA> BH.xls` (Relatório Contábil BH)
+  2. `13.PUB.NOTAS FISCAIS FATURADAS & CONTABILIZAÇÃO-<ANO>-<MÊS>-<SEMANA> UDI.xls` (Relatório Contábil UDI)
+  3. `13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-<ANO>-<MÊS>-<SEMANA> BH.xls` (Relatório Nosso Pedido BH)
+  4. `13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-<ANO>-<MÊS>-<SEMANA> UDI.xls` (Relatório Nosso Pedido UDI)
   Salvos em `T:\13-Publica\XMLS CÁLAMO\RELATÓRIOS COMPLETOS\<ANO>\<MÊS>\<SEMANA>\`.
+- **Tratamento de Devoluções / Sem Vencimento:** Caso todos os XMLs baixados no período sejam devoluções ou notas sem vencimento financeiro, o robô encerra retornando código `3` (`EXIT_SEM_FATURAMENTO`), evitando falsos positivos no Scheduler.
 - **Planilhas de OP Picking (.xlsx):** Salvas na mesma pasta de cada PDV (`<PDV>_<Nº_DOC>.xlsx`).
 - **Auditoria no Banco SQLite:** Registros automáticos na tabela `execution_logs` do `core/database/sofi.db` sob o módulo `"XML"`.
 
