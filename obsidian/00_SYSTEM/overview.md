@@ -219,3 +219,73 @@ O ecossistema divide-se conceitualmente nos seguintes domínios:
 2. **Definição do Módulo de RH:** *Não determinado pelo código disponível.* A pasta `departments/rh/modules/triagem` possui apenas um arquivo `.gitkeep`; as fontes de currículos, regras de triagem e modelo de IA a ser utilizado ainda não estão especificados no repositório.
 3. **Mapeamento Completo de Depósitos para as 43 Lojas:** O código de teste atual foca na loja 21061 (`mvp_deposito_21061.py`); a validação dos identificadores de todas as 43 lojas na planilha `lojas.xlsx` e as regras para depósitos divergentes precisam de homologação operacional.
 4. **Gatilho de Execução do Extrator de Picking:** O arquivo `extrator_picking.py` está presente no repositório mas ainda não consta na grade de jobs do `scheduler_config.json`. Precisa ser determinado se ele deve rodar manualmente ou de forma agendada semanalmente.
+
+---
+
+## 📁 Regra Corporativa de Nomenclatura de Arquivos e Estrutura de Pastas
+
+> **Origem:** Diretriz Corporativa de Governança de Arquivos e Rede (Obsidian / SOFI)  
+> **Status:** Ativo / Mandatório para Novas Rotinas e Relatórios
+
+### 1. Estrutura Canônica de Diretórios na Rede Corporativa
+
+Toda árvore de armazenamento de relatórios e dados na rede segue uma hierarquia estrita em 6 níveis conceituais:
+
+```
+<CÓDIGO_DEPARTAMENTO>-<NOME_DEPARTAMENTO>/
+└── <SETOR_OU_ÁREA>/
+    └── <PROJETO_OU_TEMA>/
+        └── <UNIDADE_OU_REGIONAL>/
+            └── <ANO>/
+                └── <MÊS_FORMATADO>/
+                    └── <ARQUIVO>
+```
+
+#### Exemplo Canônico 1 (Marketing / Eventos):
+```
+08-MARKETING/
+└── EVENTOS/
+    └── ENERGIZATT/
+        └── BH/
+            └── 2025/
+                └── 08 Agosto/
+                    └── 08-MKT.EVENTOS.ENERGIZATT.BH.PLANILHA DE ORÇAMENTOS.01-08-2025.xlsx
+```
+
+#### Exemplo Canônico 2 (Financeiro / XML / VD Captação):
+```
+13-PUBLICA/ (ou 05-FINANCEIRO/)
+└── XMLS CÁLAMO/
+    └── RELATÓRIOS DETALHADOS/
+        └── 2025/
+            └── 08 - Agosto/
+                └── Semana 01-08 a 07-08/
+                    ├── 13-PUB.XML.VD.CAPTACAO.20844.NOTA FISCAL DETALHADO.Semana 01-08 a 07-08.xlsx
+                    └── 13-PUB.XML.VD.CAPTACAO.13793.NOTA FISCAL DETALHADO.Semana 01-08 a 07-08.xlsx
+```
+
+---
+
+### 2. Regra Canônica de Nomenclatura de Arquivos
+
+O nome de qualquer planilha ou relatório gerado é composto por blocos semânticos padronizados separados por **ponto (`.`)**:
+
+```
+[COD_DEPT]-[ABREV_DEPT].[SETOR].[PROJETO_OU_TEMA].[UNIDADE].[NOME_DO_RELATÓRIO].[DATA_OU_PERÍODO].[EXT]
+```
+
+#### Especificação dos Componentes:
+1. **`[COD_DEPT]-[ABREV_DEPT]`**: Código numérico de 2 dígitos e sigla do departamento emissor:
+   - `08-MKT.` (Marketing)
+   - `05-FIN.` (Financeiro)
+   - `13-PUB.` (Pastas Públicas / Auditoria Cálamo)
+2. **`[SETOR]`**: Setor ou macroprocesso em letras maiúsculas (ex: `EVENTOS`, `XML`, `FECHAMENTO`).
+3. **`[PROJETO_OU_TEMA]`**: Projeto, canal ou contexto específico (ex: `ENERGIZATT`, `VD.CAPTACAO`, `DFC`).
+4. **`[UNIDADE]`**: Regional operacional ou identificador do PDV (ex: `BH`, `UDI`, `20844`, `13793`).
+5. **`[NOME_DO_RELATÓRIO]`**: Nome do documento em caixa alta sem caracteres especiais (ex: `PLANILHA DE ORÇAMENTOS`, `NOTA FISCAL DETALHADO`).
+6. **`[DATA_OU_PERÍODO]`**:
+   - Para rotinas **diárias**: `DD-MM-AAAA` (ex: `01-08-2025`).
+   - Para rotinas **semanais**: `Semana DD-MM a DD-MM` (ex: `Semana 01-08 a 07-08`).
+   - Para rotinas **mensais/anuais**: `AAAA-MM` ou `AAAA`.
+7. **`[EXT]`**: Extensão do arquivo em minúsculas (preferencialmente `.xlsx` ou `.xls`).
+

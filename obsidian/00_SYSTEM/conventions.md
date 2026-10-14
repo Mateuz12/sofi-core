@@ -102,3 +102,14 @@ Ao redigir documentação arquitetural, respeite rigorosamente as categorias:
 - **INFERÊNCIA:** Dedução arquitetural lógica razoável sustentada pelo código.
 - **NÃO DETERMINADO:** Quando uma regra ou motivo não puder ser comprovado, declarar explicitamente:
   > *Não determinado pelo código/documentação disponível.*
+
+---
+
+## 5. Padrões de Nomenclatura de Arquivos e Estrutura de Diretórios na Rede
+
+Para todas as automações e relatórios corporativos gerados pelo ecossistema SOFI, deve-se seguir rigorosamente a especificação definida em `[[overview]]`:
+- **Nomenclatura Canônica:** `[COD_DEPT]-[ABREV_DEPT].[SETOR].[PROJETO_OU_TEMA].[UNIDADE].[NOME_DO_RELATÓRIO].[DATA_OU_PERÍODO].[ext]`
+  - Exemplo diário: `08-MKT.EVENTOS.ENERGIZATT.BH.PLANILHA DE ORÇAMENTOS.01-08-2025.xlsx`
+  - Exemplo semanal: `13-PUB.XML.VD.CAPTACAO.20844.NOTA FISCAL DETALHADO.Semana 01-08 a 07-08.xlsx`
+- **Árvore de Diretórios:** `<COD_DEPT>-<DEPARTAMENTO>/<SETOR>/<PROJETO>/<UNIDADE>/<ANO>/<MÊS_FORMATADO>/`
+
