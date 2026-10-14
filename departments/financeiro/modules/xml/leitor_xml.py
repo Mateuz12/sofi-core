@@ -6,7 +6,10 @@ from openpyxl.styles import Font
 from datetime import datetime
 import re
 from pathlib import Path
-from lxml import etree
+try:
+    from lxml import etree
+except ImportError:
+    etree = None
 import zipfile
 import win32com.client
 
@@ -266,6 +269,79 @@ def extrair_dados_xml(caminho_xml):
     except Exception as e:
         print(f"Erro ao processar {caminho_xml}: {e}")
         return None
+
+def extrair_itens_xml(caminho_xml):
+    """
+    Extrai os itens individuais (<det>) da NF-e para o relatório detalhado por SKU.
+    Retorna uma lista de dicionários com:
+    [
+        {
+            'n_doc': int,
+            'pdv': str,
+            'dt_emissao': str (DD/MM/AAAA),
+            'sku': str,
+            'quantidade': int ou float,
+            'caminho_xml': str
+        },
+        ...
+    ]
+    """
+    ns = {'nfe': 'http://www.portalfiscal.inf.br/nfe'}
+    try:
+        tree = ET.parse(caminho_xml)
+        root = tree.getroot()
+
+        infNFe = root.find('.//nfe:infNFe', ns)
+        if infNFe is None:
+            infNFe = root.find('.//infNFe')
+            ns = {'nfe': ''}
+            if infNFe is None:
+                return []
+
+        # Extrai número do documento
+        nNF = infNFe.find('.//nfe:ide/nfe:nNF', ns) if ns['nfe'] else infNFe.find('.//ide/nNF')
+        n_doc = para_int(nNF.text) if (nNF is not None and nNF.text) else ""
+
+        # Extrai data de emissão
+        dhEmi = infNFe.find('.//nfe:ide/nfe:dhEmi', ns) if ns['nfe'] else infNFe.find('.//ide/dhEmi')
+        dt_emissao = formatar_data(dhEmi.text) if (dhEmi is not None and dhEmi.text) else ""
+
+        # Mapeia PDV a partir do CNPJ destinatário
+        pdv = ""
+        cnpj_dest = infNFe.find('.//nfe:dest/nfe:CNPJ', ns) if ns['nfe'] else infNFe.find('.//dest/CNPJ')
+        if cnpj_dest is not None and cnpj_dest.text:
+            cnpj_limpo = limpar_cnpj(cnpj_dest.text)
+            info_loja = LOJAS_MAP_DINAMICO.get(cnpj_limpo)
+            if info_loja:
+                pdv = str(info_loja.get('PDV', '')).strip()
+            else:
+                pdv = cnpj_limpo
+
+        itens = []
+        dets = infNFe.findall('.//nfe:det', ns) if ns['nfe'] else infNFe.findall('.//det')
+        for det in dets:
+            cProd = det.find('.//nfe:prod/nfe:cProd', ns) if ns['nfe'] else det.find('.//prod/cProd')
+            sku = str(cProd.text).strip() if (cProd is not None and cProd.text) else ""
+
+            qCom = det.find('.//nfe:prod/nfe:qCom', ns) if ns['nfe'] else det.find('.//prod/qCom')
+            qtd = 0
+            if qCom is not None and qCom.text:
+                val_float = para_float(qCom.text)
+                qtd = int(val_float) if val_float.is_integer() else val_float
+
+            itens.append({
+                'n_doc': n_doc,
+                'pdv': pdv,
+                'dt_emissao': dt_emissao,
+                'sku': sku,
+                'quantidade': qtd,
+                'caminho_xml': str(caminho_xml)
+            })
+
+        return itens
+    except Exception as e:
+        print(f"Erro ao extrair itens de {caminho_xml}: {e}")
+        return []
 
 def encontrar_primeira_linha_nula(sheet, col_index=1, start_row=4):
     """Procura a primeira linha vazia em uma coluna específica da planilha."""

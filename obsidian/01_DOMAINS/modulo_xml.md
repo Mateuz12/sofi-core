@@ -120,6 +120,7 @@ flowchart TD
 | `departments/financeiro/modules/xml/read_xls.py` | Utilitário complementar para leitura de planilhas legadas em formato `.xls`. |
 | `departments/financeiro/modules/xml/extrator_retaguarda_xml.py` | Robô Playwright para extração do relatório base de compras na Retaguarda. |
 | `departments/financeiro/modules/xml/extrator_picking.py` | Robô Playwright e cliente REST para extração de OP Picking na Extranet. |
+| `departments/financeiro/modules/xml/gerador_relatorio_detalhado.py` | Gerador dos relatórios de Nota Fiscal Detalhado por PDV (VD Captação 20844 e 13793). |
 | `departments/financeiro/modules/xml/regras_prazo.txt` | Arquivo de configuração de prazos de pagamento base por PDV. |
 | `departments/financeiro/modules/xml/op_piking.xlsx` | Template de referência para a geração das planilhas de separação de mercadorias. |
 
@@ -231,6 +232,11 @@ flowchart TD
   3. `13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-<ANO>-<MÊS>-<SEMANA> BH.xls` (Relatório Nosso Pedido BH)
   4. `13.PUB.NOTAS FISCAIS FATURADAS & NOSSO PEDIDO-<ANO>-<MÊS>-<SEMANA> UDI.xls` (Relatório Nosso Pedido UDI)
   Salvos em `T:\13-Publica\XMLS CÁLAMO\RELATÓRIOS COMPLETOS\<ANO>\<MÊS>\<SEMANA>\`.
+- **Relatórios de Nota Fiscal Detalhado por PDV (.xlsx):**
+  - Gerados individualmente por PDV configurado (VD Captação: `20844` e `13793`).
+  - Nomenclatura canônica: `13-PUB.XML.VD.CAPTACAO.<PDV>.NOTA FISCAL DETALHADO.<SEMANA>.xlsx`.
+  - Salvos em `T:\13-Publica\XMLS CÁLAMO\RELATÓRIOS DETALHADOS\<ANO>\<MÊS>\<SEMANA>\`.
+  - Conteúdo: Linha 1 com cabeçalhos (`Numero da Nota`, `Codigo`, `Emissao`, `SKU`, `Quantidade`) e dados detalhados por item `<det>` a partir da linha 2.
 - **Tratamento de Devoluções / Sem Vencimento:** Caso todos os XMLs baixados no período sejam devoluções ou notas sem vencimento financeiro, o robô encerra retornando código `3` (`EXIT_SEM_FATURAMENTO`), evitando falsos positivos no Scheduler.
 - **Planilhas de OP Picking (.xlsx):** Salvas na mesma pasta de cada PDV (`<PDV>_<Nº_DOC>.xlsx`).
 - **Auditoria no Banco SQLite:** Registros automáticos na tabela `execution_logs` do `core/database/sofi.db` sob o módulo `"XML"`.
