@@ -35,6 +35,14 @@ except ImportError as e:
     print(f"Erro ao importar dependências do 'leitor_xml.py': {e}")
     sys.exit(1)
 
+try:
+    from gerador_relatorio_detalhado import processar_relatorios_detalhados
+except ImportError:
+    try:
+        from departments.financeiro.modules.xml.gerador_relatorio_detalhado import processar_relatorios_detalhados
+    except ImportError:
+        processar_relatorios_detalhados = None
+
 # Localiza a raiz do projeto SOFI-core buscando onde existe o pacote 'core'.
 # Não usa .env como marcador pois subpastas também possuem .env local.
 _ROOT = Path(__file__).resolve().parent
@@ -992,6 +1000,26 @@ def gerar_relatorio_calamo():
         processar_relatorio_geral('UDI', notas_udi_combinadas, caminho_mod_udi, saida_geral_udi)
         processar_relatorio_matheus('UDI', notas_udi_combinadas, caminho_mod_matheus_udi, saida_matheus_udi)
         
+    # 4.1. GERAÇÃO DOS RELATÓRIOS DETALHADOS POR PDV (VD CAPTAÇÃO: 20844 E 13793)
+    if processar_relatorios_detalhados and arquivos_xml:
+        base_detalhados = r"T:\13-Publica\XMLS CÁLAMO\RELATÓRIOS DETALHADOS"
+        if not os.path.exists(r"T:\13-Publica\XMLS CÁLAMO"):
+            base_detalhados = os.path.join(DIRETORIO_ATUAL, 'Relatórios Cálamo Detalhado')
+
+        caminhos_xmls_processamento = [os.path.join(pasta_xml, arq) for arq in arquivos_xml]
+        try:
+            print("\n--- Iniciando Geração dos Relatórios Detalhados por PDV (VD Captação) ---")
+            processar_relatorios_detalhados(
+                lista_arquivos_xml=caminhos_xmls_processamento,
+                diretorio_base_saida=base_detalhados,
+                ano_pasta=ano_pasta,
+                mes_pasta=mes_pasta,
+                semana_pasta=semana_pasta,
+                pdvs_alvo=['20844', '13793']
+            )
+        except Exception as e_det:
+            print(f"Aviso: Erro ao gerar relatórios detalhados por PDV: {e_det}")
+
     # 5. ORGANIZA E SALVA OS XMLS POR PDV
     diretorio_xmls_saida = os.path.join(base_xmls_baixados, ano_pasta, mes_pasta, semana_pasta)
     os.makedirs(diretorio_xmls_saida, exist_ok=True)
