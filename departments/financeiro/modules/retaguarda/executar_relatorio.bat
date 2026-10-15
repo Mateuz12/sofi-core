@@ -2,9 +2,11 @@
 :: Script de execução automática dos Relatórios Retaguarda UDI + BH
 :: Agendado para rodar todos os dias às 08:15
 
-set PROJETO_DIR=c:\Users\luma.dias\Documents\PROJETO\SOFI-core\departments\financeiro\modules\retaguarda
-set PYTHON_EXE=C:\Users\luma.dias\AppData\Local\Python\pythoncore-3.14-64\python.exe
-set LOG_FILE=%PROJETO_DIR%\log_execucao.txt
+set "PROJETO_DIR=%~dp0"
+set "PYTHON_EXE=python.exe"
+if exist "%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe" set "PYTHON_EXE=%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe"
+if exist "%USERPROFILE%\AppData\Local\Python\pythoncore-3.14-64\python.exe" set "PYTHON_EXE=%USERPROFILE%\AppData\Local\Python\pythoncore-3.14-64\python.exe"
+set "LOG_FILE=%PROJETO_DIR%\log_execucao.txt"
 
 echo ============================================== >> "%LOG_FILE%"
 echo [%date% %time%] Inicio da execucao automatica >> "%LOG_FILE%"

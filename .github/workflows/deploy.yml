@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted   # roda no runner instalado dentro do Windows Server
     defaults:
       run:
-        working-directory: C:\Users\Administrator\Documents\GitHub\sofi-core   # a pasta já é o clone git de produção
+        working-directory: ${{ github.workspace }}
 
     steps:
       - name: Guardar hash do requirements.txt antes do pull
@@ -34,7 +34,8 @@ jobs:
 
           if ($hashDepois -ne $hashAntes) {
             Write-Host "requirements.txt mudou, reinstalando dependências..."
-            & "C:\producao\meu-projeto\venv\Scripts\python.exe" -m pip install -r "requirements.txt" --quiet
+            $pythonExe = if (Test-Path ".\.venv\Scripts\python.exe") { ".\.venv\Scripts\python.exe" } elseif ($env:SOFI_PYTHON) { $env:SOFI_PYTHON } else { "python.exe" }
+            & $pythonExe -m pip install -r "requirements.txt" --quiet
 
             Write-Host "Reiniciando Streamlit para carregar as novas dependências..."
             Restart-Service Streamlit-App -Force

@@ -1,16 +1,73 @@
-.env
-.env.local
-core/database/*.db
-/MDS
-*.xml
-__pycache__/
-*.pyc
-build/
-dist/
-.venv/
-database/sofi.db
+# ============================================================
+# SOFI — Sistema Operacional Financeiro Integrado
+# .gitignore
+# ============================================================
+
+# ── AMBIENTES E SEGREDOS ────────────────────────────────────
+.env*
+!.env.example
+*.env*
+!*.env.example
+*.env.exemplo
+!*.env.exemplo
+
+# Certificados, chaves privadas e credenciais
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+*.crt
+credentials*.json
+*service*account*.json
+*client*secret*.json
+
+# ── BANCOS DE DADOS E CACHES ────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
 *.log
 *.lock
+core/database/*.db
+database/sofi.db
+core/scheduler/*.db
+
+# ── DADOS E RELATÓRIOS CORPORATIVOS REAIS ───────────────────
+**/output/
+**/relatorios/
+**/XML_BAIXADOS_TESTE/
+departments/financeiro/modules/depositos/AUTOMACOES DE DEPOSITO/lojas.xlsx
+departments/financeiro/modules/depositos/AUTOMACOES DE DEPOSITO/output/
+departments/financeiro/modules/xml/Relatorio_*.xlsx
+departments/financeiro/modules/xml/*.xls
+departments/financeiro/modules/xml/*.xlsx
+!departments/financeiro/modules/xml/modelos_xmls/*.xls
+!departments/financeiro/modules/xml/op_piking.xlsx
+
+# ── BINÁRIOS, EXECUTÁVEIS E EXTENSÕES ───────────────────────
+*.vsix
+*.exe
+*.dll
+
+# ── PYTHON / AMBIENTE VIRTUAL ───────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+build/
+dist/
+/MDS
+*.xml
+
+# ── CONFIGURAÇÕES E BACKUPS TEMPORÁRIOS ──────────────────────
 config/*.tmp
 config/backups/*
 !config/backups/.gitkeep
+
+# ── IDE E SISTEMA OPERACIONAL ───────────────────────────────
+.vscode/
+.idea/
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store

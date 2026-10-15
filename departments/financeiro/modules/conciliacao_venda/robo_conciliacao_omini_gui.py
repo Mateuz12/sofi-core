@@ -361,7 +361,7 @@ class App(ctk.CTk):
         
         # Logo integration
         try:
-            logo_path = r"C:\Users\luma.dias\Desktop\ROBOS\logo.png"
+            logo_path = os.getenv("SOFI_LOGO_PATH", str(Path(__file__).resolve().parent / "logo.png"))
             logo_img = Image.open(logo_path)
             self.logo_image = ctk.CTkImage(light_image=logo_img, dark_image=logo_img, size=(60, 60))
             self.logo_label = ctk.CTkLabel(self.header_frame, image=self.logo_image, text="")

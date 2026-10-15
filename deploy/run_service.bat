@@ -10,17 +10,24 @@ echo ===========================================================================
 echo                      SOFI SERVICE ENTRYPOINT (STREAMLIT + NGROK)
 echo ==============================================================================
 
-:: 1. Ensure network share authentication (SMB \\srv-dc01)
-echo [*] Checking network share connection \\srv-dc01\File Server...
-net use \\srv-dc01\"File Server" 2>NUL
+:: 1. Ensure network share authentication (SMB)
+if defined SOFI_SMB_STORAGE (
+    echo [*] Checking network share connection %SOFI_SMB_STORAGE%...
+    net use "%SOFI_SMB_STORAGE%" 2>NUL
+) else (
+    echo [*] Checking network share connection \\srv-dc01\File Server...
+    net use \\srv-dc01\"File Server" 2>NUL
+)
 
 :: 2. Check and launch ngrok tunnel with explicit authtoken config
 set "NGROK_EXE=C:\ngrok\ngrok.exe"
 set "NGROK_CONFIG="
 if exist "C:\ngrok\ngrok.yml" (
     set "NGROK_CONFIG=--config C:\ngrok\ngrok.yml"
-) else if exist "C:\Users\Administrator\AppData\Local\ngrok\ngrok.yml" (
-    set "NGROK_CONFIG=--config C:\Users\Administrator\AppData\Local\ngrok\ngrok.yml"
+) else if exist "%LOCALAPPDATA%\ngrok\ngrok.yml" (
+    set "NGROK_CONFIG=--config %LOCALAPPDATA%\ngrok\ngrok.yml"
+) else if exist "%USERPROFILE%\AppData\Local\ngrok\ngrok.yml" (
+    set "NGROK_CONFIG=--config %USERPROFILE%\AppData\Local\ngrok\ngrok.yml"
 )
 
 if exist "%NGROK_EXE%" (
@@ -41,10 +48,10 @@ if defined SOFI_PYTHON (
     set "PYTHON_EXE=%SOFI_PYTHON%"
 ) else if exist "%PROJECT_ROOT%\.venv\Scripts\python.exe" (
     set "PYTHON_EXE=%PROJECT_ROOT%\.venv\Scripts\python.exe"
-) else if exist "C:\Users\Administrator\AppData\Local\Python\pythoncore-3.14-64\python.exe" (
-    set "PYTHON_EXE=C:\Users\Administrator\AppData\Local\Python\pythoncore-3.14-64\python.exe"
 ) else if exist "%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe" (
     set "PYTHON_EXE=%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe"
+) else if exist "%USERPROFILE%\AppData\Local\Python\pythoncore-3.14-64\python.exe" (
+    set "PYTHON_EXE=%USERPROFILE%\AppData\Local\Python\pythoncore-3.14-64\python.exe"
 ) else (
     set "PYTHON_EXE=python.exe"
 )

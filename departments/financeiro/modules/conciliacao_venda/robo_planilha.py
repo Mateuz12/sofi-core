@@ -2,8 +2,11 @@ import pandas as pd
 import openpyxl
 import re
 
+import os
+from pathlib import Path
+
 print("1. Lendo o relatório do Retaguarda...")
-caminho_retaguarda = r"C:\Users\luma.dias\Downloads\Relatorio_FormasDePagamentoAnalitico (11).xls"
+caminho_retaguarda = os.getenv("SOFI_RETAGUARDA_RELATORIO", str(Path.home() / "Downloads" / "Relatorio_FormasDePagamentoAnalitico (11).xls"))
 
 #  DESCOBRINDO A DATA 
 print("-> Procurando a data na célula F2...")
@@ -63,7 +66,7 @@ print(f"-> {len(dicionario_valores)} lojas prontas para injeção.")
 
 # Preenchimento da planilha de controle 
 print(f"\n2. Abrindo a Planilha de Controle na aba {aba_alvo}...")
-caminho_controle = r"C:\Users\luma.dias\Desktop\depositos.xlsx"
+caminho_controle = os.getenv("SOFI_CONTROLE_DEPOSITOS", str(Path.home() / "Desktop" / "depositos.xlsx"))
 wb = openpyxl.load_workbook(caminho_controle)
 
 if aba_alvo not in wb.sheetnames:

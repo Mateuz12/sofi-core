@@ -1,8 +1,9 @@
+from pathlib import Path
 import xlrd
 
-FILE = r"C:\Users\luma.dias\Documents\PROJETO\AUTOMAÇÃO DEPÓSITOS\RELATORIO_CALAMO_xml\modelos_xmls\MODELO BH.xls"
+FILE = Path(__file__).resolve().parent / "modelos_xmls" / "MODELO BH.xls"
 
-wb = xlrd.open_workbook(FILE, formatting_info=True)
+wb = xlrd.open_workbook(str(FILE), formatting_info=True)
 
 def col_label(c):
     """Convert column index to letter(s), e.g. 0->A, 23->X."""

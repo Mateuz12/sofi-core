@@ -4,10 +4,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 
+import os
+from pathlib import Path
+
 # ==========================================
 # 1. O CÉREBRO: LENDO A PLANILHA
 # ==========================================
-df_vendas = pd.read_excel(r"C:\Users\luma.dias\Desktop\VENDAS1.xls", decimal=',')
+caminho_vendas = os.getenv("SOFI_VENDAS_PATH", str(Path.home() / "Desktop" / "VENDAS1.xls"))
+df_vendas = pd.read_excel(caminho_vendas, decimal=',')
 
 pedido_alvo = 498098062
 doc_alvo = "435368362" 

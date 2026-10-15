@@ -1,5 +1,7 @@
+from pathlib import Path
 import sqlite3
-conn = sqlite3.connect(r'c:\Users\Administrator\Documents\GitHub\sofi-core\core\database\sofi.db')
+db_path = Path(__file__).resolve().parent.parent / "core" / "database" / "sofi.db"
+conn = sqlite3.connect(str(db_path))
 rows = conn.execute(
     "SELECT modulo, status, mensagem, timestamp FROM execution_logs "
     "WHERE modulo IN ('Scheduler','Notifier') ORDER BY id DESC LIMIT 40"

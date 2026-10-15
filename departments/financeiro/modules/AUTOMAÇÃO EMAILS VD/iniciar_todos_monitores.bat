@@ -1,6 +1,8 @@
 @echo off
 set SCRIPT_DIR=%~dp0
-set PY_CMD="C:\Users\Administrator\AppData\Local\Python\pythoncore-3.14-64\pythonw.exe"
+set "PY_CMD=pythonw.exe"
+if exist "%LOCALAPPDATA%\Python\pythoncore-3.14-64\pythonw.exe" set "PY_CMD=%LOCALAPPDATA%\Python\pythoncore-3.14-64\pythonw.exe"
+if exist "%USERPROFILE%\AppData\Local\Python\pythoncore-3.14-64\pythonw.exe" set "PY_CMD=%USERPROFILE%\AppData\Local\Python\pythoncore-3.14-64\pythonw.exe"
 
 echo Finalizando versoes anteriores dos monitores...
 powershell -Command "Get-CimInstance Win32_Process -Filter \"Name like '%%python%%'\" | Where-Object { $_.CommandLine -like '*monitor_emails_vd*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" >nul 2>&1
