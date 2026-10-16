@@ -80,8 +80,8 @@ st.markdown("""<div class="sofi-card-grid-3">
 </div>
 <h3 class="sofi-card-title">Emails VD</h3>
 </div>
-<div class="sofi-card disabled">
-<span class="sofi-card-badge">Em Breve</span>
+<a href="/depositos" target="_self" class="sofi-card-link">
+<div class="sofi-card">
 <div class="sofi-card-icon-container">
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
 <rect x="8" y="20" width="48" height="32" rx="3" fill="#ddeeff" stroke="#5b8fc9" stroke-width="2"/>
@@ -92,6 +92,7 @@ st.markdown("""<div class="sofi-card-grid-3">
 </div>
 <h3 class="sofi-card-title">Depósitos</h3>
 </div>
+</a>
 <div class="sofi-card disabled">
 <span class="sofi-card-badge">Em Breve</span>
 <div class="sofi-card-icon-container">

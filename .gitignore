@@ -43,6 +43,7 @@ departments/financeiro/modules/xml/*.xls
 departments/financeiro/modules/xml/*.xlsx
 !departments/financeiro/modules/xml/modelos_xmls/*.xls
 !departments/financeiro/modules/xml/op_piking.xlsx
+*.xlsx
 
 # ── BINÁRIOS, EXECUTÁVEIS E EXTENSÕES ───────────────────────
 *.vsix

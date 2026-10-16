@@ -45,6 +45,19 @@ def init_db():
                 valor_novo TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS depositos_lancados (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chave_unica TEXT UNIQUE NOT NULL,
+                codigo_loja INTEGER NOT NULL,
+                nome_loja TEXT,
+                data_deposito TEXT NOT NULL,
+                data_credito TEXT NOT NULL,
+                valor REAL NOT NULL,
+                usuario TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
 
 init_db()
 
